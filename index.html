@@ -4,405 +4,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Pro Organizer</title>
+    <title>FlowDesk — Your Personal Productivity Hub</title>
+    <meta name="description" content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, and Focus Timer — all in one place.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <nav>
-        <div class="navbar-brand" onclick="showAbout()">
-            <span>✅</span> Pro Organizer Dashboard
+    <!-- Navbar -->
+    <nav id="mainNav">
+        <div class="navbar-brand">
+            <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="32" height="32" rx="8" fill="url(#brandGrad)"/>
+                <path d="M8 10h10M8 16h8M8 22h12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.9"/>
+                <path d="M22.5 22l1 1 2-2" stroke="#6C63FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6C63FF"/>
+                        <stop offset="1" stop-color="#a78bfa"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="brand-name">FlowDesk</span>
+        </div>
+        <div class="navbar-center">
+            <span id="liveClock" class="live-clock"></span>
         </div>
         <div class="navbar-menu">
-            <button class="navbar-btn" onclick="clearCompleted()" title="Clear completed tasks">🗑️ Clear Done</button>
-            <button class="navbar-btn" onclick="exportData()" title="Export all data">📥 Export</button>
-            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</button>
+            <button class="nav-action-btn" onclick="clearCompleted()" title="Clear completed tasks">
+                <svg viewBox="0 0 20 20" fill="none"><path d="M6 2h8l1 3H5L6 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="3" y="5" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 9v5M12 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Clear Done
+            </button>
+            <button class="nav-action-btn" onclick="exportData()" title="Export all data">
+                <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Export
+            </button>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor" style="display:none"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+            </button>
         </div>
     </nav>
 
+    <!-- Dashboard Grid -->
     <div class="dashboard-grid">
 
-        <!-- Grid 1: Todo List -->
-        <div class="widget">
+        <!-- Widget 1: Todo List -->
+        <div class="widget" id="widget-todo">
             <div class="widget-header">
-                <h2>📝 To-Do List</h2>
-            </div>
-            <div class="input-container">
-                <input type="text" id="todoInput" placeholder="Add a new task..." autocomplete="off">
-                <button onclick="addTodo()">Add</button>
-            </div>
-            <ul class="todo-list" id="todoList"></ul>
-            <div class="empty-state" id="emptyState">No tasks yet. Add one! 🎯</div>
-            <div class="stats">
-                <div>Total: <span id="totalCount">0</span></div>
-                <div>Done: <span id="completedCount">0</span></div>
-                <div>Left: <span id="remainingCount">0</span></div>
-            </div>
-        </div>
-
-        <!-- Grid 2: Advanced Notes -->
-        <div class="widget">
-            <div class="widget-header">
-                <h2>📌 Quick Notes</h2>
-                <button onclick="addNewNote()">➕ Add Note</button>
-            </div>
-            <div id="notesContainer" class="notes-container">
-                <!-- Notes will be injected here by JS -->
-            </div>
-        </div>
-
-        <!-- Grid 3: Calculator -->
-        <div class="widget">
-            <div class="widget-header">
-                <h2>🧮 Calculator</h2>
-            </div>
-            <input type="text" id="calcDisplay" class="calc-display" readonly value="0">
-            <div class="calc-grid">
-                <button class="calc-btn" onclick="calcInput('7')">7</button>
-                <button class="calc-btn" onclick="calcInput('8')">8</button>
-                <button class="calc-btn" onclick="calcInput('9')">9</button>
-                <button class="calc-btn op" onclick="calcInput('/')">÷</button>
-
-                <button class="calc-btn" onclick="calcInput('4')">4</button>
-                <button class="calc-btn" onclick="calcInput('5')">5</button>
-                <button class="calc-btn" onclick="calcInput('6')">6</button>
-                <button class="calc-btn op" onclick="calcInput('*')">×</button>
-
-                <button class="calc-btn" onclick="calcInput('1')">1</button>
-                <button class="calc-btn" onclick="calcInput('2')">2</button>
-                <button class="calc-btn" onclick="calcInput('3')">3</button>
-                <button class="calc-btn op" onclick="calcInput('-')">-</button>
-
-                <button class="calc-btn" onclick="calcClear()">C</button>
-                <button class="calc-btn" onclick="calcInput('0')">0</button>
-                <button class="calc-btn op" onclick="calcCalculate()">=</button>
-                <button class="calc-btn op" onclick="calcInput('+')">+</button>
-            </div>
-        </div>
-
-        <!-- Grid 4: Pomodoro Focus Timer -->
-        <div class="widget">
-            <div class="widget-header">
-                <h2>⏱️ Focus Timer</h2>
-            </div>
-            <div
-                style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-
-                <div id="timerDisplay"
-                    style="font-size: 4.5rem; font-weight: bold; font-family: monospace; color: var(--text-color);">
-                    25:00
+                <div class="widget-title">
+                    <div class="widget-icon todo-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <h2>To-Do List</h2>
                 </div>
-
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <button id="startBtn" onclick="startTimer()"
-                        style="background-color: var(--primary-color); font-size: 1.1rem; padding: 10px 20px;">Start</button>
-                    <button id="pauseBtn" onclick="pauseTimer()"
-                        style="background-color: #f39c12; font-size: 1.1rem; padding: 10px 20px; display: none;">Pause</button>
-                    <button onclick="resetTimer()"
-                        style="background-color: #ff4757; font-size: 1.1rem; padding: 10px 20px;">Reset</button>
+                <div class="stats-pills">
+                    <span class="pill pill-total" title="Total tasks"><strong id="totalCount">0</strong> total</span>
+                    <span class="pill pill-done" title="Completed"><strong id="completedCount">0</strong> done</span>
+                    <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong> left</span>
                 </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button class="navbar-btn" onclick="setTimerMode(25)">Work (25m)</button>
-                    <button class="navbar-btn" onclick="setTimerMode(5)">Break (5m)</button>
-                    <button class="navbar-btn" onclick="setTimerMode(15)">Long Break (15m)</button>
+            </div>
+            <div class="widget-body">
+                <div class="input-row">
+                    <input type="text" id="todoInput" placeholder="Add a new task…" autocomplete="off">
+                    <button class="add-btn" onclick="addTodo()" aria-label="Add task">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <ul class="todo-list scrollable" id="todoList"></ul>
+                <div class="empty-state" id="emptyState">
+                    <svg viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <p>No tasks yet.<br>Start adding one above!</p>
                 </div>
             </div>
         </div>
 
-        <script>
-            // ==========================================
-            // 1. TODO LIST LOGIC
-            // ==========================================
-            const todoInput = document.getElementById('todoInput');
-            const todoList = document.getElementById('todoList');
-            const emptyState = document.getElementById('emptyState');
-            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        <!-- Widget 2: Quick Notes -->
+        <div class="widget" id="widget-notes">
+            <div class="widget-header">
+                <div class="widget-title">
+                    <div class="widget-icon notes-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2>Quick Notes</h2>
+                </div>
+                <button class="add-note-btn" onclick="addNewNote()" title="Add new note">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    New Note
+                </button>
+            </div>
+            <div class="widget-body">
+                <div id="notesContainer" class="notes-container scrollable"></div>
+            </div>
+        </div>
 
-            function loadTodos() {
-                todoList.innerHTML = '';
-                if (todos.length === 0) {
-                    emptyState.style.display = 'block';
-                } else {
-                    emptyState.style.display = 'none';
-                    todos.forEach((todo, index) => addTodoElement(todo, index));
-                }
-                updateStats();
-            }
+        <!-- Widget 3: Calculator -->
+        <div class="widget" id="widget-calc">
+            <div class="widget-header">
+                <div class="widget-title">
+                    <div class="widget-icon calc-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <h2>Calculator</h2>
+                </div>
+                <button class="ghost-btn" onclick="calcClear()">AC</button>
+            </div>
+            <div class="widget-body calc-body">
+                <div class="calc-display-wrap">
+                    <div class="calc-expression" id="calcExpression">&nbsp;</div>
+                    <input type="text" id="calcDisplay" class="calc-display" readonly value="0" aria-label="Calculator display">
+                </div>
+                <div class="calc-grid">
+                    <button class="calc-btn fn-btn" onclick="calcBackspace()">&#9003;</button>
+                    <button class="calc-btn fn-btn" onclick="calcInput('(')">(</button>
+                    <button class="calc-btn fn-btn" onclick="calcInput(')')">)</button>
+                    <button class="calc-btn op-btn" onclick="calcInput('/')">&#247;</button>
 
-            function addTodoElement(todo, index) {
-                const li = document.createElement('li');
-                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-                li.innerHTML = `
-                <div>
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn op-btn" onclick="calcInput('*')">&#215;</button>
+
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn op-btn" onclick="calcInput('-')">&#8722;</button>
+
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn op-btn" onclick="calcInput('+')">+</button>
+
+                    <button class="calc-btn zero-btn" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn eq-btn" onclick="calcCalculate()">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widget 4: Focus Timer -->
+        <div class="widget" id="widget-timer">
+            <div class="widget-header">
+                <div class="widget-title">
+                    <div class="widget-icon timer-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <h2>Focus Timer</h2>
+                </div>
+                <span class="mode-badge" id="modeBadge">Work</span>
+            </div>
+            <div class="widget-body timer-body">
+                <div class="timer-ring-wrap">
+                    <svg class="timer-ring" viewBox="0 0 140 140">
+                        <defs>
+                            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#6C63FF"/>
+                                <stop offset="100%" stop-color="#a78bfa"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-bg" cx="70" cy="70" r="60"/>
+                        <circle class="ring-progress" id="timerRing" cx="70" cy="70" r="60" stroke="url(#timerGrad)"/>
+                    </svg>
+                    <div class="timer-center">
+                        <div id="timerDisplay" class="timer-display">25:00</div>
+                        <div class="timer-label-text" id="timerLabel">Focus</div>
+                    </div>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-btn start-btn" id="startBtn" onclick="startTimer()">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+                        Start
+                    </button>
+                    <button class="timer-btn pause-btn" id="pauseBtn" onclick="pauseTimer()" style="display:none">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
+                        Pause
+                    </button>
+                    <button class="timer-btn reset-btn" onclick="resetTimer()">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
+                        Reset
+                    </button>
+                </div>
+                <div class="mode-chips">
+                    <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work · 25m</button>
+                    <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break · 5m</button>
+                    <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long Break · 15m</button>
+                </div>
+                <div class="session-counter">
+                    Sessions today: <strong id="sessionCount">0</strong>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ─── UTILITIES ────────────────────────────────────────
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+        function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show ' + type;
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.className = 'toast', 2500);
+        }
+
+        // ─── LIVE CLOCK ───────────────────────────────────────
+        function updateClock() {
+            document.getElementById('liveClock').textContent =
+                new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ─── TODO LIST ────────────────────────────────────────
+        const todoInput = document.getElementById('todoInput');
+        const todoList  = document.getElementById('todoList');
+        const emptyState = document.getElementById('emptyState');
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        function loadTodos() {
+            todoList.innerHTML = '';
+            emptyState.style.display = todos.length === 0 ? 'flex' : 'none';
+            todos.forEach((todo, i) => addTodoElement(todo, i));
+            updateStats();
+        }
+
+        function addTodoElement(todo, index) {
+            const li = document.createElement('li');
+            li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+            li.innerHTML = `
+                <label class="check-label">
                     <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
-                    <span class="todo-text">${escapeHtml(todo.text)}</span>
-                </div>
-                <button class="delete-btn" onclick="deleteTodo(${index})">Del</button>
-            `;
-                todoList.appendChild(li);
-            }
+                    <span class="checkmark"></span>
+                </label>
+                <span class="todo-text">${escapeHtml(todo.text)}</span>
+                <button class="del-btn" onclick="deleteTodo(${index})" title="Delete">
+                    <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>`;
+            todoList.appendChild(li);
+        }
 
-            function addTodo() {
-                const text = todoInput.value.trim();
-                if (text === '') return alert('Please enter a task!');
-                todos.push({ text: text, completed: false });
-                todoInput.value = '';
-                saveData('todos', todos);
-                loadTodos();
-            }
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (!text) { showToast('Please enter a task!', 'warn'); return; }
+            todos.push({ text, completed: false });
+            todoInput.value = '';
+            saveData('todos', todos);
+            loadTodos();
+            showToast('Task added ✓', 'success');
+        }
+        function toggleTodo(i) { todos[i].completed = !todos[i].completed; saveData('todos', todos); loadTodos(); }
+        function deleteTodo(i) { todos.splice(i, 1); saveData('todos', todos); loadTodos(); showToast('Task removed', 'info'); }
+        function clearCompleted() {
+            const n = todos.filter(t => t.completed).length;
+            if (!n) { showToast('No completed tasks', 'warn'); return; }
+            todos = todos.filter(t => !t.completed);
+            saveData('todos', todos); loadTodos();
+            showToast(`Cleared ${n} task${n > 1 ? 's' : ''}`, 'success');
+        }
+        function updateStats() {
+            const done = todos.filter(t => t.completed).length;
+            document.getElementById('totalCount').textContent = todos.length;
+            document.getElementById('completedCount').textContent = done;
+            document.getElementById('remainingCount').textContent = todos.length - done;
+        }
+        todoInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTodo(); });
 
-            function toggleTodo(index) {
-                todos[index].completed = !todos[index].completed;
-                saveData('todos', todos);
-                loadTodos();
-            }
+        // ─── QUICK NOTES ──────────────────────────────────────
+        const notesContainer = document.getElementById('notesContainer');
+        let notesArr = JSON.parse(localStorage.getItem('advancedNotes')) || [];
 
-            function deleteTodo(index) {
-                if (confirm('Delete this task?')) {
-                    todos.splice(index, 1);
-                    saveData('todos', todos);
-                    loadTodos();
-                }
+        function loadNotes() {
+            notesContainer.innerHTML = '';
+            if (!notesArr.length) {
+                notesContainer.innerHTML = `<div class="empty-state" style="display:flex">
+                    <svg viewBox="0 0 48 48" fill="none"><path d="M12 8h24v28l-6 6H12V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M30 36v6l6-6h-6z" fill="currentColor"/></svg>
+                    <p>No notes yet.<br>Click "New Note" to start!</p></div>`;
+                return;
             }
-            function clearCompleted() {
-                todos = todos.filter(t => !t.completed);
-                saveData('todos', todos);
-                loadTodos();
-            }
-            function updateStats() {
-                document.getElementById('totalCount').textContent = todos.length;
-                document.getElementById('completedCount').textContent = todos.filter(t => t.completed).length;
-                document.getElementById('remainingCount').textContent = todos.length - todos.filter(t => t.completed).length;
-            }
-            todoInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTodo(); });
-
-            // ==========================================
-            // 2. ADVANCED NOTES LOGIC (New!)
-            // ==========================================
-            const notesContainer = document.getElementById('notesContainer');
-            let notesArr = JSON.parse(localStorage.getItem('advancedNotes')) || [];
-
-            function loadNotes() {
-                notesContainer.innerHTML = '';
-                if (notesArr.length === 0) {
-                    notesContainer.innerHTML = `<div class="empty-state">No notes yet. Click + to create one!</div>`;
-                    return;
-                }
-                notesArr.forEach(note => {
-                    const noteEl = document.createElement('div');
-                    noteEl.className = 'note-card';
-                    noteEl.style.backgroundColor = note.theme || '#fff9c4';
-
-                    noteEl.innerHTML = `
-                    <div class="note-header">
-                        <input type="text" class="note-title" value="${escapeHtml(note.title)}" placeholder="Note Title..." oninput="updateNoteTitle(${note.id}, this.value)">
-                        <button class="delete-btn" onclick="deleteNote(${note.id})">🗑️</button>
+            notesArr.forEach(note => {
+                const el = document.createElement('div');
+                el.className = 'note-card';
+                el.style.setProperty('--nc', note.theme || '#6C63FF');
+                el.innerHTML = `
+                    <div class="note-head">
+                        <span class="note-accent"></span>
+                        <input class="note-title" type="text" value="${escapeHtml(note.title)}" placeholder="Note title…" oninput="updateNoteTitle(${note.id},this.value)">
+                        <button class="del-btn" onclick="deleteNote(${note.id})">
+                            <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
                     </div>
                     <div class="note-toolbar">
-                        <button class="toolbar-btn" onmousedown="event.preventDefault(); execNoteCmd('bold')" title="Bold"><b>B</b></button>
-                        <button class="toolbar-btn" onmousedown="event.preventDefault(); execNoteCmd('insertUnorderedList')" title="Bullet Points">• List</button>
-                        
-                        <div class="color-picker-wrapper" title="Text Color">
-                            <span>A</span>
-                            <input type="color" class="color-picker" value="#000000" onchange="execNoteCmd('foreColor', this.value)">
-                        </div>
-
-                        <div class="color-picker-wrapper" title="Note Theme Color">
-                            <span>🎨</span>
-                            <input type="color" class="color-picker" value="${note.theme || '#fff9c4'}" onchange="changeNoteTheme(${note.id}, this.value, this)">
-                        </div>
+                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('bold')"><b>B</b></button>
+                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('italic')"><i>I</i></button>
+                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertUnorderedList')">&#8286;</button>
+                        <label class="clr-label" title="Text color">A<input type="color" value="#000000" onchange="execNoteCmd('foreColor',this.value)"></label>
+                        <label class="clr-label" title="Accent color">&#9679;<input type="color" value="${note.theme||'#6C63FF'}" onchange="changeNoteTheme(${note.id},this.value,this)"></label>
                     </div>
-                    <div class="note-editor" contenteditable="true" oninput="updateNoteContent(${note.id}, this.innerHTML)">${note.content}</div>
-                `;
-                    notesContainer.appendChild(noteEl);
-                });
-            }
+                    <div class="note-editor" contenteditable="true" oninput="updateNoteContent(${note.id},this.innerHTML)">${note.content}</div>`;
+                notesContainer.appendChild(el);
+            });
+        }
 
-            function addNewNote() {
-                const newNote = {
-                    id: Date.now(),
-                    title: '',
-                    content: '',
-                    theme: document.body.classList.contains('dark-mode') ? '#4a483a' : '#fff9c4'
-                };
-                notesArr.unshift(newNote); // Add to top
-                saveData('advancedNotes', notesArr);
-                loadNotes();
-            }
+        function addNewNote() {
+            notesArr.unshift({ id: Date.now(), title: '', content: '', theme: '#6C63FF' });
+            saveData('advancedNotes', notesArr); loadNotes();
+            setTimeout(() => { const t = notesContainer.querySelector('.note-title'); if(t) t.focus(); }, 50);
+        }
+        function updateNoteTitle(id, v) { const n=notesArr.find(n=>n.id===id); if(n){n.title=v; saveData('advancedNotes',notesArr);} }
+        function updateNoteContent(id, v) { const n=notesArr.find(n=>n.id===id); if(n){n.content=v; saveData('advancedNotes',notesArr);} }
+        function changeNoteTheme(id, c, el) {
+            const n=notesArr.find(n=>n.id===id);
+            if(n){ n.theme=c; saveData('advancedNotes',notesArr); el.closest('.note-card').style.setProperty('--nc',c); }
+        }
+        function deleteNote(id) { notesArr=notesArr.filter(n=>n.id!==id); saveData('advancedNotes',notesArr); loadNotes(); showToast('Note deleted','info'); }
+        function execNoteCmd(cmd, val=null) { document.execCommand(cmd, false, val); }
 
-            function updateNoteTitle(id, newTitle) {
-                const note = notesArr.find(n => n.id === id);
-                if (note) { note.title = newTitle; saveData('advancedNotes', notesArr); }
-            }
+        // ─── CALCULATOR ───────────────────────────────────────
+        const calcDisplay = document.getElementById('calcDisplay');
+        const calcExpr    = document.getElementById('calcExpression');
+        let calcValue = '';
 
-            function updateNoteContent(id, newContent) {
-                const note = notesArr.find(n => n.id === id);
-                if (note) { note.content = newContent; saveData('advancedNotes', notesArr); }
-            }
-
-            function changeNoteTheme(id, color, inputElem) {
-                const note = notesArr.find(n => n.id === id);
-                if (note) {
-                    note.theme = color;
-                    saveData('advancedNotes', notesArr);
-                    // Visually update the specific note card's background immediately
-                    inputElem.closest('.note-card').style.backgroundColor = color;
-                }
-            }
-
-            function deleteNote(id) {
-                if (confirm("Delete this note?")) {
-                    notesArr = notesArr.filter(n => n.id !== id);
-                    saveData('advancedNotes', notesArr);
-                    loadNotes();
-                }
-            }
-
-            // Executes formatting commands (Bold, Bullets, Text Color) on the actively focused editable div
-            function execNoteCmd(command, value = null) {
-                document.execCommand(command, false, value);
-            }
-
-            // ==========================================
-            // 3. CALCULATOR LOGIC
-            // ==========================================
-            const calcDisplay = document.getElementById('calcDisplay');
-            let calcValue = '';
-            function calcInput(val) {
-                if (calcValue === 'Error') calcValue = '';
-                calcValue += val;
+        function calcInput(v) {
+            if (calcValue === 'Error') calcValue = '';
+            calcValue += v;
+            calcDisplay.value = calcValue;
+            calcExpr.innerHTML = '&nbsp;';
+        }
+        function calcBackspace() {
+            calcValue = calcValue === 'Error' ? '' : calcValue.slice(0,-1);
+            calcDisplay.value = calcValue || '0';
+            calcExpr.innerHTML = '&nbsp;';
+        }
+        function calcClear() { calcValue=''; calcDisplay.value='0'; calcExpr.innerHTML='&nbsp;'; }
+        function calcCalculate() {
+            if (!calcValue || calcValue==='Error') return;
+            try {
+                const expr = calcValue;
+                const res = new Function('return ' + calcValue)();
+                calcExpr.textContent = expr + ' =';
+                calcValue = String(parseFloat(res.toFixed(10)));
                 calcDisplay.value = calcValue;
-            }
-            function calcClear() { calcValue = ''; calcDisplay.value = '0'; }
-            function calcCalculate() {
-                try {
-                    const result = new Function('return ' + calcValue)();
-                    calcValue = String(result);
-                    calcDisplay.value = calcValue;
-                } catch (e) {
-                    calcValue = 'Error';
-                    calcDisplay.value = calcValue;
+            } catch(e) { calcValue='Error'; calcDisplay.value='Error'; calcExpr.innerHTML='&nbsp;'; }
+        }
+
+        // Keyboard support for calculator
+        document.addEventListener('keydown', e => {
+            const active = document.activeElement;
+            if (active && (active.id === 'todoInput' || active.classList.contains('note-title') || active.classList.contains('note-editor'))) return;
+            if ('0123456789.+-*/()'.includes(e.key) && e.key.length===1) calcInput(e.key);
+            else if (e.key==='Enter'||e.key==='=') calcCalculate();
+            else if (e.key==='Backspace') calcBackspace();
+            else if (e.key==='Escape') calcClear();
+        });
+
+        // ─── FOCUS TIMER ──────────────────────────────────────
+        let timerInterval, timeLeft=25*60, totalTime=25*60, isRunning=false;
+        let currentMode=25, currentModeLabel='Work';
+        let sessionCount = parseInt(localStorage.getItem('sessionCount')||'0');
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const timerRing = document.getElementById('timerRing');
+        const CIRC = 2 * Math.PI * 60;
+        timerRing.style.strokeDasharray = CIRC;
+        document.getElementById('sessionCount').textContent = sessionCount;
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft/60), s = timeLeft%60;
+            timerDisplay.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            timerRing.style.strokeDashoffset = CIRC * (1 - timeLeft/totalTime);
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            isRunning=true;
+            startBtn.style.display='none'; pauseBtn.style.display='inline-flex';
+            timerInterval = setInterval(() => {
+                if (timeLeft>0) { timeLeft--; updateTimerDisplay(); }
+                else {
+                    clearInterval(timerInterval); isRunning=false;
+                    startBtn.style.display='inline-flex'; pauseBtn.style.display='none';
+                    if (currentModeLabel==='Work') {
+                        sessionCount++; localStorage.setItem('sessionCount',sessionCount);
+                        document.getElementById('sessionCount').textContent = sessionCount;
+                    }
+                    showToast(currentModeLabel+' session complete! 🎉','success');
+                    resetTimer();
                 }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning=false; clearInterval(timerInterval);
+            startBtn.style.display='inline-flex'; pauseBtn.style.display='none';
+        }
+        function resetTimer() { pauseTimer(); timeLeft=currentMode*60; updateTimerDisplay(); }
+        function setTimerMode(min, label, chip) {
+            pauseTimer();
+            currentMode=min; currentModeLabel=label; totalTime=min*60; timeLeft=totalTime;
+            updateTimerDisplay();
+            document.getElementById('modeBadge').textContent = label;
+            document.getElementById('timerLabel').textContent = label;
+            document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+            if(chip) chip.classList.add('active');
+        }
+
+        // ─── THEME ────────────────────────────────────────────
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const dark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.querySelector('.icon-moon').style.display = dark ? 'none' : 'block';
+            document.querySelector('.icon-sun').style.display  = dark ? 'block' : 'none';
+        }
+
+        // ─── EXPORT ───────────────────────────────────────────
+        function exportData() {
+            const blob = new Blob([JSON.stringify({todos, notes:notesArr, exported:new Date().toISOString()},null,2)], {type:'application/json'});
+            const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:`flowdesk-${new Date().toISOString().split('T')[0]}.json`});
+            a.click(); URL.revokeObjectURL(a.href);
+            showToast('Data exported!','success');
+        }
+
+        // ─── INIT ─────────────────────────────────────────────
+        window.onload = () => {
+            if (localStorage.getItem('theme')==='dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.icon-moon').style.display='none';
+                document.querySelector('.icon-sun').style.display='block';
             }
-
-            // ==========================================
-            // 4. POMODORO TIMER LOGIC
-            // ==========================================
-            let timerInterval;
-            let timeLeft = 25 * 60; // Default 25 minutes
-            let isRunning = false;
-            let currentMode = 25; // Tracks current mode for resetting
-
-            const timerDisplay = document.getElementById('timerDisplay');
-            const startBtn = document.getElementById('startBtn');
-            const pauseBtn = document.getElementById('pauseBtn');
-
-            function updateTimerDisplay() {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-
-            function startTimer() {
-                if (!isRunning) {
-                    isRunning = true;
-                    startBtn.style.display = 'none';
-                    pauseBtn.style.display = 'inline-block';
-
-                    timerInterval = setInterval(() => {
-                        if (timeLeft > 0) {
-                            timeLeft--;
-                            updateTimerDisplay();
-                        } else {
-                            clearInterval(timerInterval);
-                            isRunning = false;
-                            startBtn.style.display = 'inline-block';
-                            pauseBtn.style.display = 'none';
-
-                            // Play a simple alert when time is up
-                            alert('Time is up! Great job.');
-                            resetTimer();
-                        }
-                    }, 1000);
-                }
-            }
-
-            function pauseTimer() {
-                isRunning = false;
-                clearInterval(timerInterval);
-                startBtn.style.display = 'inline-block';
-                pauseBtn.style.display = 'none';
-            }
-
-            function resetTimer() {
-                pauseTimer();
-                timeLeft = currentMode * 60;
-                updateTimerDisplay();
-            }
-
-            function setTimerMode(minutes) {
-                pauseTimer();
-                currentMode = minutes;
-                timeLeft = minutes * 60;
-                updateTimerDisplay();
-            }
-
-            // ==========================================
-            // GLOBAL & UTILITY FUNCTIONS
-            // ==========================================
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function saveData(key, data) {
-                localStorage.setItem(key, JSON.stringify(data));
-            }
-
-            function toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-                const themeToggle = document.querySelector('.theme-toggle');
-                if (document.body.classList.contains('dark-mode')) {
-                    localStorage.setItem('theme', 'dark');
-                    themeToggle.textContent = '☀️';
-                } else {
-                    localStorage.setItem('theme', 'light');
-                    themeToggle.textContent = '🌙';
-                }
-            }
-
-            function exportData() {
-                const allData = {
-                    todos: todos,
-                    notes: notesArr, // Export the new notes array
-                };
-                const dataStr = JSON.stringify(allData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `organizer-backup-${new Date().toISOString().split('T')[0]}.json`;
-                link.click();
-                URL.revokeObjectURL(url);
-            }
-
-            function showAbout() {
-                alert('️📝 Pro Organizer\n\nFeatures:\n✅ To-Do List\n📌 Advanced Notes (Rich text & themes!)\n🧮 Calculator\n📖 Daily Journal\n\nAll data is saved locally on your device!');
-            }
-
-            // Initialize Everything on Load
-            window.onload = () => {
-                if (localStorage.getItem('theme') === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    document.querySelector('.theme-toggle').textContent = '☀️';
-                }
-                loadTodos();
-                loadNotes();
-                updateTimerDisplay();
-            };
-        </script>
+            loadTodos(); loadNotes(); updateTimerDisplay();
+        };
+    </script>
 </body>
-
 </html>
