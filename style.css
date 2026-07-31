@@ -1,425 +1,324 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        :root {
+            --bg-color: #f4f7f6;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #4CAF50;
+            --hover-color: #45a049;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --note-default-bg: #fff9c4;
+            /* Default sticky note color */
+        }
 
-@keyframes slideInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #f4f4f4;
+            --border-color: #444444;
+            --primary-color: #5cb85c;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --note-default-bg: #4a483a;
+        }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
+        /* Navbar */
+        nav {
+            background-color: var(--container-bg);
+            padding: 15px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-@keyframes slideOutRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-}
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
+        .navbar-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
 
-@keyframes checkmark {
-    0% {
-        transform: scale(0.8) rotate(0deg);
-    }
-    100% {
-        transform: scale(1) rotate(360deg);
-    }
-}
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
 
-@keyframes bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-5px);
-    }
-}
+        button:hover {
+            background-color: var(--hover-color);
+        }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding-top: 90px;
-    animation: fadeIn 0.5s ease-in;
-}
+        .navbar-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
 
-.container {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 500px;
-    padding: 30px;
-    animation: slideInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+        .navbar-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
 
-h1 {
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-    font-size: 2em;
-    animation: slideInLeft 0.7s ease-out;
-}
+        .theme-toggle {
+            font-size: 1.2rem;
+            background: transparent;
+        }
 
-.input-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    animation: slideInLeft 0.8s ease-out;
-}
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+        }
 
-#todoInput {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
+        .widget {
+            background-color: var(--container-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-#todoInput:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
-}
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
 
-button {
-    padding: 12px 20px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
+        .widget h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            border: none;
+            padding: 0;
+        }
 
-button:hover {
-    background: #5568d3;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
+        /* Generic Inputs */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
 
-button:active {
-    transform: scale(0.98) translateY(0);
-    animation: pulse 0.3s ease-out;
-}
+        textarea {
+            flex-grow: 1;
+            resize: none;
+            margin-top: 10px;
+        }
 
-.todo-list {
-    list-style: none;
-}
+        /* Todo List */
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-.todo-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: #f9f9f9;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border-left: 4px solid #667eea;
-    animation: slideInLeft 0.4s ease-out;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
 
-.todo-item.new {
-    animation: slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-.todo-item.deleting {
-    animation: slideOutRight 0.4s ease-in forwards;
-}
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
 
-.todo-item:hover {
-    background: #f0f0f0;
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+        .delete-btn {
+            background-color: #ff4757;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
 
-.todo-item.completed {
-    opacity: 0.7;
-    border-left-color: #4caf50;
-    background: #f5f5f5;
-}
+        .delete-btn:hover {
+            background-color: #ff6b81;
+        }
 
-.todo-item.completed .todo-text {
-    text-decoration: line-through;
-    color: #999;
-    animation: fadeIn 0.3s ease-out;
-}
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
 
-.checkbox {
-    width: 20px;
-    height: 20px;
-    margin-right: 15px;
-    cursor: pointer;
-    accent-color: #1a3bcf;
-    transition: all 0.3s ease-out;
-}
+        .empty-state {
+            text-align: center;
+            opacity: 0.6;
+            margin-top: 20px;
+        }
 
-.checkbox:hover {
-    transform: scale(1.1);
-}
+        /* MULTI-NOTES SPECIFICS */
+        .notes-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 5px;
+        }
 
-.checkbox:checked {
-    animation: checkmark 0.5s ease-out;
-}
+        .note-card {
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #000;
+            /* Default text color for notes */
+            transition: background-color 0.3s;
+        }
 
-.todo-text {
-    flex: 1;
-    font-size: 1em;
-    color: #333;
-    transition: all 0.3s ease-out;
-}
+        .note-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
 
-.delete-btn {
-    background: #ff4757;
-    padding: 6px 12px;
-    font-size: 0.9em;
-    margin-left: 10px;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.2);
-}
+        .note-title {
+            flex-grow: 1;
+            font-weight: bold;
+            border: none !important;
+            background: transparent !important;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.3) !important;
+            color: inherit !important;
+            padding: 5px !important;
+        }
 
-.delete-btn:hover {
-    background: #ff3838;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
-}
+        .note-toolbar {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
 
-.delete-btn:active {
-    animation: pulse 0.3s ease-out;
-}
+        .toolbar-btn {
+            background: transparent;
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+        }
 
-.empty-state {
-    text-align: center;
-    color: #999;
-    padding: 40px 20px;
-    font-size: 1.1em;
-    animation: fadeIn 0.5s ease-out;
-}
+        .toolbar-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
 
-.stats {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #eee;
-    color: #666;
-    font-size: 0.9em;
-    animation: slideInLeft 0.9s ease-out;
-}
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.8rem;
+            color: #333;
+        }
 
-.stat {
-    text-align: center;
-    transition: all 0.3s ease-out;
-}
+        .color-picker {
+            width: 25px;
+            height: 25px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
 
-.stat:hover {
-    transform: translateY(-5px);
-}
+        .note-editor {
+            min-height: 80px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            outline: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            line-height: 1.5;
+        }
 
-.stat-number {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #667eea;
-    transition: all 0.3s ease-out;
-    display: inline-block;
-}
+        .note-editor ul {
+            margin: 0;
+            padding-left: 20px;
+        }
 
-.stat:hover .stat-number {
-    animation: bounce 0.4s ease-out;
-    color: #764ba2;
-}
+        /* Calculator */
+        .calc-display {
+            font-size: 1.5rem;
+            text-align: right;
+            margin-bottom: 10px;
+        }
 
-/* Navbar Styles */
-nav {
-    background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
-    padding: 0;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1000;
-    animation: slideInDown 0.5s ease-out;
-    color: red;
-}
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            flex-grow: 1;
+        }
 
-.navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 70px;
-}
+        .calc-btn {
+            font-size: 1.2rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
 
-.navbar-brand {
-    color: white;
-    font-size: 1.8em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease-out;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+        .calc-btn:hover {
+            background-color: var(--border-color);
+        }
 
-.navbar-brand:hover {
-    transform: scale(1.05);
-}
+        .calc-btn.op {
+            background-color: var(--primary-color);
+            color: white;
+        }
 
-.navbar-menu {
-    display: flex;
-    gap: 15px;
-    list-style: none;
-    align-items: center;
-}
+        /* Responsive */
+        @media (max-width: 800px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
 
-.navbar-btn {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.navbar-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.navbar-btn:active {
-    transform: scale(0.98);
-}
-
-.theme-toggle {
-    font-size: 1.3em;
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: white;
-    transition: all 0.3s ease-out;
-    padding: 10px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: rotate(20deg) scale(1.1);
-}
-
-.separator {
-    width: 1px;
-    height: 25px;
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Dark Mode */
-body.dark-mode {
-    background: #1a1a1a;
-}
-
-body.dark-mode .container {
-    background: #2d2d2d;
-    color: #e0e0e0;
-}
-
-body.dark-mode h1 {
-    color: #e0e0e0;
-}
-
-body.dark-mode .todo-item {
-    background: #3d3d3d;
-    color: #e0e0e0;
-}
-
-body.dark-mode .todo-item:hover {
-    background: #4d4d4d;
-}
-
-body.dark-mode .todo-text {
-    color: #e0e0e0;
-}
-
-body.dark-mode .empty-state {
-    color: #999;
-}
-
-body.dark-mode .stats {
-    border-top-color: #3d3d3d;
-}
-
-body.dark-mode #todoInput {
-    background: #3d3d3d;
-    border-color: #555;
-    color: #e0e0e0;
-}
-
-body.dark-mode #todoInput::placeholder {
-    color: #999;
-}
-
-body.dark-mode #todoInput:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-}
+            .widget {
+                height: 500px;
+            }
+        }

@@ -1,277 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Todo List</title>
+    <title>My Pro Organizer</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <nav>
-        <div class="navbar-container">
-            <div class="navbar-brand" onclick="showAbout()">
-                <span>📝</span>
-                <span>Todo Pro</span>
-            </div>
-            <ul class="navbar-menu">
-                <button class="navbar-btn" onclick="clearCompleted()" title="Clear all completed tasks">
-                    <span>🗑️</span> Clear Completed
-                </button>
-                <div class="separator"></div>
-                <button class="navbar-btn" onclick="exportTodos()" title="Export tasks as JSON">
-                    <span>📥</span> Export
-                </button>
-                <button class="navbar-btn" onclick="importTodos()" title="Import tasks from JSON">
-                    <span>📤</span> Import
-                </button>
-                <div class="separator"></div>
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-                    🌙
-                </button>
-            </ul>
+        <div class="navbar-brand" onclick="showAbout()">
+            <span>✅</span> Pro Organizer Dashboard
+        </div>
+        <div class="navbar-menu">
+            <button class="navbar-btn" onclick="clearCompleted()" title="Clear completed tasks">🗑️ Clear Done</button>
+            <button class="navbar-btn" onclick="exportData()" title="Export all data">📥 Export</button>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</button>
         </div>
     </nav>
 
-    <div class="container">
-        <h1>📝 My Todo List</h1>
-        
-        <div class="input-container">
-            <input 
-                type="text" 
-                id="todoInput" 
-                placeholder="Add a new task..." 
-                autocomplete="off"
-            >
-            <button onclick="addTodo()">Add</button>
-        </div>
+    <div class="dashboard-grid">
 
-        <ul class="todo-list" id="todoList"></ul>
-
-        <div class="empty-state" id="emptyState">
-            No tasks yet. Add one to get started! 🎯
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number" id="totalCount">0</div>
-                <div>Total</div>
+        <!-- Grid 1: Todo List -->
+        <div class="widget">
+            <div class="widget-header">
+                <h2>📝 To-Do List</h2>
             </div>
-            <div class="stat">
-                <div class="stat-number" id="completedCount">0</div>
-                <div>Completed</div>
+            <div class="input-container">
+                <input type="text" id="todoInput" placeholder="Add a new task..." autocomplete="off">
+                <button onclick="addTodo()">Add</button>
             </div>
-            <div class="stat">
-                <div class="stat-number" id="remainingCount">0</div>
-                <div>Remaining</div>
+            <ul class="todo-list" id="todoList"></ul>
+            <div class="empty-state" id="emptyState">No tasks yet. Add one! 🎯</div>
+            <div class="stats">
+                <div>Total: <span id="totalCount">0</span></div>
+                <div>Done: <span id="completedCount">0</span></div>
+                <div>Left: <span id="remainingCount">0</span></div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const todoInput = document.getElementById('todoInput');
-        const todoList = document.getElementById('todoList');
-        const emptyState = document.getElementById('emptyState');
+        <!-- Grid 2: Advanced Notes -->
+        <div class="widget">
+            <div class="widget-header">
+                <h2>📌 Quick Notes</h2>
+                <button onclick="addNewNote()">➕ Add Note</button>
+            </div>
+            <div id="notesContainer" class="notes-container">
+                <!-- Notes will be injected here by JS -->
+            </div>
+        </div>
 
-        // Sample todos
-        const sampleTodos = [
-            { text: 'Learn Git basics', completed: false },
-            { text: 'Complete section 8 video', completed: false },
-            { text: 'Practice Git commands', completed: true },
-            { text: 'Review data analytics course', completed: false },
-            { text: 'Prepare project presentation', completed: false }
-        ];
+        <!-- Grid 3: Calculator -->
+        <div class="widget">
+            <div class="widget-header">
+                <h2>🧮 Calculator</h2>
+            </div>
+            <input type="text" id="calcDisplay" class="calc-display" readonly value="0">
+            <div class="calc-grid">
+                <button class="calc-btn" onclick="calcInput('7')">7</button>
+                <button class="calc-btn" onclick="calcInput('8')">8</button>
+                <button class="calc-btn" onclick="calcInput('9')">9</button>
+                <button class="calc-btn op" onclick="calcInput('/')">÷</button>
 
-        // Initialize with sample data
-        let todos = JSON.parse(localStorage.getItem('todos')) || sampleTodos;
+                <button class="calc-btn" onclick="calcInput('4')">4</button>
+                <button class="calc-btn" onclick="calcInput('5')">5</button>
+                <button class="calc-btn" onclick="calcInput('6')">6</button>
+                <button class="calc-btn op" onclick="calcInput('*')">×</button>
 
-        // Load todos on page load
-        function loadTodos() {
-            todoList.innerHTML = '';
-            
-            if (todos.length === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-                todos.forEach((todo, index) => {
-                    addTodoElement(todo, index);
-                });
+                <button class="calc-btn" onclick="calcInput('1')">1</button>
+                <button class="calc-btn" onclick="calcInput('2')">2</button>
+                <button class="calc-btn" onclick="calcInput('3')">3</button>
+                <button class="calc-btn op" onclick="calcInput('-')">-</button>
+
+                <button class="calc-btn" onclick="calcClear()">C</button>
+                <button class="calc-btn" onclick="calcInput('0')">0</button>
+                <button class="calc-btn op" onclick="calcCalculate()">=</button>
+                <button class="calc-btn op" onclick="calcInput('+')">+</button>
+            </div>
+        </div>
+
+        <!-- Grid 4: Pomodoro Focus Timer -->
+        <div class="widget">
+            <div class="widget-header">
+                <h2>⏱️ Focus Timer</h2>
+            </div>
+            <div
+                style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+                <div id="timerDisplay"
+                    style="font-size: 4.5rem; font-weight: bold; font-family: monospace; color: var(--text-color);">
+                    25:00
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button id="startBtn" onclick="startTimer()"
+                        style="background-color: var(--primary-color); font-size: 1.1rem; padding: 10px 20px;">Start</button>
+                    <button id="pauseBtn" onclick="pauseTimer()"
+                        style="background-color: #f39c12; font-size: 1.1rem; padding: 10px 20px; display: none;">Pause</button>
+                    <button onclick="resetTimer()"
+                        style="background-color: #ff4757; font-size: 1.1rem; padding: 10px 20px;">Reset</button>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="navbar-btn" onclick="setTimerMode(25)">Work (25m)</button>
+                    <button class="navbar-btn" onclick="setTimerMode(5)">Break (5m)</button>
+                    <button class="navbar-btn" onclick="setTimerMode(15)">Long Break (15m)</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ==========================================
+            // 1. TODO LIST LOGIC
+            // ==========================================
+            const todoInput = document.getElementById('todoInput');
+            const todoList = document.getElementById('todoList');
+            const emptyState = document.getElementById('emptyState');
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            function loadTodos() {
+                todoList.innerHTML = '';
+                if (todos.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                    todos.forEach((todo, index) => addTodoElement(todo, index));
+                }
+                updateStats();
             }
-            
-            updateStats();
-        }
 
-        function addTodoElement(todo, index) {
-            const li = document.createElement('li');
-            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-            
-            // Add stagger animation delay
-            li.style.animationDelay = `${index * 0.05}s`;
-            
-            li.innerHTML = `
-                <input 
-                    type="checkbox" 
-                    class="checkbox" 
-                    ${todo.completed ? 'checked' : ''} 
-                    onchange="toggleTodo(${index})"
-                >
-                <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+            function addTodoElement(todo, index) {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                <div>
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteTodo(${index})">Del</button>
             `;
-            
-            todoList.appendChild(li);
-        }
-
-        function addTodo() {
-            const text = todoInput.value.trim();
-            
-            if (text === '') {
-                alert('Please enter a task!');
-                return;
+                todoList.appendChild(li);
             }
-            
-            todos.push({ text: text, completed: false });
-            todoInput.value = '';
-            saveTodos();
-            loadTodos();
-            todoInput.focus();
-        }
 
-        function toggleTodo(index) {
-            todos[index].completed = !todos[index].completed;
-            saveTodos();
-            loadTodos();
-        }
-
-        function deleteTodo(index) {
-            if (confirm('Are you sure you want to delete this task?')) {
-                const todoItems = document.querySelectorAll('.todo-item');
-                todoItems[index].classList.add('deleting');
-                
-                // Wait for animation to complete before removing
-                setTimeout(() => {
-                    todos.splice(index, 1);
-                    saveTodos();
-                    loadTodos();
-                }, 400);
-            }
-        }
-
-        function saveTodos() {
-            localStorage.setItem('todos', JSON.stringify(todos));
-        }
-
-        function updateStats() {
-            const total = todos.length;
-            const completed = todos.filter(t => t.completed).length;
-            const remaining = total - completed;
-            
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('completedCount').textContent = completed;
-            document.getElementById('remainingCount').textContent = remaining;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Allow Enter key to add todo
-        todoInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addTodo();
-            }
-        });
-
-        // Load todos on page load
-        loadTodos();
-
-        // Initialize theme
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            document.querySelector('.theme-toggle').textContent = '☀️';
-        }
-
-        // Navbar Functions
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const themeToggle = document.querySelector('.theme-toggle');
-            
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                themeToggle.textContent = '☀️';
-            } else {
-                localStorage.setItem('theme', 'light');
-                themeToggle.textContent = '🌙';
-            }
-        }
-
-        function clearCompleted() {
-            const completedCount = todos.filter(t => t.completed).length;
-            
-            if (completedCount === 0) {
-                alert('No completed tasks to clear!');
-                return;
-            }
-            
-            if (confirm(`Clear ${completedCount} completed task(s)?`)) {
-                todos = todos.filter(t => !t.completed);
-                saveTodos();
+            function addTodo() {
+                const text = todoInput.value.trim();
+                if (text === '') return alert('Please enter a task!');
+                todos.push({ text: text, completed: false });
+                todoInput.value = '';
+                saveData('todos', todos);
                 loadTodos();
             }
-        }
 
-        function exportTodos() {
-            const dataStr = JSON.stringify(todos, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `todos-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            alert('✅ Tasks exported successfully!');
-        }
+            function toggleTodo(index) {
+                todos[index].completed = !todos[index].completed;
+                saveData('todos', todos);
+                loadTodos();
+            }
 
-        function importTodos() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                
-                reader.onload = (event) => {
-                    try {
-                        const importedTodos = JSON.parse(event.target.result);
+            function deleteTodo(index) {
+                if (confirm('Delete this task?')) {
+                    todos.splice(index, 1);
+                    saveData('todos', todos);
+                    loadTodos();
+                }
+            }
+            function clearCompleted() {
+                todos = todos.filter(t => !t.completed);
+                saveData('todos', todos);
+                loadTodos();
+            }
+            function updateStats() {
+                document.getElementById('totalCount').textContent = todos.length;
+                document.getElementById('completedCount').textContent = todos.filter(t => t.completed).length;
+                document.getElementById('remainingCount').textContent = todos.length - todos.filter(t => t.completed).length;
+            }
+            todoInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTodo(); });
+
+            // ==========================================
+            // 2. ADVANCED NOTES LOGIC (New!)
+            // ==========================================
+            const notesContainer = document.getElementById('notesContainer');
+            let notesArr = JSON.parse(localStorage.getItem('advancedNotes')) || [];
+
+            function loadNotes() {
+                notesContainer.innerHTML = '';
+                if (notesArr.length === 0) {
+                    notesContainer.innerHTML = `<div class="empty-state">No notes yet. Click + to create one!</div>`;
+                    return;
+                }
+                notesArr.forEach(note => {
+                    const noteEl = document.createElement('div');
+                    noteEl.className = 'note-card';
+                    noteEl.style.backgroundColor = note.theme || '#fff9c4';
+
+                    noteEl.innerHTML = `
+                    <div class="note-header">
+                        <input type="text" class="note-title" value="${escapeHtml(note.title)}" placeholder="Note Title..." oninput="updateNoteTitle(${note.id}, this.value)">
+                        <button class="delete-btn" onclick="deleteNote(${note.id})">🗑️</button>
+                    </div>
+                    <div class="note-toolbar">
+                        <button class="toolbar-btn" onmousedown="event.preventDefault(); execNoteCmd('bold')" title="Bold"><b>B</b></button>
+                        <button class="toolbar-btn" onmousedown="event.preventDefault(); execNoteCmd('insertUnorderedList')" title="Bullet Points">• List</button>
                         
-                        if (!Array.isArray(importedTodos)) {
-                            throw new Error('Invalid format');
-                        }
-                        
-                        if (confirm('Replace current tasks with imported ones?')) {
-                            todos = importedTodos;
-                            saveTodos();
-                            loadTodos();
-                            alert('✅ Tasks imported successfully!');
-                        }
-                    } catch (err) {
-                        alert('❌ Error importing file. Make sure it\'s a valid JSON file.');
-                    }
+                        <div class="color-picker-wrapper" title="Text Color">
+                            <span>A</span>
+                            <input type="color" class="color-picker" value="#000000" onchange="execNoteCmd('foreColor', this.value)">
+                        </div>
+
+                        <div class="color-picker-wrapper" title="Note Theme Color">
+                            <span>🎨</span>
+                            <input type="color" class="color-picker" value="${note.theme || '#fff9c4'}" onchange="changeNoteTheme(${note.id}, this.value, this)">
+                        </div>
+                    </div>
+                    <div class="note-editor" contenteditable="true" oninput="updateNoteContent(${note.id}, this.innerHTML)">${note.content}</div>
+                `;
+                    notesContainer.appendChild(noteEl);
+                });
+            }
+
+            function addNewNote() {
+                const newNote = {
+                    id: Date.now(),
+                    title: '',
+                    content: '',
+                    theme: document.body.classList.contains('dark-mode') ? '#4a483a' : '#fff9c4'
                 };
-                
-                reader.readAsText(file);
-            };
-            
-            input.click();
-        }
+                notesArr.unshift(newNote); // Add to top
+                saveData('advancedNotes', notesArr);
+                loadNotes();
+            }
 
-        function showAbout() {
-            alert('️📝 Todo Pro\n\nA beautiful, feature-rich todo list application.\n\nFeatures:\n✅ Add, complete, and delete tasks\n🌙 Dark/Light mode\n💾 Auto-save to local storage\n📥 Export/Import tasks\n📊 Live statistics\n\nMade with ❤️ using HTML, CSS & JavaScript');
-        }
-    </script>
+            function updateNoteTitle(id, newTitle) {
+                const note = notesArr.find(n => n.id === id);
+                if (note) { note.title = newTitle; saveData('advancedNotes', notesArr); }
+            }
+
+            function updateNoteContent(id, newContent) {
+                const note = notesArr.find(n => n.id === id);
+                if (note) { note.content = newContent; saveData('advancedNotes', notesArr); }
+            }
+
+            function changeNoteTheme(id, color, inputElem) {
+                const note = notesArr.find(n => n.id === id);
+                if (note) {
+                    note.theme = color;
+                    saveData('advancedNotes', notesArr);
+                    // Visually update the specific note card's background immediately
+                    inputElem.closest('.note-card').style.backgroundColor = color;
+                }
+            }
+
+            function deleteNote(id) {
+                if (confirm("Delete this note?")) {
+                    notesArr = notesArr.filter(n => n.id !== id);
+                    saveData('advancedNotes', notesArr);
+                    loadNotes();
+                }
+            }
+
+            // Executes formatting commands (Bold, Bullets, Text Color) on the actively focused editable div
+            function execNoteCmd(command, value = null) {
+                document.execCommand(command, false, value);
+            }
+
+            // ==========================================
+            // 3. CALCULATOR LOGIC
+            // ==========================================
+            const calcDisplay = document.getElementById('calcDisplay');
+            let calcValue = '';
+            function calcInput(val) {
+                if (calcValue === 'Error') calcValue = '';
+                calcValue += val;
+                calcDisplay.value = calcValue;
+            }
+            function calcClear() { calcValue = ''; calcDisplay.value = '0'; }
+            function calcCalculate() {
+                try {
+                    const result = new Function('return ' + calcValue)();
+                    calcValue = String(result);
+                    calcDisplay.value = calcValue;
+                } catch (e) {
+                    calcValue = 'Error';
+                    calcDisplay.value = calcValue;
+                }
+            }
+
+            // ==========================================
+            // 4. POMODORO TIMER LOGIC
+            // ==========================================
+            let timerInterval;
+            let timeLeft = 25 * 60; // Default 25 minutes
+            let isRunning = false;
+            let currentMode = 25; // Tracks current mode for resetting
+
+            const timerDisplay = document.getElementById('timerDisplay');
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            function startTimer() {
+                if (!isRunning) {
+                    isRunning = true;
+                    startBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+
+                    timerInterval = setInterval(() => {
+                        if (timeLeft > 0) {
+                            timeLeft--;
+                            updateTimerDisplay();
+                        } else {
+                            clearInterval(timerInterval);
+                            isRunning = false;
+                            startBtn.style.display = 'inline-block';
+                            pauseBtn.style.display = 'none';
+
+                            // Play a simple alert when time is up
+                            alert('Time is up! Great job.');
+                            resetTimer();
+                        }
+                    }, 1000);
+                }
+            }
+
+            function pauseTimer() {
+                isRunning = false;
+                clearInterval(timerInterval);
+                startBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+            }
+
+            function resetTimer() {
+                pauseTimer();
+                timeLeft = currentMode * 60;
+                updateTimerDisplay();
+            }
+
+            function setTimerMode(minutes) {
+                pauseTimer();
+                currentMode = minutes;
+                timeLeft = minutes * 60;
+                updateTimerDisplay();
+            }
+
+            // ==========================================
+            // GLOBAL & UTILITY FUNCTIONS
+            // ==========================================
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function saveData(key, data) {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const themeToggle = document.querySelector('.theme-toggle');
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.textContent = '☀️';
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.textContent = '🌙';
+                }
+            }
+
+            function exportData() {
+                const allData = {
+                    todos: todos,
+                    notes: notesArr, // Export the new notes array
+                };
+                const dataStr = JSON.stringify(allData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `organizer-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function showAbout() {
+                alert('️📝 Pro Organizer\n\nFeatures:\n✅ To-Do List\n📌 Advanced Notes (Rich text & themes!)\n🧮 Calculator\n📖 Daily Journal\n\nAll data is saved locally on your device!');
+            }
+
+            // Initialize Everything on Load
+            window.onload = () => {
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    document.querySelector('.theme-toggle').textContent = '☀️';
+                }
+                loadTodos();
+                loadNotes();
+                updateTimerDisplay();
+            };
+        </script>
 </body>
+
 </html>
