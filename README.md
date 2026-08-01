@@ -100,4 +100,4 @@ MIT © [Hi-iamAT](https://github.com/Hi-iamAT)
 
 ---
 
-<p align="center">Made with ❤️ and vanilla code</p>
+<p align="center">Made by AT Alauddin with ❤️</p>

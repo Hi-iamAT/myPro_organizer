@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowDesk — Your Personal Productivity Hub</title>
-    <meta name="description" content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, and Focus Timer — all in one place.">
-    <!-- Favicon -->
+    <meta name="description" content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, Focus Timer, BMI Calculator, and Weather — all in one beautiful place.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.svg">
     <meta name="theme-color" content="#6C63FF">
@@ -17,7 +16,7 @@
 </head>
 
 <body>
-    <!-- Navbar -->
+    <!-- ── Navbar ── -->
     <nav id="mainNav">
         <div class="navbar-brand">
             <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,10 +37,6 @@
             <span id="liveClock" class="live-clock"></span>
         </div>
         <div class="navbar-menu">
-            <button class="nav-action-btn" onclick="clearCompleted()" title="Clear completed tasks">
-                <svg viewBox="0 0 20 20" fill="none"><path d="M6 2h8l1 3H5L6 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="3" y="5" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 9v5M12 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                Clear Done
-            </button>
             <button class="nav-action-btn" onclick="exportData()" title="Export all data">
                 <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 Export
@@ -53,156 +48,440 @@
         </div>
     </nav>
 
-    <!-- Dashboard Grid -->
-    <div class="dashboard-grid">
+    <!-- ── App Shell ── -->
+    <div class="app-shell">
 
-        <!-- Widget 1: Todo List -->
-        <div class="widget" id="widget-todo">
-            <div class="widget-header">
-                <div class="widget-title">
-                    <div class="widget-icon todo-icon">
+        <!-- ── Sidebar ── -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <button class="sidebar-item active" id="nav-todo" onclick="switchTool('todo', this)">
+                    <span class="sidebar-icon todo-icon">
                         <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    </div>
-                    <h2>To-Do List</h2>
-                </div>
-                <div class="stats-pills">
-                    <span class="pill pill-total" title="Total tasks"><strong id="totalCount">0</strong> total</span>
-                    <span class="pill pill-done" title="Completed"><strong id="completedCount">0</strong> done</span>
-                    <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong> left</span>
-                </div>
-            </div>
-            <div class="widget-body">
-                <div class="input-row">
-                    <input type="text" id="todoInput" placeholder="Add a new task…" autocomplete="off">
-                    <button class="add-btn" onclick="addTodo()" aria-label="Add task">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-                    </button>
-                </div>
-                <ul class="todo-list scrollable" id="todoList"></ul>
-                <div class="empty-state" id="emptyState">
-                    <svg viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    <p>No tasks yet.<br>Start adding one above!</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Widget 2: Quick Notes -->
-        <div class="widget" id="widget-notes">
-            <div class="widget-header">
-                <div class="widget-title">
-                    <div class="widget-icon notes-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
-                    </div>
-                    <h2>Quick Notes</h2>
-                </div>
-                <button class="add-note-btn" onclick="addNewNote()" title="Add new note">
-                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-                    New Note
+                    </span>
+                    <span class="sidebar-label">To-Do</span>
                 </button>
-            </div>
-            <div class="widget-body">
-                <div id="notesContainer" class="notes-container scrollable"></div>
-            </div>
-        </div>
-
-        <!-- Widget 3: Calculator -->
-        <div class="widget" id="widget-calc">
-            <div class="widget-header">
-                <div class="widget-title">
-                    <div class="widget-icon calc-icon">
+                <button class="sidebar-item" id="nav-notes" onclick="switchTool('notes', this)">
+                    <span class="sidebar-icon notes-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="sidebar-label">Notes</span>
+                </button>
+                <button class="sidebar-item" id="nav-calc" onclick="switchTool('calc', this)">
+                    <span class="sidebar-icon calc-icon">
                         <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    </div>
-                    <h2>Calculator</h2>
-                </div>
-                <button class="ghost-btn" onclick="calcClear()">AC</button>
-            </div>
-            <div class="widget-body calc-body">
-                <div class="calc-display-wrap">
-                    <div class="calc-expression" id="calcExpression">&nbsp;</div>
-                    <input type="text" id="calcDisplay" class="calc-display" readonly value="0" aria-label="Calculator display">
-                </div>
-                <div class="calc-grid">
-                    <button class="calc-btn fn-btn" onclick="calcBackspace()">&#9003;</button>
-                    <button class="calc-btn fn-btn" onclick="calcInput('(')">(</button>
-                    <button class="calc-btn fn-btn" onclick="calcInput(')')">)</button>
-                    <button class="calc-btn op-btn" onclick="calcInput('/')">&#247;</button>
-
-                    <button class="calc-btn" onclick="calcInput('7')">7</button>
-                    <button class="calc-btn" onclick="calcInput('8')">8</button>
-                    <button class="calc-btn" onclick="calcInput('9')">9</button>
-                    <button class="calc-btn op-btn" onclick="calcInput('*')">&#215;</button>
-
-                    <button class="calc-btn" onclick="calcInput('4')">4</button>
-                    <button class="calc-btn" onclick="calcInput('5')">5</button>
-                    <button class="calc-btn" onclick="calcInput('6')">6</button>
-                    <button class="calc-btn op-btn" onclick="calcInput('-')">&#8722;</button>
-
-                    <button class="calc-btn" onclick="calcInput('1')">1</button>
-                    <button class="calc-btn" onclick="calcInput('2')">2</button>
-                    <button class="calc-btn" onclick="calcInput('3')">3</button>
-                    <button class="calc-btn op-btn" onclick="calcInput('+')">+</button>
-
-                    <button class="calc-btn zero-btn" onclick="calcInput('0')">0</button>
-                    <button class="calc-btn" onclick="calcInput('.')">.</button>
-                    <button class="calc-btn eq-btn" onclick="calcCalculate()">=</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Widget 4: Focus Timer -->
-        <div class="widget" id="widget-timer">
-            <div class="widget-header">
-                <div class="widget-title">
-                    <div class="widget-icon timer-icon">
+                    </span>
+                    <span class="sidebar-label">Calculator</span>
+                </button>
+                <button class="sidebar-item" id="nav-timer" onclick="switchTool('timer', this)">
+                    <span class="sidebar-icon timer-icon">
                         <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    </div>
-                    <h2>Focus Timer</h2>
-                </div>
-                <span class="mode-badge" id="modeBadge">Work</span>
-            </div>
-            <div class="widget-body timer-body">
-                <div class="timer-ring-wrap">
-                    <svg class="timer-ring" viewBox="0 0 140 140">
-                        <defs>
-                            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#6C63FF"/>
-                                <stop offset="100%" stop-color="#a78bfa"/>
-                            </linearGradient>
-                        </defs>
-                        <circle class="ring-bg" cx="70" cy="70" r="60"/>
-                        <circle class="ring-progress" id="timerRing" cx="70" cy="70" r="60" stroke="url(#timerGrad)"/>
-                    </svg>
-                    <div class="timer-center">
-                        <div id="timerDisplay" class="timer-display">25:00</div>
-                        <div class="timer-label-text" id="timerLabel">Focus</div>
-                    </div>
-                </div>
-                <div class="timer-controls">
-                    <button class="timer-btn start-btn" id="startBtn" onclick="startTimer()">
-                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
-                        Start
-                    </button>
-                    <button class="timer-btn pause-btn" id="pauseBtn" onclick="pauseTimer()" style="display:none">
-                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
-                        Pause
-                    </button>
-                    <button class="timer-btn reset-btn" onclick="resetTimer()">
-                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
-                        Reset
-                    </button>
-                </div>
-                <div class="mode-chips">
-                    <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work · 25m</button>
-                    <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break · 5m</button>
-                    <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long Break · 15m</button>
-                </div>
-                <div class="session-counter">
-                    Sessions today: <strong id="sessionCount">0</strong>
-                </div>
-            </div>
-        </div>
+                    </span>
+                    <span class="sidebar-label">Focus Timer</span>
+                </button>
 
+                <div class="sidebar-divider"></div>
+
+                <button class="sidebar-item" id="nav-bmi" onclick="switchTool('bmi', this)">
+                    <span class="sidebar-icon bmi-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="sidebar-label">BMI</span>
+                </button>
+                <button class="sidebar-item" id="nav-weather" onclick="switchTool('weather', this)">
+                    <span class="sidebar-icon weather-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="sidebar-label">Weather</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- ── Main Panel ── -->
+        <main class="main-panel">
+
+            <!-- ════ TO-DO PANEL ════ -->
+            <div class="tool-panel active" id="panel-todo">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon todo-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>To-Do List</h1>
+                            <p class="panel-subtitle">Stay on top of your tasks</p>
+                        </div>
+                    </div>
+                    <div class="stats-pills">
+                        <span class="pill pill-total" title="Total tasks"><strong id="totalCount">0</strong> total</span>
+                        <span class="pill pill-done" title="Completed"><strong id="completedCount">0</strong> done</span>
+                        <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong> left</span>
+                    </div>
+                    <button class="ghost-btn danger" onclick="clearCompleted()" title="Clear completed tasks">Clear Done</button>
+                </div>
+                <div class="panel-split">
+                    <!-- Left: Task List -->
+                    <div class="split-left">
+                        <div class="split-left-header">
+                            <span class="split-left-title">All Tasks</span>
+                            <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task" aria-label="Add task">
+                                <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            </button>
+                        </div>
+                        <ul class="todo-list scrollable" id="todoList"></ul>
+                        <div class="empty-state" id="emptyState">
+                            <svg viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <p>No tasks yet.<br>Click <strong>+</strong> to start!</p>
+                        </div>
+                    </div>
+                    <!-- Right: Task Detail/Add -->
+                    <div class="split-right">
+                        <div class="split-right-empty" id="todoDetailEmpty">
+                            <svg viewBox="0 0 64 64" fill="none"><rect x="12" y="8" width="40" height="48" rx="6" stroke="currentColor" stroke-width="2"/><path d="M20 24h24M20 32h16M20 40h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M32 48v8M28 52l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <p>Click <strong>+</strong> to add a new task<br>or select one to edit</p>
+                        </div>
+                        <div class="task-editor" id="taskEditor" style="display:none">
+                            <div class="task-editor-header">
+                                <span class="editor-badge" id="taskEditorBadge">New Task</span>
+                                <button class="icon-btn" onclick="closeTaskEditor()" title="Close">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                </button>
+                            </div>
+                            <input type="text" id="todoInput" placeholder="Task title…" autocomplete="off" class="task-title-input">
+                            <textarea id="todoNote" placeholder="Add a note (optional)…" class="task-note-input" rows="5"></textarea>
+                            <div class="task-priority-row">
+                                <span class="field-label">Priority</span>
+                                <div class="priority-chips">
+                                    <button class="priority-chip active" data-priority="low" onclick="setPriority('low',this)">Low</button>
+                                    <button class="priority-chip" data-priority="medium" onclick="setPriority('medium',this)">Medium</button>
+                                    <button class="priority-chip" data-priority="high" onclick="setPriority('high',this)">High</button>
+                                </div>
+                            </div>
+                            <div class="task-editor-actions">
+                                <button class="btn-primary" id="taskSaveBtn" onclick="saveTodo()">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                                    Add Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ NOTES PANEL ════ -->
+            <div class="tool-panel" id="panel-notes">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon notes-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Quick Notes</h1>
+                            <p class="panel-subtitle">Capture your thoughts</p>
+                        </div>
+                    </div>
+                    <button class="add-note-btn" id="addNoteBtn" onclick="addNewNote()">
+                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                        New Note
+                    </button>
+                </div>
+                <div class="panel-split">
+                    <!-- Left: Note Titles List -->
+                    <div class="split-left">
+                        <div class="split-left-header">
+                            <span class="split-left-title">All Notes</span>
+                            <span class="count-badge" id="noteCount">0</span>
+                        </div>
+                        <div id="notesList" class="notes-list scrollable"></div>
+                    </div>
+                    <!-- Right: Note Editor -->
+                    <div class="split-right">
+                        <div class="split-right-empty" id="noteEditorEmpty">
+                            <svg viewBox="0 0 64 64" fill="none"><path d="M16 8h32v40l-10 10H16V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M38 48v10l10-10h-10z" fill="currentColor"/><path d="M24 24h16M24 32h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <p>Select a note to start editing<br>or click <strong>New Note</strong></p>
+                        </div>
+                        <div class="note-editor-panel" id="activeNoteEditor" style="display:none">
+                            <div class="note-editor-topbar">
+                                <input class="note-title-big" id="activeNoteTitle" type="text" placeholder="Note title…" oninput="updateActiveNoteTitle(this.value)">
+                                <div class="note-editor-controls">
+                                    <label class="clr-label" title="Accent color">&#9679;<input type="color" id="activeNoteThemeColor" value="#6C63FF" onchange="changeActiveNoteTheme(this.value)"></label>
+                                    <button class="del-btn" onclick="deleteActiveNote()" title="Delete this note">
+                                        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="note-toolbar">
+                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('bold')"><b>B</b></button>
+                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('italic')"><i>I</i></button>
+                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('underline')"><u>U</u></button>
+                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertUnorderedList')">&#8286;</button>
+                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertOrderedList')">1.</button>
+                                <div class="tb-sep"></div>
+                                <label class="clr-label" title="Text color">A<input type="color" value="#000000" onchange="execNoteCmd('foreColor',this.value)"></label>
+                            </div>
+                            <div class="note-content-editor scrollable" id="activeNoteContent" contenteditable="true" oninput="updateActiveNoteContent(this.innerHTML)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ CALCULATOR PANEL ════ -->
+            <div class="tool-panel" id="panel-calc">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon calc-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Calculator</h1>
+                            <p class="panel-subtitle">Quick arithmetic &amp; expressions</p>
+                        </div>
+                    </div>
+                    <button class="ghost-btn danger" onclick="calcClear()" id="calcAcBtn">AC</button>
+                </div>
+                <div class="panel-single">
+                    <div class="calc-wrap">
+                        <div class="calc-display-wrap">
+                            <div class="calc-expression" id="calcExpression">&nbsp;</div>
+                            <input type="text" id="calcDisplay" class="calc-display" readonly value="0" aria-label="Calculator display">
+                        </div>
+                        <div class="calc-grid">
+                            <button class="calc-btn fn-btn" onclick="calcBackspace()">&#9003;</button>
+                            <button class="calc-btn fn-btn" onclick="calcInput('(')">(</button>
+                            <button class="calc-btn fn-btn" onclick="calcInput(')')">)</button>
+                            <button class="calc-btn op-btn" onclick="calcInput('/')">&#247;</button>
+                            <button class="calc-btn" onclick="calcInput('7')">7</button>
+                            <button class="calc-btn" onclick="calcInput('8')">8</button>
+                            <button class="calc-btn" onclick="calcInput('9')">9</button>
+                            <button class="calc-btn op-btn" onclick="calcInput('*')">&#215;</button>
+                            <button class="calc-btn" onclick="calcInput('4')">4</button>
+                            <button class="calc-btn" onclick="calcInput('5')">5</button>
+                            <button class="calc-btn" onclick="calcInput('6')">6</button>
+                            <button class="calc-btn op-btn" onclick="calcInput('-')">&#8722;</button>
+                            <button class="calc-btn" onclick="calcInput('1')">1</button>
+                            <button class="calc-btn" onclick="calcInput('2')">2</button>
+                            <button class="calc-btn" onclick="calcInput('3')">3</button>
+                            <button class="calc-btn op-btn" onclick="calcInput('+')">+</button>
+                            <button class="calc-btn zero-btn" onclick="calcInput('0')">0</button>
+                            <button class="calc-btn" onclick="calcInput('.')">.</button>
+                            <button class="calc-btn eq-btn" onclick="calcCalculate()">=</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ FOCUS TIMER PANEL ════ -->
+            <div class="tool-panel" id="panel-timer">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon timer-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Focus Timer</h1>
+                            <p class="panel-subtitle">Deep work sessions · Pomodoro</p>
+                        </div>
+                    </div>
+                    <span class="mode-badge" id="modeBadge">Work</span>
+                </div>
+                <div class="panel-single">
+                    <div class="timer-body-wrap">
+                        <div class="timer-ring-wrap">
+                            <svg class="timer-ring" viewBox="0 0 140 140">
+                                <defs>
+                                    <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#6C63FF"/>
+                                        <stop offset="100%" stop-color="#a78bfa"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="ring-bg" cx="70" cy="70" r="60"/>
+                                <circle class="ring-progress" id="timerRing" cx="70" cy="70" r="60" stroke="url(#timerGrad)"/>
+                            </svg>
+                            <div class="timer-center">
+                                <div id="timerDisplay" class="timer-display">25:00</div>
+                                <div class="timer-label-text" id="timerLabel">Focus</div>
+                            </div>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-btn start-btn" id="startBtn" onclick="startTimer()">
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+                                Start
+                            </button>
+                            <button class="timer-btn pause-btn" id="pauseBtn" onclick="pauseTimer()" style="display:none">
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
+                                Pause
+                            </button>
+                            <button class="timer-btn reset-btn" onclick="resetTimer()">
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
+                                Reset
+                            </button>
+                        </div>
+                        <div class="mode-chips">
+                            <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work · 25m</button>
+                            <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break · 5m</button>
+                            <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long Break · 15m</button>
+                        </div>
+                        <div class="session-counter">
+                            Sessions today: <strong id="sessionCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ BMI PANEL ════ -->
+            <div class="tool-panel" id="panel-bmi">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon bmi-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>BMI Calculator</h1>
+                            <p class="panel-subtitle">Body Mass Index checker</p>
+                        </div>
+                    </div>
+                    <button class="ghost-btn" onclick="resetBMI()" id="bmiResetBtn">Reset</button>
+                </div>
+                <div class="panel-single">
+                    <div class="bmi-wrap">
+                        <div class="bmi-inputs">
+                            <div class="bmi-field">
+                                <label class="bmi-label">Height</label>
+                                <div class="bmi-input-group">
+                                    <input type="number" id="bmiHeight" placeholder="e.g. 170" min="50" max="300" oninput="calcBMI()">
+                                    <div class="unit-toggle-group">
+                                        <button class="unit-btn active" id="unitCm" onclick="setBmiHeightUnit('cm', this)">cm</button>
+                                        <button class="unit-btn" id="unitFt" onclick="setBmiHeightUnit('ft', this)">ft</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bmi-field">
+                                <label class="bmi-label">Weight</label>
+                                <div class="bmi-input-group">
+                                    <input type="number" id="bmiWeight" placeholder="e.g. 70" min="1" max="500" oninput="calcBMI()">
+                                    <div class="unit-toggle-group">
+                                        <button class="unit-btn active" id="unitKg" onclick="setBmiWeightUnit('kg', this)">kg</button>
+                                        <button class="unit-btn" id="unitLb" onclick="setBmiWeightUnit('lb', this)">lb</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bmi-placeholder" id="bmiPlaceholder">
+                            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="14" r="8" stroke="currentColor" stroke-width="2"/><path d="M16 56v-12a16 16 0 0132 0v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <p>Enter your height &amp; weight<br>to calculate your BMI</p>
+                        </div>
+
+                        <div class="bmi-result" id="bmiResult" style="display:none">
+                            <div class="bmi-result-main">
+                                <div class="bmi-score-ring">
+                                    <svg viewBox="0 0 120 120" width="160" height="160">
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="10"/>
+                                        <circle id="bmiRingArc" cx="60" cy="60" r="50" fill="none" stroke="#34d399" stroke-width="10" stroke-linecap="round"
+                                            stroke-dasharray="314" stroke-dashoffset="314"
+                                            style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1),stroke 0.5s"/>
+                                    </svg>
+                                    <div class="bmi-score-center">
+                                        <span class="bmi-number" id="bmiNumber">--</span>
+                                        <span class="bmi-unit-label">BMI</span>
+                                    </div>
+                                </div>
+                                <div class="bmi-class-info">
+                                    <span class="bmi-class-badge" id="bmiClassBadge">Normal</span>
+                                    <p class="bmi-class-desc" id="bmiClassDesc"></p>
+                                    <div class="bmi-ideal">
+                                        <span class="bmi-ideal-label">Ideal range:</span>
+                                        <span class="bmi-ideal-value">18.5 – 24.9</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bmi-scale">
+                                <div class="bmi-scale-track">
+                                    <div class="bmi-scale-needle" id="bmiNeedle"></div>
+                                </div>
+                                <div class="bmi-scale-nums">
+                                    <span>16</span><span>18.5</span><span>25</span><span>30</span><span>40</span>
+                                </div>
+                                <div class="bmi-scale-labels">
+                                    <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ WEATHER PANEL ════ -->
+            <div class="tool-panel" id="panel-weather">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon weather-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Weather</h1>
+                            <p class="panel-subtitle">Current local conditions</p>
+                        </div>
+                    </div>
+                    <button class="ghost-btn" onclick="fetchWeather()" id="weatherRefreshBtn">&#8635; Refresh</button>
+                </div>
+                <div class="panel-single">
+                    <div class="weather-wrap">
+                        <div class="weather-status" id="weatherLoading">
+                            <div class="spinner"></div>
+                            <p>Detecting your location…</p>
+                        </div>
+                        <div class="weather-status weather-err" id="weatherError" style="display:none">
+                            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2"/><path d="M32 20v16M32 42v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            <p id="weatherErrorMsg">Unable to get location.<br>Please allow location access.</p>
+                            <button class="btn-primary" onclick="fetchWeather()" style="margin-top:8px">Try Again</button>
+                        </div>
+                        <div class="weather-content" id="weatherContent" style="display:none">
+                            <div class="weather-hero">
+                                <div class="weather-icon-big" id="weatherIconBig">🌤️</div>
+                                <div class="weather-temp-group">
+                                    <div class="weather-temp-big" id="weatherTempBig">--</div>
+                                    <div class="weather-temp-unit">°C</div>
+                                </div>
+                            </div>
+                            <div class="weather-location" id="weatherCity">--</div>
+                            <div class="weather-desc" id="weatherDesc">--</div>
+                            <div class="weather-cards">
+                                <div class="weather-card">
+                                    <div class="wc-icon">🌡️</div>
+                                    <span class="wc-value" id="weatherFeels">--</span>
+                                    <span class="wc-label">Feels Like</span>
+                                </div>
+                                <div class="weather-card">
+                                    <div class="wc-icon">💧</div>
+                                    <span class="wc-value" id="weatherHumidity">--</span>
+                                    <span class="wc-label">Humidity</span>
+                                </div>
+                                <div class="weather-card">
+                                    <div class="wc-icon">💨</div>
+                                    <span class="wc-value" id="weatherWind">--</span>
+                                    <span class="wc-label">Wind km/h</span>
+                                </div>
+                                <div class="weather-card">
+                                    <div class="wc-icon">☀️</div>
+                                    <span class="wc-value" id="weatherUV">--</span>
+                                    <span class="wc-label">UV Index</span>
+                                </div>
+                            </div>
+                            <div class="weather-updated" id="weatherUpdated"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
+
+    <!-- ── Footer ── -->
+    <footer class="app-footer">
+        <span class="footer-copy">&copy; <span id="footerYear"></span> FlowDesk &middot; All rights reserved.</span>
+        <span class="footer-divider">|</span>
+        <span class="footer-credit">Made by <strong>AT Alauddin</strong> with ❤️</span>
+    </footer>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -231,11 +510,29 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        // ─── FOOTER YEAR ──────────────────────────────────────
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+        // ─── TOOL SWITCHER ────────────────────────────────────
+        let currentTool = 'todo';
+        let weatherFetched = false;
+
+        function switchTool(tool, btn) {
+            if (currentTool === tool) return;
+            document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + tool).classList.add('active');
+            btn.classList.add('active');
+            currentTool = tool;
+            if (tool === 'weather' && !weatherFetched) fetchWeather();
+        }
+
         // ─── TODO LIST ────────────────────────────────────────
-        const todoInput = document.getElementById('todoInput');
-        const todoList  = document.getElementById('todoList');
+        const todoList   = document.getElementById('todoList');
         const emptyState = document.getElementById('emptyState');
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let editingTodoIndex = -1;
+        let selectedPriority = 'low';
 
         function loadTodos() {
             todoList.innerHTML = '';
@@ -246,30 +543,95 @@
 
         function addTodoElement(todo, index) {
             const li = document.createElement('li');
+            const pColors = { low: 'var(--brand)', medium: 'var(--warn)', high: 'var(--danger)' };
+            const pColor  = pColors[todo.priority || 'low'];
             li.className = 'todo-item' + (todo.completed ? ' completed' : '');
             li.innerHTML = `
                 <label class="check-label">
                     <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
                     <span class="checkmark"></span>
                 </label>
-                <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="del-btn" onclick="deleteTodo(${index})" title="Delete">
+                <div class="todo-content" onclick="openEditTask(${index})">
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    ${todo.note ? `<span class="todo-note-preview">${escapeHtml(todo.note.substring(0,60))}${todo.note.length > 60 ? '…' : ''}</span>` : ''}
+                </div>
+                <span class="priority-dot" style="background:${pColor}" title="${todo.priority || 'low'} priority"></span>
+                <button class="del-btn" onclick="deleteTodo(${index})" title="Delete task">
                     <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>`;
             todoList.appendChild(li);
         }
 
-        function addTodo() {
-            const text = todoInput.value.trim();
+        function openAddTask() {
+            editingTodoIndex = -1;
+            selectedPriority = 'low';
+            document.getElementById('todoInput').value = '';
+            document.getElementById('todoNote').value = '';
+            document.getElementById('taskEditorBadge').textContent = 'New Task';
+            document.getElementById('taskSaveBtn').innerHTML = `
+                <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Add Task`;
+            document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === 'low'));
+            document.getElementById('todoDetailEmpty').style.display = 'none';
+            document.getElementById('taskEditor').style.display = 'flex';
+            setTimeout(() => document.getElementById('todoInput').focus(), 50);
+        }
+
+        function openEditTask(index) {
+            editingTodoIndex = index;
+            const todo = todos[index];
+            selectedPriority = todo.priority || 'low';
+            document.getElementById('todoInput').value = todo.text;
+            document.getElementById('todoNote').value = todo.note || '';
+            document.getElementById('taskEditorBadge').textContent = 'Edit Task';
+            document.getElementById('taskSaveBtn').innerHTML = `
+                <svg viewBox="0 0 20 20" fill="none"><path d="M16 4L8 14l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Save Changes`;
+            document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === selectedPriority));
+            document.getElementById('todoDetailEmpty').style.display = 'none';
+            document.getElementById('taskEditor').style.display = 'flex';
+            setTimeout(() => document.getElementById('todoInput').focus(), 50);
+        }
+
+        function closeTaskEditor() {
+            document.getElementById('taskEditor').style.display = 'none';
+            document.getElementById('todoDetailEmpty').style.display = 'flex';
+            editingTodoIndex = -1;
+        }
+
+        function setPriority(p, btn) {
+            selectedPriority = p;
+            document.querySelectorAll('.priority-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function saveTodo() {
+            const text = document.getElementById('todoInput').value.trim();
             if (!text) { showToast('Please enter a task!', 'warn'); return; }
-            todos.push({ text, completed: false });
-            todoInput.value = '';
+            const note = document.getElementById('todoNote').value.trim();
+            if (editingTodoIndex >= 0) {
+                todos[editingTodoIndex] = { ...todos[editingTodoIndex], text, note, priority: selectedPriority };
+                showToast('Task updated ✓', 'success');
+            } else {
+                todos.push({ text, note, priority: selectedPriority, completed: false });
+                showToast('Task added ✓', 'success');
+                document.getElementById('todoInput').value = '';
+                document.getElementById('todoNote').value = '';
+                selectedPriority = 'low';
+                document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === 'low'));
+            }
             saveData('todos', todos);
             loadTodos();
-            showToast('Task added ✓', 'success');
         }
+
         function toggleTodo(i) { todos[i].completed = !todos[i].completed; saveData('todos', todos); loadTodos(); }
-        function deleteTodo(i) { todos.splice(i, 1); saveData('todos', todos); loadTodos(); showToast('Task removed', 'info'); }
+        function deleteTodo(i) {
+            if (editingTodoIndex === i) closeTaskEditor();
+            todos.splice(i, 1);
+            saveData('todos', todos);
+            loadTodos();
+            showToast('Task removed', 'info');
+        }
         function clearCompleted() {
             const n = todos.filter(t => t.completed).length;
             if (!n) { showToast('No completed tasks', 'warn'); return; }
@@ -283,57 +645,90 @@
             document.getElementById('completedCount').textContent = done;
             document.getElementById('remainingCount').textContent = todos.length - done;
         }
-        todoInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTodo(); });
+        document.getElementById('todoInput').addEventListener('keypress', e => { if (e.key === 'Enter') saveTodo(); });
 
         // ─── QUICK NOTES ──────────────────────────────────────
-        const notesContainer = document.getElementById('notesContainer');
-        let notesArr = JSON.parse(localStorage.getItem('advancedNotes')) || [];
+        let notesArr   = JSON.parse(localStorage.getItem('advancedNotes')) || [];
+        let activeNoteId = null;
 
-        function loadNotes() {
-            notesContainer.innerHTML = '';
+        function renderNotesList() {
+            const list = document.getElementById('notesList');
+            document.getElementById('noteCount').textContent = notesArr.length;
+            list.innerHTML = '';
             if (!notesArr.length) {
-                notesContainer.innerHTML = `<div class="empty-state" style="display:flex">
+                list.innerHTML = `<div class="empty-state" style="display:flex">
                     <svg viewBox="0 0 48 48" fill="none"><path d="M12 8h24v28l-6 6H12V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M30 36v6l6-6h-6z" fill="currentColor"/></svg>
-                    <p>No notes yet.<br>Click "New Note" to start!</p></div>`;
+                    <p>No notes yet.<br>Click <strong>New Note</strong>!</p></div>`;
                 return;
             }
             notesArr.forEach(note => {
-                const el = document.createElement('div');
-                el.className = 'note-card';
-                el.style.setProperty('--nc', note.theme || '#6C63FF');
-                el.innerHTML = `
-                    <div class="note-head">
-                        <span class="note-accent"></span>
-                        <input class="note-title" type="text" value="${escapeHtml(note.title)}" placeholder="Note title…" oninput="updateNoteTitle(${note.id},this.value)">
-                        <button class="del-btn" onclick="deleteNote(${note.id})">
-                            <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
-                    </div>
-                    <div class="note-toolbar">
-                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('bold')"><b>B</b></button>
-                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('italic')"><i>I</i></button>
-                        <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertUnorderedList')">&#8286;</button>
-                        <label class="clr-label" title="Text color">A<input type="color" value="#000000" onchange="execNoteCmd('foreColor',this.value)"></label>
-                        <label class="clr-label" title="Accent color">&#9679;<input type="color" value="${note.theme||'#6C63FF'}" onchange="changeNoteTheme(${note.id},this.value,this)"></label>
-                    </div>
-                    <div class="note-editor" contenteditable="true" oninput="updateNoteContent(${note.id},this.innerHTML)">${note.content}</div>`;
-                notesContainer.appendChild(el);
+                const btn = document.createElement('button');
+                btn.className = 'note-list-item' + (note.id === activeNoteId ? ' active' : '');
+                btn.style.setProperty('--nc', note.theme || '#6C63FF');
+                const dateStr = note.updatedAt
+                    ? new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : 'Just now';
+                btn.innerHTML = `
+                    <span class="note-list-accent"></span>
+                    <div class="note-list-info">
+                        <span class="note-list-title">${escapeHtml(note.title) || '<em>Untitled Note</em>'}</span>
+                        <span class="note-list-date">${dateStr}</span>
+                    </div>`;
+                btn.onclick = () => openNote(note.id);
+                list.appendChild(btn);
             });
         }
 
+        function openNote(id) {
+            activeNoteId = id;
+            const note = notesArr.find(n => n.id === id);
+            if (!note) return;
+            renderNotesList();
+            document.getElementById('noteEditorEmpty').style.display = 'none';
+            document.getElementById('activeNoteEditor').style.display = 'flex';
+            document.getElementById('activeNoteTitle').value = note.title || '';
+            document.getElementById('activeNoteContent').innerHTML = note.content || '';
+            document.getElementById('activeNoteThemeColor').value = note.theme || '#6C63FF';
+            document.getElementById('activeNoteEditor').style.setProperty('--nc', note.theme || '#6C63FF');
+        }
+
         function addNewNote() {
-            notesArr.unshift({ id: Date.now(), title: '', content: '', theme: '#6C63FF' });
-            saveData('advancedNotes', notesArr); loadNotes();
-            setTimeout(() => { const t = notesContainer.querySelector('.note-title'); if(t) t.focus(); }, 50);
+            const newNote = { id: Date.now(), title: '', content: '', theme: '#6C63FF', updatedAt: new Date().toISOString() };
+            notesArr.unshift(newNote);
+            saveData('advancedNotes', notesArr);
+            openNote(newNote.id);
+            renderNotesList();
+            setTimeout(() => { const t = document.getElementById('activeNoteTitle'); if (t) t.focus(); }, 50);
         }
-        function updateNoteTitle(id, v) { const n=notesArr.find(n=>n.id===id); if(n){n.title=v; saveData('advancedNotes',notesArr);} }
-        function updateNoteContent(id, v) { const n=notesArr.find(n=>n.id===id); if(n){n.content=v; saveData('advancedNotes',notesArr);} }
-        function changeNoteTheme(id, c, el) {
-            const n=notesArr.find(n=>n.id===id);
-            if(n){ n.theme=c; saveData('advancedNotes',notesArr); el.closest('.note-card').style.setProperty('--nc',c); }
+
+        function updateActiveNoteTitle(v) {
+            const n = notesArr.find(n => n.id === activeNoteId);
+            if (n) { n.title = v; n.updatedAt = new Date().toISOString(); saveData('advancedNotes', notesArr); renderNotesList(); }
         }
-        function deleteNote(id) { notesArr=notesArr.filter(n=>n.id!==id); saveData('advancedNotes',notesArr); loadNotes(); showToast('Note deleted','info'); }
-        function execNoteCmd(cmd, val=null) { document.execCommand(cmd, false, val); }
+        function updateActiveNoteContent(v) {
+            const n = notesArr.find(n => n.id === activeNoteId);
+            if (n) { n.content = v; n.updatedAt = new Date().toISOString(); saveData('advancedNotes', notesArr); }
+        }
+        function changeActiveNoteTheme(c) {
+            const n = notesArr.find(n => n.id === activeNoteId);
+            if (n) {
+                n.theme = c;
+                saveData('advancedNotes', notesArr);
+                document.getElementById('activeNoteEditor').style.setProperty('--nc', c);
+                renderNotesList();
+            }
+        }
+        function deleteActiveNote() {
+            if (!activeNoteId) return;
+            notesArr = notesArr.filter(n => n.id !== activeNoteId);
+            saveData('advancedNotes', notesArr);
+            activeNoteId = null;
+            document.getElementById('activeNoteEditor').style.display = 'none';
+            document.getElementById('noteEditorEmpty').style.display = 'flex';
+            renderNotesList();
+            showToast('Note deleted', 'info');
+        }
+        function execNoteCmd(cmd, val = null) { document.execCommand(cmd, false, val); }
 
         // ─── CALCULATOR ───────────────────────────────────────
         const calcDisplay = document.getElementById('calcDisplay');
@@ -347,83 +742,259 @@
             calcExpr.innerHTML = '&nbsp;';
         }
         function calcBackspace() {
-            calcValue = calcValue === 'Error' ? '' : calcValue.slice(0,-1);
+            calcValue = calcValue === 'Error' ? '' : calcValue.slice(0, -1);
             calcDisplay.value = calcValue || '0';
             calcExpr.innerHTML = '&nbsp;';
         }
-        function calcClear() { calcValue=''; calcDisplay.value='0'; calcExpr.innerHTML='&nbsp;'; }
+        function calcClear() { calcValue = ''; calcDisplay.value = '0'; calcExpr.innerHTML = '&nbsp;'; }
         function calcCalculate() {
-            if (!calcValue || calcValue==='Error') return;
+            if (!calcValue || calcValue === 'Error') return;
             try {
                 const expr = calcValue;
-                const res = new Function('return ' + calcValue)();
+                const res  = new Function('return ' + calcValue)();
                 calcExpr.textContent = expr + ' =';
                 calcValue = String(parseFloat(res.toFixed(10)));
                 calcDisplay.value = calcValue;
-            } catch(e) { calcValue='Error'; calcDisplay.value='Error'; calcExpr.innerHTML='&nbsp;'; }
+            } catch(e) { calcValue = 'Error'; calcDisplay.value = 'Error'; calcExpr.innerHTML = '&nbsp;'; }
         }
-
-        // Keyboard support for calculator
         document.addEventListener('keydown', e => {
+            if (currentTool !== 'calc') return;
             const active = document.activeElement;
-            if (active && (active.id === 'todoInput' || active.classList.contains('note-title') || active.classList.contains('note-editor'))) return;
-            if ('0123456789.+-*/()'.includes(e.key) && e.key.length===1) calcInput(e.key);
-            else if (e.key==='Enter'||e.key==='=') calcCalculate();
-            else if (e.key==='Backspace') calcBackspace();
-            else if (e.key==='Escape') calcClear();
+            if (active && (active.id === 'todoInput' || active.classList.contains('note-title-big') || active.classList.contains('note-content-editor'))) return;
+            if ('0123456789.+-*/()'.includes(e.key) && e.key.length === 1) calcInput(e.key);
+            else if (e.key === 'Enter' || e.key === '=') calcCalculate();
+            else if (e.key === 'Backspace') calcBackspace();
+            else if (e.key === 'Escape') calcClear();
         });
 
         // ─── FOCUS TIMER ──────────────────────────────────────
-        let timerInterval, timeLeft=25*60, totalTime=25*60, isRunning=false;
-        let currentMode=25, currentModeLabel='Work';
-        let sessionCount = parseInt(localStorage.getItem('sessionCount')||'0');
-
+        let timerInterval, timeLeft = 25 * 60, totalTime = 25 * 60, isRunning = false;
+        let currentMode = 25, currentModeLabel = 'Work';
+        let sessionCount = parseInt(localStorage.getItem('sessionCount') || '0');
         const timerDisplay = document.getElementById('timerDisplay');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const timerRing = document.getElementById('timerRing');
+        const startBtn     = document.getElementById('startBtn');
+        const pauseBtn     = document.getElementById('pauseBtn');
+        const timerRing    = document.getElementById('timerRing');
         const CIRC = 2 * Math.PI * 60;
         timerRing.style.strokeDasharray = CIRC;
         document.getElementById('sessionCount').textContent = sessionCount;
 
         function updateTimerDisplay() {
-            const m = Math.floor(timeLeft/60), s = timeLeft%60;
-            timerDisplay.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            timerRing.style.strokeDashoffset = CIRC * (1 - timeLeft/totalTime);
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            timerRing.style.strokeDashoffset = CIRC * (1 - timeLeft / totalTime);
         }
-
         function startTimer() {
             if (isRunning) return;
-            isRunning=true;
-            startBtn.style.display='none'; pauseBtn.style.display='inline-flex';
+            isRunning = true;
+            startBtn.style.display = 'none'; pauseBtn.style.display = 'inline-flex';
             timerInterval = setInterval(() => {
-                if (timeLeft>0) { timeLeft--; updateTimerDisplay(); }
+                if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); }
                 else {
-                    clearInterval(timerInterval); isRunning=false;
-                    startBtn.style.display='inline-flex'; pauseBtn.style.display='none';
-                    if (currentModeLabel==='Work') {
-                        sessionCount++; localStorage.setItem('sessionCount',sessionCount);
+                    clearInterval(timerInterval); isRunning = false;
+                    startBtn.style.display = 'inline-flex'; pauseBtn.style.display = 'none';
+                    if (currentModeLabel === 'Work') {
+                        sessionCount++;
+                        localStorage.setItem('sessionCount', sessionCount);
                         document.getElementById('sessionCount').textContent = sessionCount;
                     }
-                    showToast(currentModeLabel+' session complete! 🎉','success');
+                    showToast(currentModeLabel + ' session complete! 🎉', 'success');
                     resetTimer();
                 }
             }, 1000);
         }
-
         function pauseTimer() {
-            isRunning=false; clearInterval(timerInterval);
-            startBtn.style.display='inline-flex'; pauseBtn.style.display='none';
+            isRunning = false; clearInterval(timerInterval);
+            startBtn.style.display = 'inline-flex'; pauseBtn.style.display = 'none';
         }
-        function resetTimer() { pauseTimer(); timeLeft=currentMode*60; updateTimerDisplay(); }
+        function resetTimer() { pauseTimer(); timeLeft = currentMode * 60; updateTimerDisplay(); }
         function setTimerMode(min, label, chip) {
             pauseTimer();
-            currentMode=min; currentModeLabel=label; totalTime=min*60; timeLeft=totalTime;
+            currentMode = min; currentModeLabel = label; totalTime = min * 60; timeLeft = totalTime;
             updateTimerDisplay();
             document.getElementById('modeBadge').textContent = label;
             document.getElementById('timerLabel').textContent = label;
             document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
-            if(chip) chip.classList.add('active');
+            if (chip) chip.classList.add('active');
+        }
+
+        // ─── BMI CALCULATOR ───────────────────────────────────
+        let bmiHeightUnit = 'cm';
+        let bmiWeightUnit = 'kg';
+
+        function setBmiHeightUnit(unit, btn) {
+            bmiHeightUnit = unit;
+            document.getElementById('unitCm').classList.toggle('active', unit === 'cm');
+            document.getElementById('unitFt').classList.toggle('active', unit === 'ft');
+            document.getElementById('bmiHeight').value = '';
+            document.getElementById('bmiHeight').placeholder = unit === 'cm' ? 'e.g. 170' : 'e.g. 5.7';
+            calcBMI();
+        }
+        function setBmiWeightUnit(unit, btn) {
+            bmiWeightUnit = unit;
+            document.getElementById('unitKg').classList.toggle('active', unit === 'kg');
+            document.getElementById('unitLb').classList.toggle('active', unit === 'lb');
+            document.getElementById('bmiWeight').value = '';
+            document.getElementById('bmiWeight').placeholder = unit === 'kg' ? 'e.g. 70' : 'e.g. 154';
+            calcBMI();
+        }
+
+        function calcBMI() {
+            let h = parseFloat(document.getElementById('bmiHeight').value);
+            let w = parseFloat(document.getElementById('bmiWeight').value);
+            if (!h || !w || h <= 0 || w <= 0) {
+                document.getElementById('bmiResult').style.display = 'none';
+                document.getElementById('bmiPlaceholder').style.display = 'flex';
+                return;
+            }
+            if (bmiHeightUnit === 'ft') h = h * 30.48;
+            if (bmiWeightUnit === 'lb') w = w * 0.453592;
+            const hM  = h / 100;
+            const bmi = w / (hM * hM);
+            showBMIResult(bmi);
+        }
+
+        function showBMIResult(bmi) {
+            document.getElementById('bmiPlaceholder').style.display = 'none';
+            document.getElementById('bmiResult').style.display = 'flex';
+            document.getElementById('bmiNumber').textContent = bmi.toFixed(1);
+
+            let cls, desc, color, needlePos;
+            if (bmi < 18.5) {
+                cls = 'Underweight'; desc = 'BMI below 18.5. Consider consulting a nutritionist for a balanced diet plan.'; color = '#60a5fa';
+                needlePos = Math.max(0, ((bmi - 16) / 2.5) * 25);
+            } else if (bmi < 25) {
+                cls = 'Normal Weight'; desc = 'Great! You\'re in the healthy BMI range. Keep maintaining your lifestyle!'; color = '#34d399';
+                needlePos = 25 + ((bmi - 18.5) / 6.5) * 25;
+            } else if (bmi < 30) {
+                cls = 'Overweight'; desc = 'Slightly above normal. Regular exercise and a balanced diet can help.'; color = '#fbbf24';
+                needlePos = 50 + ((bmi - 25) / 5) * 25;
+            } else {
+                cls = 'Obese'; desc = 'BMI above 30. Please consult a healthcare professional for guidance.'; color = '#f87171';
+                needlePos = Math.min(100, 75 + ((bmi - 30) / 10) * 25);
+            }
+
+            const badge = document.getElementById('bmiClassBadge');
+            badge.textContent = cls;
+            badge.style.cssText = `background:${color}22;color:${color};border-color:${color}55`;
+            document.getElementById('bmiClassDesc').textContent = desc;
+
+            // Ring arc
+            const circ = 2 * Math.PI * 50;
+            const pct  = Math.min(bmi / 40, 1);
+            const arc  = document.getElementById('bmiRingArc');
+            arc.style.strokeDashoffset = circ * (1 - pct);
+            arc.style.stroke = color;
+
+            // Scale needle
+            document.getElementById('bmiNeedle').style.left = needlePos + '%';
+        }
+
+        function resetBMI() {
+            document.getElementById('bmiHeight').value = '';
+            document.getElementById('bmiWeight').value = '';
+            document.getElementById('bmiResult').style.display = 'none';
+            document.getElementById('bmiPlaceholder').style.display = 'flex';
+        }
+
+        // ─── WEATHER ──────────────────────────────────────────
+        const WMO = {
+            0:  { label:'Clear Sky',               icon:'☀️' },
+            1:  { label:'Mainly Clear',            icon:'🌤️' },
+            2:  { label:'Partly Cloudy',           icon:'⛅' },
+            3:  { label:'Overcast',                icon:'☁️' },
+            45: { label:'Foggy',                   icon:'🌫️' },
+            48: { label:'Icy Fog',                 icon:'🌫️' },
+            51: { label:'Light Drizzle',           icon:'🌦️' },
+            53: { label:'Moderate Drizzle',        icon:'🌦️' },
+            55: { label:'Dense Drizzle',           icon:'🌧️' },
+            61: { label:'Light Rain',              icon:'🌧️' },
+            63: { label:'Rain',                    icon:'🌧️' },
+            65: { label:'Heavy Rain',              icon:'🌧️' },
+            71: { label:'Light Snow',              icon:'🌨️' },
+            73: { label:'Snow',                    icon:'❄️' },
+            75: { label:'Heavy Snow',              icon:'❄️' },
+            77: { label:'Snow Grains',             icon:'🌨️' },
+            80: { label:'Light Showers',           icon:'🌦️' },
+            81: { label:'Showers',                 icon:'🌧️' },
+            82: { label:'Violent Showers',         icon:'⛈️' },
+            85: { label:'Snow Showers',            icon:'🌨️' },
+            86: { label:'Heavy Snow Showers',      icon:'❄️' },
+            95: { label:'Thunderstorm',            icon:'⛈️' },
+            96: { label:'Thunderstorm w/ Hail',    icon:'⛈️' },
+            99: { label:'Thunderstorm Heavy Hail', icon:'⛈️' }
+        };
+
+        async function fetchWeatherData(lat, lon, fallbackCity = null) {
+            try {
+                const wRes = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+                    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,uv_index` +
+                    `&wind_speed_unit=kmh&timezone=auto`
+                );
+                const wData = await wRes.json();
+                const c = wData.current;
+
+                let cityName = fallbackCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+                if (!fallbackCity) {
+                    try {
+                        const gRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+                        const gData = await gRes.json();
+                        cityName = gData.city || gData.locality || gData.principalSubdivision || cityName;
+                    } catch(_) {}
+                }
+
+                const wmo = WMO[c.weather_code] || { label: 'Unknown', icon: '🌡️' };
+                document.getElementById('weatherIconBig').textContent  = wmo.icon;
+                document.getElementById('weatherTempBig').textContent  = Math.round(c.temperature_2m);
+                document.getElementById('weatherCity').textContent     = cityName;
+                document.getElementById('weatherDesc').textContent     = wmo.label;
+                document.getElementById('weatherFeels').textContent    = Math.round(c.apparent_temperature) + '°C';
+                document.getElementById('weatherHumidity').textContent = c.relative_humidity_2m + '%';
+                document.getElementById('weatherWind').textContent     = Math.round(c.wind_speed_10m);
+                document.getElementById('weatherUV').textContent       = c.uv_index !== undefined ? c.uv_index.toFixed(1) : '--';
+                document.getElementById('weatherUpdated').textContent  = 'Updated ' +
+                    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                document.getElementById('weatherLoading').style.display = 'none';
+                document.getElementById('weatherContent').style.display = 'flex';
+                weatherFetched = true;
+            } catch(e) {
+                showWeatherError('Failed to fetch weather data. Check your connection and try again.');
+            }
+        }
+
+        async function fetchWeatherIPFallback() {
+            try {
+                const res = await fetch('https://ipwho.is/');
+                const data = await res.json();
+                if (data.success) fetchWeatherData(data.latitude, data.longitude, data.city);
+                else throw new Error();
+            } catch(e) {
+                showWeatherError('Location access denied. Please allow location in your browser settings.');
+            }
+        }
+
+        function fetchWeather() {
+            document.getElementById('weatherLoading').style.display  = 'flex';
+            document.getElementById('weatherError').style.display    = 'none';
+            document.getElementById('weatherContent').style.display  = 'none';
+
+            if (!navigator.geolocation) {
+                fetchWeatherIPFallback();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                pos => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
+                err => fetchWeatherIPFallback(),
+                { timeout: 10000 }
+            );
+        }
+
+        function showWeatherError(msg) {
+            document.getElementById('weatherLoading').style.display = 'none';
+            document.getElementById('weatherErrorMsg').innerHTML = msg;
+            document.getElementById('weatherError').style.display = 'flex';
         }
 
         // ─── THEME ────────────────────────────────────────────
@@ -437,20 +1008,28 @@
 
         // ─── EXPORT ───────────────────────────────────────────
         function exportData() {
-            const blob = new Blob([JSON.stringify({todos, notes:notesArr, exported:new Date().toISOString()},null,2)], {type:'application/json'});
-            const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:`flowdesk-${new Date().toISOString().split('T')[0]}.json`});
+            const blob = new Blob(
+                [JSON.stringify({ todos, notes: notesArr, exported: new Date().toISOString() }, null, 2)],
+                { type: 'application/json' }
+            );
+            const a = Object.assign(document.createElement('a'), {
+                href: URL.createObjectURL(blob),
+                download: `flowdesk-${new Date().toISOString().split('T')[0]}.json`
+            });
             a.click(); URL.revokeObjectURL(a.href);
-            showToast('Data exported!','success');
+            showToast('Data exported!', 'success');
         }
 
         // ─── INIT ─────────────────────────────────────────────
         window.onload = () => {
-            if (localStorage.getItem('theme')==='dark') {
+            if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-mode');
-                document.querySelector('.icon-moon').style.display='none';
-                document.querySelector('.icon-sun').style.display='block';
+                document.querySelector('.icon-moon').style.display = 'none';
+                document.querySelector('.icon-sun').style.display  = 'block';
             }
-            loadTodos(); loadNotes(); updateTimerDisplay();
+            loadTodos();
+            renderNotesList();
+            updateTimerDisplay();
         };
     </script>
 </body>
