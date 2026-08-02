@@ -597,7 +597,7 @@ nav#mainNav {
 .bmi-result-main { display: flex; align-items: center; gap: 24px; padding: 20px; background: var(--surface-2); border-radius: var(--r-lg); border: 1px solid var(--border); }
 .bmi-score-ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
 .bmi-score-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.bmi-number { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+.bmi-number { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; }
 .bmi-unit-label { font-size: 0.75rem; color: var(--txt-2); font-weight: 600; }
 .bmi-class-info { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .bmi-class-badge { font-size: 0.85rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; border: 1px solid transparent; }
