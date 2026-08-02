@@ -729,11 +729,13 @@ nav#mainNav {
     .bmi-inputs { grid-template-columns: 1fr; gap: 16px; }
     .bmi-result-main { flex-direction: column; text-align: center; gap: 16px; padding: 16px; align-items: center; }
     .bmi-class-info { align-items: center; }
+    .bmi-scale-labels { font-size: 0.55rem; }
     
     /* Weather */
     .weather-wrap { padding: 16px; min-height: 0; }
     .weather-hero { flex-direction: column; gap: 12px; align-items: center; text-align: center; }
-    .weather-cards { grid-template-columns: 1fr; }
+    .weather-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .weather-card { padding: 12px; }
     
     /* Global Buttons */
     .btn-primary, .ghost-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; width: 100%; }
