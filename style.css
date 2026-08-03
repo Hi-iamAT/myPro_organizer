@@ -691,28 +691,34 @@ nav#mainNav {
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
+    html { font-size: 14px; }
     .app-shell { flex-direction: column; }
     .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 12px; flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .sidebar-nav { flex-direction: row; width: max-content; }
     .sidebar-item { padding: 8px 16px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 99px; }
     .sidebar-divider { display: none; }
     
+    .tool-panel { height: auto; min-height: 100%; overflow: visible; }
+    
     .panel-split { flex-direction: column; }
-    .split-left { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; flex-shrink: 0; }
-    .split-right { flex: 1; }
+    .split-left { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 35vh; flex-shrink: 0; display: flex; flex-direction: column; }
+    .todo-list, .notes-list { flex: 1; overflow-y: auto; }
+    .split-right { flex: 1; display: flex; flex-direction: column; min-height: 50vh; }
     
     .panel-header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
     .panel-title { flex-wrap: wrap; }
-    .panel-title h1 { white-space: nowrap; }
+    .panel-title h1 { white-space: nowrap; font-size: 1.15rem; }
+    .panel-icon { width: 36px; height: 36px; }
+    .panel-icon svg { width: 20px; height: 20px; }
     .stats-pills { flex-wrap: wrap; }
     
-    .task-editor { padding: 20px; }
-    .task-title-input { font-size: 1.25rem; }
+    .task-editor { padding: 20px; flex: 1; }
+    .task-title-input { font-size: 1.15rem; }
     .task-note-input { min-height: 100px; }
     
     .note-editor-topbar { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
     .note-toolbar { padding: 12px 16px; justify-content: flex-start; }
-    .note-content-editor { padding: 16px; font-size: 0.95rem; }
+    .note-content-editor { padding: 16px; font-size: 0.95rem; min-height: 200px; }
     
     .main-panel { padding: 12px; overflow-y: auto; }
     
@@ -721,8 +727,8 @@ nav#mainNav {
     
     /* Timer */
     .timer-body-wrap { padding: 24px; gap: 24px; }
-    .timer-display { font-size: 2.75rem; }
-    .timer-ring { width: 180px; height: 180px; }
+    .timer-display { font-size: 2.5rem; }
+    .timer-ring { width: 160px; height: 160px; }
     
     /* BMI */
     .bmi-wrap { padding: 16px; gap: 24px; max-width: 100%; }
@@ -734,10 +740,12 @@ nav#mainNav {
     /* Weather */
     .weather-wrap { padding: 16px; min-height: 0; }
     .weather-hero { flex-direction: column; gap: 12px; align-items: center; text-align: center; }
+    .weather-icon-big { font-size: 4rem; }
+    .weather-temp-big { font-size: 4rem; }
     .weather-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .weather-card { padding: 12px; }
     
     /* Global Buttons */
-    .btn-primary, .ghost-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; width: 100%; }
+    .btn-primary, .ghost-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; width: 100%; font-size: 0.9rem; }
     .ghost-btn.danger { width: auto; }
 }
