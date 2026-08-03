@@ -18,7 +18,7 @@
 <body>
     <!-- ── Navbar ── -->
     <nav id="mainNav">
-        <div class="navbar-brand">
+        <div class="navbar-brand" onclick="switchTool('todo', document.getElementById('nav-todo'))" style="cursor: pointer;" title="Go to To-Do">
             <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="32" height="32" rx="8" fill="url(#brandGrad)"/>
                 <path d="M8 10h10M8 16h8M8 22h12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
@@ -679,6 +679,13 @@
         }
 
         function openNote(id) {
+            if (activeNoteId === id) {
+                activeNoteId = null;
+                renderNotesList();
+                document.getElementById('activeNoteEditor').style.display = 'none';
+                document.getElementById('noteEditorEmpty').style.display = 'flex';
+                return;
+            }
             activeNoteId = id;
             const note = notesArr.find(n => n.id === id);
             if (!note) return;
