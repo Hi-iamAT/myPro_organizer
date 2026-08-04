@@ -752,3 +752,21 @@ nav#mainNav {
     .btn-primary, .ghost-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; width: 100%; font-size: 0.9rem; }
     .ghost-btn.danger { width: auto; }
 }
+/* ============================================================
+   MODALS
+   ============================================================ */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+.modal-content {
+    background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--shadow-lg);
+    width: 90%; max-width: 500px; padding: 32px; display: flex; flex-direction: column; gap: 24px;
+}
+.task-date-input {
+    padding: 10px 16px; border: 1px solid var(--border); border-radius: var(--r-md);
+    background: var(--surface-2); color: var(--txt); font-family: inherit; font-size: 0.95rem;
+}
+.task-date-input:focus { outline: none; border-color: var(--brand); }

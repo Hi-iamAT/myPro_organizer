@@ -119,7 +119,7 @@
                 </div>
                 <div class="panel-split">
                     <!-- Left: Task List -->
-                    <div class="split-left">
+                    <div class="split-left" style="width: 100%; border-right: none; flex: 1;">
                         <div class="split-left-header">
                             <span class="split-left-title">All Tasks</span>
                             <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task" aria-label="Add task">
@@ -133,36 +133,7 @@
                         </div>
                     </div>
                     <!-- Right: Task Detail/Add -->
-                    <div class="split-right">
-                        <div class="split-right-empty" id="todoDetailEmpty">
-                            <svg viewBox="0 0 64 64" fill="none"><rect x="12" y="8" width="40" height="48" rx="6" stroke="currentColor" stroke-width="2"/><path d="M20 24h24M20 32h16M20 40h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M32 48v8M28 52l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            <p>Click <strong>+</strong> to add a new task<br>or select one to edit</p>
-                        </div>
-                        <div class="task-editor" id="taskEditor" style="display:none">
-                            <div class="task-editor-header">
-                                <span class="editor-badge" id="taskEditorBadge">New Task</span>
-                                <button class="icon-btn" onclick="closeTaskEditor()" title="Close">
-                                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                </button>
-                            </div>
-                            <input type="text" id="todoInput" placeholder="Task title…" autocomplete="off" class="task-title-input">
-                            <textarea id="todoNote" placeholder="Add a note (optional)…" class="task-note-input" rows="5"></textarea>
-                            <div class="task-priority-row">
-                                <span class="field-label">Priority</span>
-                                <div class="priority-chips">
-                                    <button class="priority-chip active" data-priority="low" onclick="setPriority('low',this)">Low</button>
-                                    <button class="priority-chip" data-priority="medium" onclick="setPriority('medium',this)">Medium</button>
-                                    <button class="priority-chip" data-priority="high" onclick="setPriority('high',this)">High</button>
-                                </div>
-                            </div>
-                            <div class="task-editor-actions">
-                                <button class="btn-primary" id="taskSaveBtn" onclick="saveTodo()">
-                                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-                                    Add Task
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="split-right" style="display: none;"></div>
                 </div>
             </div>
 
@@ -482,6 +453,42 @@
         <span class="footer-credit">Made by <strong>AT Alauddin</strong> with ❤️</span>
     </footer>
 
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-content">
+            <div class="task-editor-header">
+                <span class="editor-badge" id="taskEditorBadge">New Task</span>
+                <button class="icon-btn" onclick="closeTaskEditor()" title="Close">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <input type="text" id="todoInput" placeholder="Task title…" autocomplete="off" class="task-title-input">
+            <textarea id="todoNote" placeholder="Add a note (optional)…" class="task-note-input" rows="3"></textarea>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="task-priority-row">
+                    <span class="field-label">Priority</span>
+                    <div class="priority-chips">
+                        <button class="priority-chip active" data-priority="low" onclick="setPriority('low',this)">Low</button>
+                        <button class="priority-chip" data-priority="medium" onclick="setPriority('medium',this)">Medium</button>
+                        <button class="priority-chip" data-priority="high" onclick="setPriority('high',this)">High</button>
+                    </div>
+                </div>
+                <div class="task-priority-row">
+                    <span class="field-label">Due Date</span>
+                    <input type="date" id="todoDate" class="task-date-input">
+                </div>
+            </div>
+
+            <div class="task-editor-actions">
+                <button class="btn-primary" id="taskSaveBtn" onclick="saveTodo()">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    Add Task
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -534,6 +541,15 @@
         let selectedPriority = 'low';
 
         function loadTodos() {
+            // Sort by date: tasks with dates first (earliest to latest), then tasks without dates.
+            todos.sort((a, b) => {
+                if (a.date && b.date) return new Date(a.date) - new Date(b.date);
+                if (a.date) return -1;
+                if (b.date) return 1;
+                return 0;
+            });
+            saveData('todos', todos);
+
             todoList.innerHTML = '';
             emptyState.style.display = todos.length === 0 ? 'flex' : 'none';
             todos.forEach((todo, i) => addTodoElement(todo, i));
@@ -544,6 +560,16 @@
             const li = document.createElement('li');
             const pColors = { low: 'var(--brand)', medium: 'var(--warn)', high: 'var(--danger)' };
             const pColor  = pColors[todo.priority || 'low'];
+            
+            let dateHtml = '';
+            if (todo.date) {
+                const d = new Date(todo.date);
+                dateHtml = `<span class="todo-date-preview" style="font-size:0.75rem; color:var(--brand); display:flex; align-items:center; gap:4px; margin-top:2px;">
+                    <svg viewBox="0 0 20 20" fill="currentColor" style="width:12px; height:12px;"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+                    ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>`;
+            }
+
             li.className = 'todo-item' + (todo.completed ? ' completed' : '');
             li.innerHTML = `
                 <label class="check-label">
@@ -552,6 +578,7 @@
                 </label>
                 <div class="todo-content" onclick="openEditTask(${index})">
                     <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    ${dateHtml}
                     ${todo.note ? `<span class="todo-note-preview">${escapeHtml(todo.note.substring(0,60))}${todo.note.length > 60 ? '…' : ''}</span>` : ''}
                 </div>
                 <span class="priority-dot" style="background:${pColor}" title="${todo.priority || 'low'} priority"></span>
@@ -566,13 +593,13 @@
             selectedPriority = 'low';
             document.getElementById('todoInput').value = '';
             document.getElementById('todoNote').value = '';
+            document.getElementById('todoDate').value = '';
             document.getElementById('taskEditorBadge').textContent = 'New Task';
             document.getElementById('taskSaveBtn').innerHTML = `
                 <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
                 Add Task`;
             document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === 'low'));
-            document.getElementById('todoDetailEmpty').style.display = 'none';
-            document.getElementById('taskEditor').style.display = 'flex';
+            document.getElementById('taskModal').style.display = 'flex';
             setTimeout(() => document.getElementById('todoInput').focus(), 50);
         }
 
@@ -582,19 +609,18 @@
             selectedPriority = todo.priority || 'low';
             document.getElementById('todoInput').value = todo.text;
             document.getElementById('todoNote').value = todo.note || '';
+            document.getElementById('todoDate').value = todo.date || '';
             document.getElementById('taskEditorBadge').textContent = 'Edit Task';
             document.getElementById('taskSaveBtn').innerHTML = `
                 <svg viewBox="0 0 20 20" fill="none"><path d="M16 4L8 14l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Save Changes`;
             document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === selectedPriority));
-            document.getElementById('todoDetailEmpty').style.display = 'none';
-            document.getElementById('taskEditor').style.display = 'flex';
+            document.getElementById('taskModal').style.display = 'flex';
             setTimeout(() => document.getElementById('todoInput').focus(), 50);
         }
 
         function closeTaskEditor() {
-            document.getElementById('taskEditor').style.display = 'none';
-            document.getElementById('todoDetailEmpty').style.display = 'flex';
+            document.getElementById('taskModal').style.display = 'none';
             editingTodoIndex = -1;
         }
 
@@ -608,17 +634,15 @@
             const text = document.getElementById('todoInput').value.trim();
             if (!text) { showToast('Please enter a task!', 'warn'); return; }
             const note = document.getElementById('todoNote').value.trim();
+            const date = document.getElementById('todoDate').value;
             if (editingTodoIndex >= 0) {
-                todos[editingTodoIndex] = { ...todos[editingTodoIndex], text, note, priority: selectedPriority };
+                todos[editingTodoIndex] = { ...todos[editingTodoIndex], text, note, date, priority: selectedPriority };
                 showToast('Task updated ✓', 'success');
             } else {
-                todos.push({ text, note, priority: selectedPriority, completed: false });
+                todos.push({ text, note, date, priority: selectedPriority, completed: false });
                 showToast('Task added ✓', 'success');
-                document.getElementById('todoInput').value = '';
-                document.getElementById('todoNote').value = '';
-                selectedPriority = 'low';
-                document.querySelectorAll('.priority-chip').forEach(c => c.classList.toggle('active', c.dataset.priority === 'low'));
             }
+            closeTaskEditor();
             saveData('todos', todos);
             loadTodos();
         }
