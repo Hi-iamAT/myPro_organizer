@@ -203,7 +203,7 @@
                         </div>
                         <div>
                             <h1>Calculator</h1>
-                            <p class="panel-subtitle">Quick arithmetic &amp; expressions</p>
+                            <p class="panel-subtitle">Arithmetic, scientific &amp; expressions</p>
                         </div>
                     </div>
                     <button class="ghost-btn danger" onclick="calcClear()" id="calcAcBtn">AC</button>
@@ -213,6 +213,16 @@
                         <div class="calc-display-wrap">
                             <div class="calc-expression" id="calcExpression">&nbsp;</div>
                             <input type="text" id="calcDisplay" class="calc-display" readonly value="0" aria-label="Calculator display">
+                        </div>
+                        <div class="calc-fn-row">
+                            <button class="calc-fn-btn" onclick="calcInput('sqrt(')" title="Square root">&#8730;</button>
+                            <button class="calc-fn-btn" onclick="calcSquare()" title="Square">x&#178;</button>
+                            <button class="calc-fn-btn" onclick="calcPercent()" title="Percent">%</button>
+                            <button class="calc-fn-btn" onclick="calcInput('^')" title="Power">x&#7511;</button>
+                            <button class="calc-fn-btn" onclick="calcInput('sin(')" title="Sine (degrees)">sin</button>
+                            <button class="calc-fn-btn" onclick="calcInput('cos(')" title="Cosine (degrees)">cos</button>
+                            <button class="calc-fn-btn" onclick="calcInput('tan(')" title="Tangent (degrees)">tan</button>
+                            <button class="calc-fn-btn" onclick="calcInput('π')" title="Pi">&#960;</button>
                         </div>
                         <div class="calc-grid">
                             <button class="calc-btn fn-btn" onclick="calcBackspace()">&#9003;</button>
@@ -293,6 +303,13 @@
                         <div class="session-counter">
                             Sessions today: <strong id="sessionCount">0</strong>
                         </div>
+                        <label class="timer-notif-toggle">
+                            <input type="checkbox" id="timerNotifToggle" checked onchange="toggleTimerNotifications(this.checked)">
+                            <span class="timer-notif-label">
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+                                Browser notifications
+                            </span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -314,13 +331,31 @@
                 <div class="panel-single">
                     <div class="bmi-wrap">
                         <div class="bmi-inputs">
-                            <div class="bmi-field">
+                            <div class="bmi-field bmi-field-height">
                                 <label class="bmi-label">Height</label>
-                                <div class="bmi-input-group">
-                                    <input type="number" id="bmiHeight" placeholder="e.g. 170" min="50" max="300" oninput="calcBMI()">
-                                    <div class="unit-toggle-group">
-                                        <button class="unit-btn active" id="unitCm" onclick="setBmiHeightUnit('cm', this)">cm</button>
-                                        <button class="unit-btn" id="unitFt" onclick="setBmiHeightUnit('ft', this)">ft</button>
+                                <div class="bmi-height-cm" id="bmiHeightCmWrap">
+                                    <div class="bmi-input-group">
+                                        <input type="number" id="bmiHeight" placeholder="e.g. 170" min="50" max="300" oninput="calcBMI()">
+                                        <div class="unit-toggle-group">
+                                            <button class="unit-btn active" id="unitCm" onclick="setBmiHeightUnit('cm', this)">cm</button>
+                                            <button class="unit-btn" id="unitFtIn" onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bmi-height-ftin" id="bmiHeightFtInWrap" style="display:none">
+                                    <div class="bmi-ftin-row">
+                                        <div class="bmi-input-group bmi-ftin-group">
+                                            <input type="number" id="bmiHeightFt" placeholder="5" min="1" max="8" oninput="calcBMI()">
+                                            <span class="bmi-unit-suffix">ft</span>
+                                        </div>
+                                        <div class="bmi-input-group bmi-ftin-group">
+                                            <input type="number" id="bmiHeightIn" placeholder="7" min="0" max="11" step="0.1" oninput="calcBMI()">
+                                            <span class="bmi-unit-suffix">in</span>
+                                        </div>
+                                        <div class="unit-toggle-group">
+                                            <button class="unit-btn" id="unitCmAlt" onclick="setBmiHeightUnit('cm', document.getElementById('unitCm'))">cm</button>
+                                            <button class="unit-btn active" id="unitFtInAlt" onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -777,11 +812,40 @@
             calcExpr.innerHTML = '&nbsp;';
         }
         function calcClear() { calcValue = ''; calcDisplay.value = '0'; calcExpr.innerHTML = '&nbsp;'; }
+        function calcSquare() {
+            if (calcValue === 'Error' || !calcValue) return;
+            calcValue += '**2';
+            calcDisplay.value = calcValue;
+            calcExpr.innerHTML = '&nbsp;';
+        }
+        function calcPercent() {
+            if (calcValue === 'Error' || !calcValue) return;
+            calcValue += '/100';
+            calcDisplay.value = calcValue;
+            calcExpr.innerHTML = '&nbsp;';
+        }
+        function calcPrepareExpr(raw) {
+            let e = raw.replace(/π/g, 'PI').replace(/\^/g, '**');
+            e = e.replace(/(\d+\.?\d*)\*\*2/g, '($1)**2');
+            e = e.replace(/sin\(/g, 'SIN(').replace(/cos\(/g, 'COS(').replace(/tan\(/g, 'TAN(');
+            e = e.replace(/sqrt\(/g, 'SQRT(');
+            return e;
+        }
+        function calcSafeEval(expr) {
+            const PI = Math.PI;
+            const SIN = deg => Math.sin(deg * Math.PI / 180);
+            const COS = deg => Math.cos(deg * Math.PI / 180);
+            const TAN = deg => Math.tan(deg * Math.PI / 180);
+            const SQRT = Math.sqrt;
+            return Function('PI', 'SIN', 'COS', 'TAN', 'SQRT', '"use strict"; return (' + expr + ')')(PI, SIN, COS, TAN, SQRT);
+        }
         function calcCalculate() {
             if (!calcValue || calcValue === 'Error') return;
             try {
                 const expr = calcValue;
-                const res  = new Function('return ' + calcValue)();
+                const prepared = calcPrepareExpr(expr);
+                const res  = calcSafeEval(prepared);
+                if (!isFinite(res)) throw new Error('Invalid');
                 calcExpr.textContent = expr + ' =';
                 calcValue = String(parseFloat(res.toFixed(10)));
                 calcDisplay.value = calcValue;
@@ -801,6 +865,8 @@
         let timerInterval, timeLeft = 25 * 60, totalTime = 25 * 60, isRunning = false;
         let currentMode = 25, currentModeLabel = 'Work';
         let sessionCount = parseInt(localStorage.getItem('sessionCount') || '0');
+        let timerNotificationsEnabled = localStorage.getItem('timerNotifications') !== 'false';
+        let titleFlashInterval = null;
         const timerDisplay = document.getElementById('timerDisplay');
         const startBtn     = document.getElementById('startBtn');
         const pauseBtn     = document.getElementById('pauseBtn');
@@ -808,6 +874,90 @@
         const CIRC = 2 * Math.PI * 60;
         timerRing.style.strokeDasharray = CIRC;
         document.getElementById('sessionCount').textContent = sessionCount;
+        document.getElementById('timerNotifToggle').checked = timerNotificationsEnabled;
+
+        function toggleTimerNotifications(enabled) {
+            timerNotificationsEnabled = enabled;
+            localStorage.setItem('timerNotifications', enabled);
+            if (enabled) requestTimerNotificationPermission();
+        }
+
+        async function requestTimerNotificationPermission() {
+            if (!('Notification' in window)) return false;
+            if (Notification.permission === 'granted') return true;
+            if (Notification.permission !== 'denied') {
+                const result = await Notification.requestPermission();
+                return result === 'granted';
+            }
+            return false;
+        }
+
+        function playTimerSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.5);
+                setTimeout(() => {
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.frequency.value = 1100;
+                    osc2.type = 'sine';
+                    gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc2.start(ctx.currentTime);
+                    osc2.stop(ctx.currentTime + 0.5);
+                }, 200);
+            } catch (_) {}
+        }
+
+        function flashDocumentTitle(message) {
+            if (titleFlashInterval) clearInterval(titleFlashInterval);
+            const original = document.title;
+            let showAlt = true;
+            titleFlashInterval = setInterval(() => {
+                document.title = showAlt ? message : original;
+                showAlt = !showAlt;
+            }, 800);
+            setTimeout(() => {
+                clearInterval(titleFlashInterval);
+                titleFlashInterval = null;
+                document.title = original;
+            }, 8000);
+        }
+
+        function notifyTimerComplete(message) {
+            showToast(message, 'success');
+            playTimerSound();
+            flashDocumentTitle('⏰ Timer Done!');
+            showBrowserNotification(message);
+        }
+
+        function showBrowserNotification(message) {
+            if (!timerNotificationsEnabled || !('Notification' in window)) return;
+            if (Notification.permission === 'granted') {
+                const n = new Notification('Focus Timer', {
+                    body: message,
+                    icon: 'favicon.svg',
+                    tag: 'flowdesk-timer',
+                    requireInteraction: false
+                });
+                n.onclick = () => { window.focus(); n.close(); };
+            } else if (Notification.permission !== 'denied') {
+                requestTimerNotificationPermission().then(granted => {
+                    if (granted) showBrowserNotification(message);
+                });
+            }
+        }
 
         function updateTimerDisplay() {
             const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
@@ -816,6 +966,7 @@
         }
         function startTimer() {
             if (isRunning) return;
+            if (timerNotificationsEnabled) requestTimerNotificationPermission();
             isRunning = true;
             startBtn.style.display = 'none'; pauseBtn.style.display = 'inline-flex';
             timerInterval = setInterval(() => {
@@ -828,7 +979,7 @@
                         localStorage.setItem('sessionCount', sessionCount);
                         document.getElementById('sessionCount').textContent = sessionCount;
                     }
-                    showToast(currentModeLabel + ' session complete! 🎉', 'success');
+                    notifyTimerComplete(currentModeLabel + ' session complete! 🎉');
                     resetTimer();
                 }
             }, 1000);
@@ -855,9 +1006,14 @@
         function setBmiHeightUnit(unit, btn) {
             bmiHeightUnit = unit;
             document.getElementById('unitCm').classList.toggle('active', unit === 'cm');
-            document.getElementById('unitFt').classList.toggle('active', unit === 'ft');
+            document.getElementById('unitFtIn').classList.toggle('active', unit === 'ftin');
+            document.getElementById('unitCmAlt').classList.toggle('active', unit === 'cm');
+            document.getElementById('unitFtInAlt').classList.toggle('active', unit === 'ftin');
+            document.getElementById('bmiHeightCmWrap').style.display = unit === 'cm' ? 'block' : 'none';
+            document.getElementById('bmiHeightFtInWrap').style.display = unit === 'ftin' ? 'block' : 'none';
             document.getElementById('bmiHeight').value = '';
-            document.getElementById('bmiHeight').placeholder = unit === 'cm' ? 'e.g. 170' : 'e.g. 5.7';
+            document.getElementById('bmiHeightFt').value = '';
+            document.getElementById('bmiHeightIn').value = '';
             calcBMI();
         }
         function setBmiWeightUnit(unit, btn) {
@@ -869,15 +1025,24 @@
             calcBMI();
         }
 
+        function getBmiHeightCm() {
+            if (bmiHeightUnit === 'cm') {
+                return parseFloat(document.getElementById('bmiHeight').value);
+            }
+            const ft = parseFloat(document.getElementById('bmiHeightFt').value) || 0;
+            const inches = parseFloat(document.getElementById('bmiHeightIn').value) || 0;
+            if (ft <= 0 && inches <= 0) return NaN;
+            return (ft * 12 + inches) * 2.54;
+        }
+
         function calcBMI() {
-            let h = parseFloat(document.getElementById('bmiHeight').value);
+            let h = getBmiHeightCm();
             let w = parseFloat(document.getElementById('bmiWeight').value);
             if (!h || !w || h <= 0 || w <= 0) {
                 document.getElementById('bmiResult').style.display = 'none';
                 document.getElementById('bmiPlaceholder').style.display = 'flex';
                 return;
             }
-            if (bmiHeightUnit === 'ft') h = h * 30.48;
             if (bmiWeightUnit === 'lb') w = w * 0.453592;
             const hM  = h / 100;
             const bmi = w / (hM * hM);
@@ -922,6 +1087,8 @@
 
         function resetBMI() {
             document.getElementById('bmiHeight').value = '';
+            document.getElementById('bmiHeightFt').value = '';
+            document.getElementById('bmiHeightIn').value = '';
             document.getElementById('bmiWeight').value = '';
             document.getElementById('bmiResult').style.display = 'none';
             document.getElementById('bmiPlaceholder').style.display = 'flex';

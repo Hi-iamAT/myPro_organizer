@@ -1112,10 +1112,34 @@ nav#mainNav {
     padding: 24px;
     box-shadow: var(--shadow-sm);
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.calc-fn-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.calc-fn-btn {
+    border-radius: var(--r-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    color: var(--warn);
+    padding: 8px 4px;
+    transition: all 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.calc-fn-btn:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: var(--warn);
+    transform: scale(1.04);
 }
 
 .calc-display-wrap {
@@ -1388,6 +1412,37 @@ nav#mainNav {
     font-weight: 700;
 }
 
+.timer-notif-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-top: 4px;
+    user-select: none;
+}
+
+.timer-notif-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brand);
+    cursor: pointer;
+}
+
+.timer-notif-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--txt-2);
+    font-weight: 500;
+}
+
+.timer-notif-label svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
 
 /* ============================================================
    BMI CALCULATOR SPECIFIC
@@ -1399,7 +1454,7 @@ nav#mainNav {
     padding: 32px;
     box-shadow: var(--shadow-sm);
     width: 100%;
-    max-width: 500px;
+    max-width: 540px;
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -1448,6 +1503,31 @@ nav#mainNav {
     color: var(--txt);
     font-weight: 600;
     outline: none;
+}
+
+.bmi-ftin-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.bmi-ftin-group {
+    flex: 1;
+    min-width: 70px;
+}
+
+.bmi-unit-suffix {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--txt-2);
+    padding-right: 10px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.bmi-field-height {
+    grid-column: 1 / -1;
 }
 
 .unit-toggle-group {
