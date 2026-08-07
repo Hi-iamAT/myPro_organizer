@@ -959,36 +959,73 @@
             }
         }
 
+        let timerEndTime = null;
+        let pausedTimeLeft = 25 * 60;
+
         function updateTimerDisplay() {
             const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const timeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            timerDisplay.textContent = timeStr;
             timerRing.style.strokeDashoffset = CIRC * (1 - timeLeft / totalTime);
+            if (isRunning) {
+                document.title = `(${timeStr}) FlowDesk — ${currentModeLabel}`;
+            }
         }
+
+        function tickTimer() {
+            if (!isRunning || !timerEndTime) return;
+            const now = Date.now();
+            timeLeft = Math.max(0, Math.round((timerEndTime - now) / 1000));
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                timerEndTime = null;
+                startBtn.style.display = 'inline-flex';
+                pauseBtn.style.display = 'none';
+                if (currentModeLabel === 'Work') {
+                    sessionCount++;
+                    localStorage.setItem('sessionCount', sessionCount);
+                    document.getElementById('sessionCount').textContent = sessionCount;
+                }
+                notifyTimerComplete(currentModeLabel + ' session complete! 🎉');
+                resetTimer();
+            }
+        }
+
         function startTimer() {
             if (isRunning) return;
             if (timerNotificationsEnabled) requestTimerNotificationPermission();
             isRunning = true;
-            startBtn.style.display = 'none'; pauseBtn.style.display = 'inline-flex';
-            timerInterval = setInterval(() => {
-                if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); }
-                else {
-                    clearInterval(timerInterval); isRunning = false;
-                    startBtn.style.display = 'inline-flex'; pauseBtn.style.display = 'none';
-                    if (currentModeLabel === 'Work') {
-                        sessionCount++;
-                        localStorage.setItem('sessionCount', sessionCount);
-                        document.getElementById('sessionCount').textContent = sessionCount;
-                    }
-                    notifyTimerComplete(currentModeLabel + ' session complete! 🎉');
-                    resetTimer();
-                }
-            }, 1000);
+            timerEndTime = Date.now() + timeLeft * 1000;
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-flex';
+            
+            // Immediate update and start interval
+            tickTimer();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(tickTimer, 500);
         }
+
         function pauseTimer() {
-            isRunning = false; clearInterval(timerInterval);
-            startBtn.style.display = 'inline-flex'; pauseBtn.style.display = 'none';
+            if (isRunning && timerEndTime) {
+                timeLeft = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+            }
+            isRunning = false;
+            timerEndTime = null;
+            if (timerInterval) clearInterval(timerInterval);
+            startBtn.style.display = 'inline-flex';
+            pauseBtn.style.display = 'none';
+            document.title = 'FlowDesk — Your Personal Productivity Hub';
         }
-        function resetTimer() { pauseTimer(); timeLeft = currentMode * 60; updateTimerDisplay(); }
+
+        function resetTimer() {
+            pauseTimer();
+            totalTime = currentMode * 60;
+            timeLeft = totalTime;
+            updateTimerDisplay();
+        }
         function setTimerMode(min, label, chip) {
             pauseTimer();
             currentMode = min; currentModeLabel = label; totalTime = min * 60; timeLeft = totalTime;
@@ -998,6 +1035,12 @@
             document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
             if (chip) chip.classList.add('active');
         }
+
+        document.addEventListener('visibilitychange', () => {
+            if (isRunning) {
+                tickTimer();
+            }
+        });
 
         // ─── BMI CALCULATOR ───────────────────────────────────
         let bmiHeightUnit = 'cm';
