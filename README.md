@@ -8,6 +8,14 @@
 
 ---
 
+## 📸 Website Screenshots & Preview
+
+Here is a glimpse of the FlowDesk dark-mode productivity hub interface:
+
+![FlowDesk Dashboard Preview](screenshots/dashboard_preview.png)
+
+---
+
 ## ✨ Features
 
 | Widget | Description |
@@ -16,6 +24,8 @@
 | **📌 Quick Notes** | Multi-note rich-text editor. Bold, italic, bullet lists, custom text colour, per-note accent colour. |
 | **🧮 Calculator** | Full expression evaluator with backspace, parentheses support, and keyboard input. |
 | **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. |
+| **⚖️ BMI Calculator** | Easily check body mass index with category indicators. |
+| **🌤️ Weather Widget** | Check live local weather updates. |
 
 ### Extras
 - 🌙 / ☀️ **Dark / Light mode** — persisted across sessions
@@ -30,7 +40,7 @@
 
 ## 🚀 Getting Started
 
-No build step needed. Just open the file:
+No build step needed. Just open `index.html`:
 
 ```bash
 # Clone the repo
@@ -55,11 +65,15 @@ python3 -m http.server 5500
 ## 🗂️ Project Structure
 
 ```
-flowdesk/
-├── index.html      # App structure + all JavaScript logic
-├── style.css       # Design system, tokens, layout, animations
-├── favicon.svg     # Browser tab icon
-└── README.md       # You are here
+myPro_organizer/
+├── index.html              # Main HTML entry point
+├── src/
+│   └── style.css           # Design system, tokens, layout & widget styles
+├── public/
+│   └── favicon.svg         # Tab & app branding icon
+├── screenshots/
+│   └── dashboard_preview.png # Application UI screenshot
+└── README.md               # Project documentation
 ```
 
 ---
@@ -83,21 +97,11 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 
 - **HTML5** — semantic markup
 - **CSS3** — grid layout, custom properties, transitions, SVG animations
-- **Vanilla JavaScript** — no libraries or frameworks
+- **Vanilla JavaScript** — no external runtime dependencies
 - **LocalStorage** — client-side data persistence
-
----
-
-## 📸 Screenshots
-
-> Open `index.html` in your browser to see the live dashboard.
 
 ---
 
 ## 📄 License
 
 MIT © [Hi-iamAT](https://github.com/Hi-iamAT)
-
----
-
-<p align="center">Made by AT Alauddin with ❤️</p>
