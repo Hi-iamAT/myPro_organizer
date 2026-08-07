@@ -12,7 +12,13 @@
 
 Here is a glimpse of the FlowDesk dark-mode productivity hub interface:
 
-![FlowDesk Dashboard Preview](screenshots/dashboard_preview.png)
+![FlowDesk Dashboard Preview](screenshots/dashboard_UI.png)
+![FlowDesk Dashboard Preview](screenshots/todo_UI.png)
+![FlowDesk Dashboard Preview](screenshots/notes_UI.png)
+![FlowDesk Dashboard Preview](screenshots/calc_UI.png)
+![FlowDesk Dashboard Preview](screenshots/timer_UI.png)
+![FlowDesk Dashboard Preview](screenshots/bmi_UI.png)
+![FlowDesk Dashboard Preview](screenshots/weather_UI.png)
 
 ---
 
