@@ -67,10 +67,8 @@ python3 -m http.server 5500
 ```
 myPro_organizer/
 ├── index.html              # Main HTML entry point
-├── src/
-│   └── style.css           # Design system, tokens, layout & widget styles
-├── public/
-│   └── favicon.svg         # Tab & app branding icon
+├── style.css               # Design system, tokens, layout & widget styles
+├── favicon.svg             # Tab & app branding icon
 ├── screenshots/
 │   └── dashboard_preview.png # Application UI screenshot
 └── README.md               # Project documentation
