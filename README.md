@@ -10,15 +10,47 @@
 
 ## 📸 Website Screenshots & Preview
 
-Here is a glimpse of the FlowDesk dark-mode productivity hub interface:
+Here is a tour of the FlowDesk dark & light productivity hub interface across all core widgets:
 
-![FlowDesk Dashboard Preview](screenshots/dashboard_UI.png)
-![FlowDesk Dashboard Preview](screenshots/todo_UI.png)
-![FlowDesk Dashboard Preview](screenshots/notes_UI.png)
-![FlowDesk Dashboard Preview](screenshots/calc_UI.png)
-![FlowDesk Dashboard Preview](screenshots/timer_UI.png)
-![FlowDesk Dashboard Preview](screenshots/bmi_UI.png)
-![FlowDesk Dashboard Preview](screenshots/weather_UI.png)
+### 🖥️ Main Dashboard Overview
+<p align="center">
+  <img src="screenshots/dashboard_UI.png" alt="FlowDesk Main Dashboard" width="100%" style="border-radius: 8px;">
+</p>
+
+### 🛠️ Feature & Widget Showcase
+
+<table width="100%">
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <h4>📝 To-Do Manager</h4>
+      <img src="screenshots/todo_UI.png" alt="To-Do List Widget" width="100%">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <h4>📌 Quick Notes</h4>
+      <img src="screenshots/quicknotes_UI.png" alt="Quick Notes Widget" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <h4>⏱️ Focus Timer</h4>
+      <img src="screenshots/focustimer_UI.png" alt="Focus Timer Widget" width="100%">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <h4>🧮 Calculator</h4>
+      <img src="screenshots/calculator_UI.png" alt="Calculator Widget" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <h4>⚖️ BMI Calculator</h4>
+      <img src="screenshots/BMI_UI.png" alt="BMI Calculator Widget" width="100%">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <h4>🌤️ Weather Forecast</h4>
+      <img src="screenshots/weather_UI.png" alt="Weather Widget" width="100%">
+    </td>
+  </tr>
+</table>
 
 ---
 
