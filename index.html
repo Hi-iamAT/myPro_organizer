@@ -92,6 +92,12 @@
                     </span>
                     <span class="sidebar-label">Weather</span>
                 </button>
+                <button class="sidebar-item" id="nav-calendar" onclick="switchTool('calendar', this)">
+                    <span class="sidebar-icon calendar-icon">
+                        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="sidebar-label">Calendar</span>
+                </button>
             </nav>
         </aside>
 
@@ -473,6 +479,83 @@
                                 </div>
                             </div>
                             <div class="weather-updated" id="weatherUpdated"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ CALENDAR PANEL ════ -->
+            <div class="tool-panel" id="panel-calendar">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon calendar-panel-icon">
+                            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Live Calendar</h1>
+                            <p class="panel-subtitle">Plan your days with Hijri & Bengali dates</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-single scrollable" style="padding: 24px; display: flex; flex-direction: column; height: 100%; overflow-y: auto;">
+                    <div class="calendar-layout">
+                        <!-- Calendar Main Body (Grid and Headers) -->
+                        <div class="calendar-main">
+                            <div class="calendar-nav-bar">
+                                <div class="calendar-selectors">
+                                    <select id="calMonthSelect" onchange="changeCalendarMonthYear()"></select>
+                                    <select id="calYearSelect" onchange="changeCalendarMonthYear()"></select>
+                                </div>
+                                <div class="calendar-nav-arrows">
+                                    <button class="ghost-btn icon-btn-small" onclick="prevCalendarMonth()" title="Previous Month">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                    <button class="ghost-btn" onclick="jumpToToday()">Today</button>
+                                    <button class="ghost-btn icon-btn-small" onclick="nextCalendarMonth()" title="Next Month">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDaysGrid"></div>
+                        </div>
+                        
+                        <!-- Event/Notes Sidebar -->
+                        <div class="calendar-event-sidebar">
+                            <div class="selected-date-header">
+                                <h3 id="selectedDateGregorian">Select a date</h3>
+                                <div class="alternative-dates">
+                                    <div class="alt-date-row">
+                                        <span class="alt-label">Bengali:</span>
+                                        <span class="alt-val" id="selectedDateBengali">--</span>
+                                    </div>
+                                    <div class="alt-date-row">
+                                        <span class="alt-label">Arabic/Hijri:</span>
+                                        <span class="alt-val" id="selectedDateHijri">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notes-section">
+                                <h4>Events & Notes</h4>
+                                <div class="notes-list" id="calendarNotesList"></div>
+                                
+                                <div class="add-note-form">
+                                    <textarea id="calendarNoteInput" placeholder="Write a note/event for this day..." rows="3"></textarea>
+                                    <button class="btn-primary" onclick="addCalendarNote()">
+                                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                                        Add Note
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1237,6 +1320,379 @@
             document.getElementById('weatherError').style.display = 'flex';
         }
 
+        // ─── LIVE CALENDAR ────────────────────────────────────
+        let calendarDate = new Date();
+        let selectedDate = new Date();
+        let calendarEvents = JSON.parse(localStorage.getItem('calendar_events')) || {};
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        function initCalendar() {
+            // Populate Month Select
+            const mSelect = document.getElementById('calMonthSelect');
+            mSelect.innerHTML = '';
+            monthNames.forEach((m, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = m;
+                mSelect.appendChild(opt);
+            });
+
+            // Populate Year Select (current year - 20 to current year + 20)
+            const ySelect = document.getElementById('calYearSelect');
+            ySelect.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear - 20; y <= currentYear + 20; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                ySelect.appendChild(opt);
+            }
+
+            syncCalendarSelectors();
+            renderCalendar();
+            selectCalendarDate(new Date());
+        }
+
+        function syncCalendarSelectors() {
+            document.getElementById('calMonthSelect').value = calendarDate.getMonth();
+            document.getElementById('calYearSelect').value = calendarDate.getFullYear();
+        }
+
+        function changeCalendarMonthYear() {
+            const m = parseInt(document.getElementById('calMonthSelect').value);
+            const y = parseInt(document.getElementById('calYearSelect').value);
+            calendarDate.setFullYear(y);
+            calendarDate.setMonth(m);
+            renderCalendar();
+        }
+
+        function prevCalendarMonth() {
+            calendarDate.setMonth(calendarDate.getMonth() - 1);
+            syncCalendarSelectors();
+            renderCalendar();
+        }
+
+        function nextCalendarMonth() {
+            calendarDate.setMonth(calendarDate.getMonth() + 1);
+            syncCalendarSelectors();
+            renderCalendar();
+        }
+
+        function jumpToToday() {
+            calendarDate = new Date();
+            syncCalendarSelectors();
+            renderCalendar();
+            selectCalendarDate(new Date());
+        }
+
+        // Custom Bengali Date Converter (Bangla Academy Revised Calendar)
+        function getBengaliDate(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1; // 1-12
+            const day = date.getDate();
+            const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+
+            let bYear = year - 593;
+            let bMonth = 1;
+            let bDay = 1;
+
+            if (month === 4) { // April
+                if (day >= 14) { bMonth = 1; bDay = day - 13; }
+                else { bMonth = 12; bDay = day + 17; bYear--; }
+            } else if (month === 5) { // May
+                if (day >= 15) { bMonth = 2; bDay = day - 14; }
+                else { bMonth = 1; bDay = day + 17; }
+            } else if (month === 6) { // June
+                if (day >= 15) { bMonth = 3; bDay = day - 14; }
+                else { bMonth = 2; bDay = day + 17; }
+            } else if (month === 7) { // July
+                if (day >= 16) { bMonth = 4; bDay = day - 15; }
+                else { bMonth = 3; bDay = day + 16; }
+            } else if (month === 8) { // August
+                if (day >= 16) { bMonth = 5; bDay = day - 15; }
+                else { bMonth = 4; bDay = day + 16; }
+            } else if (month === 9) { // September
+                if (day >= 16) { bMonth = 6; bDay = day - 15; }
+                else { bMonth = 5; bDay = day + 16; }
+            } else if (month === 10) { // October
+                if (day >= 17) { bMonth = 7; bDay = day - 16; }
+                else { bMonth = 6; bDay = day + 15; }
+            } else if (month === 11) { // November
+                if (day >= 16) { bMonth = 8; bDay = day - 15; }
+                else { bMonth = 7; bDay = day + 15; }
+            } else if (month === 12) { // December
+                if (day >= 16) { bMonth = 9; bDay = day - 15; }
+                else { bMonth = 8; bDay = day + 15; }
+            } else if (month === 1) { // January
+                if (day >= 15) { bMonth = 10; bDay = day - 14; }
+                else { bMonth = 9; bDay = day + 16; }
+                bYear--;
+            } else if (month === 2) { // February
+                if (day >= 14) { bMonth = 11; bDay = day - 13; }
+                else { bMonth = 10; bDay = day + 17; }
+                bYear--;
+            } else if (month === 3) { // March
+                if (day >= 15) { bMonth = 12; bDay = day - 14; }
+                else { bMonth = 11; bDay = day + (isLeap ? 16 : 15); }
+                bYear--;
+            }
+
+            const banglaMonths = [
+                "Boishakh", "Jyaistha", "Ashadh", "Shravan", "Bhadra", "Ashwin",
+                "Kartik", "Agrahayan", "Poush", "Magh", "Falgun", "Chaitra"
+            ];
+            const banglaMonthsBn = [
+                "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
+                "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
+            ];
+
+            const toBnDigits = (num) => {
+                const digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+                return num.toString().split('').map(d => digits[d] || d).join('');
+            };
+
+            return {
+                day: bDay,
+                month: bMonth,
+                year: bYear,
+                monthName: banglaMonths[bMonth - 1],
+                monthNameBn: banglaMonthsBn[bMonth - 1],
+                dayBn: toBnDigits(bDay),
+                yearBn: toBnDigits(bYear),
+                dateString: `${bDay} ${banglaMonths[bMonth - 1]} ${bYear}`,
+                dateStringBn: `${toBnDigits(bDay)} ${banglaMonthsBn[bMonth - 1]} ${toBnDigits(bYear)}`
+            };
+        }
+
+        // Custom Arabic/Hijri Converter
+        function getHijriDate(date) {
+            try {
+                const fmtAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                const fmtEn = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                
+                // For showing short number in cells
+                const fmtDayAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric' });
+                
+                return {
+                    ar: fmtAr.format(date),
+                    en: fmtEn.format(date),
+                    dayAr: fmtDayAr.format(date)
+                };
+            } catch (e) {
+                return { ar: '--', en: '--', dayAr: '' };
+            }
+        }
+
+        // Render Calendar Grid
+        function renderCalendar() {
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const prevTotalDays = new Date(year, month, 0).getDate();
+
+            const today = new Date();
+
+            const getLocalDateString = (d) => {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            };
+
+            // Previous month buffer days
+            for (let i = firstDayIndex; i > 0; i--) {
+                const day = prevTotalDays - i + 1;
+                const dateObj = new Date(year, month - 1, day);
+                createDayCell(dateObj, true, grid, getLocalDateString(dateObj), today);
+            }
+
+            // Current month days
+            for (let day = 1; day <= totalDays; day++) {
+                const dateObj = new Date(year, month, day);
+                createDayCell(dateObj, false, grid, getLocalDateString(dateObj), today);
+            }
+
+            // Next month buffer days
+            const gridLength = firstDayIndex + totalDays;
+            const remainingDays = gridLength % 7 === 0 ? 0 : 7 - (gridLength % 7);
+            for (let i = 1; i <= remainingDays; i++) {
+                const dateObj = new Date(year, month + 1, i);
+                createDayCell(dateObj, true, grid, getLocalDateString(dateObj), today);
+            }
+        }
+
+        function createDayCell(dateObj, isInactive, container, dateStr, today) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day-cell';
+            if (isInactive) cell.classList.add('inactive');
+
+            // Today indicator
+            if (dateObj.getDate() === today.getDate() &&
+                dateObj.getMonth() === today.getMonth() &&
+                dateObj.getFullYear() === today.getFullYear()) {
+                cell.classList.add('today');
+            }
+
+            // Selected indicator
+            if (dateObj.getDate() === selectedDate.getDate() &&
+                dateObj.getMonth() === selectedDate.getMonth() &&
+                dateObj.getFullYear() === selectedDate.getFullYear()) {
+                cell.classList.add('selected');
+            }
+
+            // Has events indicator
+            if (calendarEvents[dateStr] && calendarEvents[dateStr].length > 0) {
+                cell.classList.add('has-events');
+            }
+
+            const bn = getBengaliDate(dateObj);
+            const ar = getHijriDate(dateObj);
+
+            // Gregorian number
+            const mainDay = document.createElement('span');
+            mainDay.className = 'cell-gregorian';
+            mainDay.textContent = dateObj.getDate();
+
+            // Bengali number
+            const bnDay = document.createElement('span');
+            bnDay.className = 'cell-bengali';
+            bnDay.textContent = bn.dayBn;
+            bnDay.title = bn.dateStringBn;
+
+            // Arabic number
+            const arDay = document.createElement('span');
+            arDay.className = 'cell-arabic';
+            arDay.textContent = ar.dayAr;
+            arDay.title = ar.ar;
+
+            cell.appendChild(mainDay);
+            cell.appendChild(bnDay);
+            cell.appendChild(arDay);
+
+            if (cell.classList.contains('has-events')) {
+                const dot = document.createElement('div');
+                dot.className = 'event-dot';
+                cell.appendChild(dot);
+            }
+
+            cell.onclick = () => {
+                selectedDate = new Date(dateObj);
+                if (isInactive) {
+                    calendarDate = new Date(dateObj);
+                    syncCalendarSelectors();
+                }
+                renderCalendar();
+                selectCalendarDate(dateObj);
+            };
+
+            container.appendChild(cell);
+        }
+
+        function selectCalendarDate(dateObj) {
+            selectedDate = dateObj;
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('selectedDateGregorian').textContent = dateObj.toLocaleDateString('en-US', options);
+
+            const bn = getBengaliDate(dateObj);
+            document.getElementById('selectedDateBengali').textContent = `${bn.dateStringBn} (${bn.dateString})`;
+
+            const ar = getHijriDate(dateObj);
+            document.getElementById('selectedDateHijri').textContent = `${ar.ar} / ${ar.en}`;
+
+            renderCalendarNotes(dateStr);
+        }
+
+        function renderCalendarNotes(dateStr) {
+            const list = document.getElementById('calendarNotesList');
+            list.innerHTML = '';
+
+            const notes = calendarEvents[dateStr] || [];
+
+            if (notes.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'notes-empty-state';
+                empty.textContent = 'No events or notes for this date.';
+                list.appendChild(empty);
+                return;
+            }
+
+            notes.forEach((note) => {
+                const item = document.createElement('div');
+                item.className = 'note-item';
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'note-item-text';
+                textSpan.textContent = note.text;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'note-delete-btn';
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.title = 'Delete Event';
+                deleteBtn.onclick = () => deleteCalendarNote(dateStr, note.id);
+
+                item.appendChild(textSpan);
+                item.appendChild(deleteBtn);
+                list.appendChild(item);
+            });
+        }
+
+        function addCalendarNote() {
+            const input = document.getElementById('calendarNoteInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const yyyy = selectedDate.getFullYear();
+            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(selectedDate.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+
+            if (!calendarEvents[dateStr]) {
+                calendarEvents[dateStr] = [];
+            }
+
+            const newEvent = {
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                text: text
+            };
+
+            calendarEvents[dateStr].push(newEvent);
+            localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
+            input.value = '';
+
+            renderCalendar();
+            renderCalendarNotes(dateStr);
+            showToast('Event added successfully!', 'success');
+        }
+
+        function deleteCalendarNote(dateStr, noteId) {
+            if (!calendarEvents[dateStr]) return;
+
+            calendarEvents[dateStr] = calendarEvents[dateStr].filter(note => note.id !== noteId);
+            if (calendarEvents[dateStr].length === 0) {
+                delete calendarEvents[dateStr];
+            }
+
+            localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
+
+            renderCalendar();
+            renderCalendarNotes(dateStr);
+            showToast('Event deleted!', 'info');
+        }
+
         // ─── THEME ────────────────────────────────────────────
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
@@ -1249,7 +1705,7 @@
         // ─── EXPORT ───────────────────────────────────────────
         function exportData() {
             const blob = new Blob(
-                [JSON.stringify({ todos, notes: notesArr, exported: new Date().toISOString() }, null, 2)],
+                [JSON.stringify({ todos, notes: notesArr, calendarEvents, exported: new Date().toISOString() }, null, 2)],
                 { type: 'application/json' }
             );
             const a = Object.assign(document.createElement('a'), {
@@ -1270,6 +1726,7 @@
             loadTodos();
             renderNotesList();
             updateTimerDisplay();
+            initCalendar();
         };
     </script>
 </body>
