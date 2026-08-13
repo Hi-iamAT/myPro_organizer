@@ -305,6 +305,7 @@
                             <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work · 25m</button>
                             <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break · 5m</button>
                             <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long Break · 15m</button>
+                            <button class="mode-chip" id="chip-custom" onclick="openCustomTimerModal(this)">Custom</button>
                         </div>
                         <div class="session-counter">
                             Sessions today: <strong id="sessionCount">0</strong>
@@ -543,6 +544,15 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Holiday Banner -->
+                            <div class="holiday-banner" id="calendarHolidayBanner" style="display:none">
+                                <span class="holiday-banner-flag">🇧🇩</span>
+                                <div class="holiday-banner-info">
+                                    <span class="holiday-banner-label">Public Holiday</span>
+                                    <span class="holiday-banner-name" id="calendarHolidayName"></span>
+                                </div>
+                            </div>
                             
                             <div class="notes-section">
                                 <h4>Events & Notes</h4>
@@ -602,6 +612,32 @@
                 <button class="btn-primary" id="taskSaveBtn" onclick="saveTodo()">
                     <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
                     Add Task
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Timer Modal -->
+    <div class="modal-overlay" id="customTimerModal">
+        <div class="modal-content">
+            <div class="task-editor-header">
+                <span class="editor-badge" style="background: var(--brand);">Custom Timer</span>
+                <button class="icon-btn" onclick="closeCustomTimerModal()" title="Close">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label class="field-label" for="customTimerInput">Duration (Minutes)</label>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="number" id="customTimerInput" min="1" max="1440" placeholder="25" class="task-title-input" style="flex: 1; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 12px;">
+                    <span style="font-weight: 600; font-size: 1.1rem; color: var(--txt-2);">minutes</span>
+                </div>
+            </div>
+
+            <div class="task-editor-actions">
+                <button class="btn-primary" onclick="applyCustomTimer()">
+                    Set Timer
                 </button>
             </div>
         </div>
@@ -1119,6 +1155,30 @@
             if (chip) chip.classList.add('active');
         }
 
+        function openCustomTimerModal(chip) {
+            document.getElementById('customTimerModal').style.display = 'flex';
+            document.getElementById('customTimerInput').value = currentModeLabel === 'Custom' ? currentMode : '';
+            document.getElementById('customTimerInput').focus();
+        }
+
+        function closeCustomTimerModal() {
+            document.getElementById('customTimerModal').style.display = 'none';
+        }
+
+        function applyCustomTimer() {
+            const input = document.getElementById('customTimerInput');
+            const min = parseInt(input.value);
+            if (isNaN(min) || min < 1 || min > 1440) {
+                showToast('Please enter a valid duration between 1 and 1440 minutes.', 'error');
+                return;
+            }
+            
+            setTimerMode(min, 'Custom', document.getElementById('chip-custom'));
+            document.getElementById('chip-custom').textContent = `Custom · ${min}m`;
+            closeCustomTimerModal();
+            showToast(`Custom timer set to ${min} minutes!`, 'success');
+        }
+
         document.addEventListener('visibilitychange', () => {
             if (isRunning) {
                 tickTimer();
@@ -1486,6 +1546,96 @@
                 return { ar: '--', en: '--', dayAr: '' };
             }
         }
+        // ─── BANGLADESH PUBLIC HOLIDAYS ──────────────────────
+        // Lookup table for variable lunar holidays (Hindu/Buddhist) 2024-2030
+        const BD_LUNAR_HOLIDAYS = {
+            // Durga Puja – Bijoya Dashami (Govt holiday)
+            'durga_puja': {
+                2024: '2024-10-12', 2025: '2025-10-02', 2026: '2026-10-21',
+                2027: '2027-10-11', 2028: '2028-09-29', 2029: '2029-10-18', 2030: '2030-10-07'
+            },
+            // Janmashtami
+            'janmashtami': {
+                2024: '2024-08-26', 2025: '2025-08-16', 2026: '2026-09-04',
+                2027: '2027-08-25', 2028: '2028-08-13', 2029: '2029-09-01', 2030: '2030-08-22'
+            },
+            // Buddha Purnima
+            'buddha_purnima': {
+                2024: '2024-05-23', 2025: '2025-05-12', 2026: '2026-05-01',
+                2027: '2027-05-20', 2028: '2028-05-09', 2029: '2029-05-28', 2030: '2030-05-17'
+            }
+        };
+
+        function getBangladeshHoliday(date) {
+            const y = date.getFullYear();
+            const m = date.getMonth() + 1; // 1-indexed
+            const d = date.getDate();
+            const yyyy = y;
+            const mmStr = String(m).padStart(2, '0');
+            const ddStr = String(d).padStart(2, '0');
+            const dateStr = `${yyyy}-${mmStr}-${ddStr}`;
+
+            // ── 1. Fixed Solar Holidays ──────────────────────────
+            const fixed = {
+                '02-21': 'Shaheed Day & International Mother Language Day',
+                '03-17': "Sheikh Mujibur Rahman's Birthday & Children's Day",
+                '03-26': 'Independence Day',
+                '04-14': 'Pahela Baishakh – Bengali New Year',
+                '05-01': 'International Labour Day (May Day)',
+                '08-15': 'National Mourning Day',
+                '12-16': 'Victory Day',
+                '12-25': 'Christmas Day'
+            };
+            const monthDay = `${mmStr}-${ddStr}`;
+            if (fixed[monthDay]) return fixed[monthDay];
+
+            // ── 2. Hindu/Buddhist Lunar Holidays (lookup table) ──
+            for (const key of Object.keys(BD_LUNAR_HOLIDAYS)) {
+                const yearMap = BD_LUNAR_HOLIDAYS[key];
+                if (yearMap[y] === dateStr) {
+                    if (key === 'durga_puja')    return 'Durga Puja – Bijoya Dashami';
+                    if (key === 'janmashtami')   return 'Janmashtami';
+                    if (key === 'buddha_purnima') return 'Buddha Purnima (Vesak)';
+                }
+            }
+
+            // ── 3. Hijri-based Islamic Holidays ──────────────────
+            try {
+                const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+                    day: 'numeric', month: 'numeric', year: 'numeric'
+                }).formatToParts(date);
+
+                let hDay = 0, hMonth = 0, hYear = 0;
+                parts.forEach(p => {
+                    if (p.type === 'day')   hDay   = parseInt(p.value);
+                    if (p.type === 'month') hMonth = parseInt(p.value);
+                    if (p.type === 'year')  hYear  = parseInt(p.value);
+                });
+
+                // Muharram 10 – Ashura
+                if (hMonth === 1  && hDay === 10) return 'Ashura (10 Muharram)';
+                // Rabi al-Awwal 12 – Eid-e-Milad-un-Nabi
+                if (hMonth === 3  && hDay === 12) return 'Eid-e-Milad-un-Nabi (Prophet\'s Birthday)';
+                // Sha\'ban 15 – Shab-e-Barat
+                if (hMonth === 8  && hDay === 15) return 'Shab-e-Barat';
+                // Ramadan 27 – Laylat al-Qadr (Shab-e-Qadr)
+                if (hMonth === 9  && hDay === 27) return 'Laylat al-Qadr (Shab-e-Qadr)';
+                // Shawwal 1,2,3 – Eid-ul-Fitr
+                if (hMonth === 10 && (hDay === 1 || hDay === 2 || hDay === 3)) {
+                    if (hDay === 1) return 'Eid-ul-Fitr – Day 1';
+                    if (hDay === 2) return 'Eid-ul-Fitr – Day 2';
+                    if (hDay === 3) return 'Eid-ul-Fitr – Day 3';
+                }
+                // Dhu al-Hijja 10,11,12 – Eid-ul-Adha
+                if (hMonth === 12 && (hDay === 10 || hDay === 11 || hDay === 12)) {
+                    if (hDay === 10) return 'Eid-ul-Adha – Day 1';
+                    if (hDay === 11) return 'Eid-ul-Adha – Day 2';
+                    if (hDay === 12) return 'Eid-ul-Adha – Day 3';
+                }
+            } catch (e) { /* Intl not supported */ }
+
+            return null; // Not a holiday
+        }
 
         // Render Calendar Grid
         function renderCalendar() {
@@ -1554,6 +1704,18 @@
                 cell.classList.add('has-events');
             }
 
+            // Friday indicator
+            if (dateObj.getDay() === 5) {
+                cell.classList.add('is-friday');
+            }
+
+            // Holiday indicator
+            const holidayName = getBangladeshHoliday(dateObj);
+            if (holidayName) {
+                cell.classList.add('is-holiday');
+                cell.title = holidayName;
+            }
+
             const bn = getBengaliDate(dateObj);
             const ar = getHijriDate(dateObj);
 
@@ -1577,6 +1739,16 @@
             cell.appendChild(mainDay);
             cell.appendChild(bnDay);
             cell.appendChild(arDay);
+
+            // Holiday name chip (small label inside cell)
+            if (holidayName) {
+                const chip = document.createElement('span');
+                chip.className = 'cell-holiday-chip';
+                // Shorten very long names for display
+                const shortName = holidayName.length > 18 ? holidayName.substring(0, 16) + '…' : holidayName;
+                chip.textContent = shortName;
+                cell.appendChild(chip);
+            }
 
             if (cell.classList.contains('has-events')) {
                 const dot = document.createElement('div');
@@ -1612,6 +1784,25 @@
 
             const ar = getHijriDate(dateObj);
             document.getElementById('selectedDateHijri').textContent = `${ar.ar} / ${ar.en}`;
+
+            // Show/hide holiday banner
+            const banner = document.getElementById('calendarHolidayBanner');
+            const holidayName = getBangladeshHoliday(dateObj);
+            if (holidayName) {
+                document.getElementById('calendarHolidayName').textContent = holidayName;
+                banner.style.display = 'flex';
+            } else {
+                banner.style.display = 'none';
+            }
+
+            // Show Friday label
+            if (dateObj.getDay() === 5) {
+                const fridayNote = document.getElementById('calendarFridayNote');
+                if (fridayNote) fridayNote.style.display = 'flex';
+            } else {
+                const fridayNote = document.getElementById('calendarFridayNote');
+                if (fridayNote) fridayNote.style.display = 'none';
+            }
 
             renderCalendarNotes(dateStr);
         }
