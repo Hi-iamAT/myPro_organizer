@@ -5,29 +5,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowDesk — Your Personal Productivity Hub</title>
-    <meta name="description" content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, Focus Timer, BMI Calculator, and Weather — all in one beautiful place.">
+    <meta name="description"
+        content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, Focus Timer, BMI Calculator, and Weather — all in one beautiful place.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.svg">
     <meta name="theme-color" content="#6C63FF">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <!-- ── Navbar ── -->
     <nav id="mainNav">
-        <div class="navbar-brand" onclick="switchTool('todo', document.getElementById('nav-todo'))" style="cursor: pointer;" title="Go to To-Do">
+        <div class="navbar-brand" onclick="switchTool('todo', document.getElementById('nav-todo'))"
+            style="cursor: pointer;" title="Go to To-Do">
             <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="32" height="32" rx="8" fill="url(#brandGrad)"/>
-                <path d="M8 10h10M8 16h8M8 22h12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.9"/>
-                <path d="M22.5 22l1 1 2-2" stroke="#6C63FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect width="32" height="32" rx="8" fill="url(#brandGrad)" />
+                <path d="M8 10h10M8 16h8M8 22h12" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.9" />
+                <path d="M22.5 22l1 1 2-2" stroke="#6C63FF" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 <defs>
                     <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#6C63FF"/>
-                        <stop offset="1" stop-color="#a78bfa"/>
+                        <stop stop-color="#6C63FF" />
+                        <stop offset="1" stop-color="#a78bfa" />
                     </linearGradient>
                 </defs>
             </svg>
@@ -38,12 +43,24 @@
         </div>
         <div class="navbar-menu">
             <button class="nav-action-btn" onclick="exportData()" title="Export all data">
-                <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <svg viewBox="0 0 20 20" fill="none">
+                    <path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                </svg>
                 Export
             </button>
-            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
-                <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-                <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor" style="display:none"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode"
+                aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor" style="display:none">
+                    <path fill-rule="evenodd"
+                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                        clip-rule="evenodd" />
+                </svg>
             </button>
         </div>
     </nav>
@@ -56,45 +73,76 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-item active" id="nav-todo" onclick="switchTool('todo', this)">
                     <span class="sidebar-icon todo-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">To-Do</span>
                 </button>
                 <button class="sidebar-item" id="nav-notes" onclick="switchTool('notes', this)">
                     <span class="sidebar-icon notes-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2"
+                                stroke-linejoin="round" />
+                            <path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1"
+                                stroke-linejoin="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">Notes</span>
                 </button>
                 <button class="sidebar-item" id="nav-calc" onclick="switchTool('calc', this)">
                     <span class="sidebar-icon calc-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" />
+                            <path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">Calculator</span>
                 </button>
                 <button class="sidebar-item" id="nav-timer" onclick="switchTool('timer', this)">
                     <span class="sidebar-icon timer-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                            <path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">Focus Timer</span>
                 </button>
 
-       
+
                 <button class="sidebar-item" id="nav-bmi" onclick="switchTool('bmi', this)">
                     <span class="sidebar-icon bmi-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2" />
+                            <path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                            <path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">BMI</span>
                 </button>
                 <button class="sidebar-item" id="nav-weather" onclick="switchTool('weather', this)">
                     <span class="sidebar-icon weather-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">Weather</span>
                 </button>
                 <button class="sidebar-item" id="nav-calendar" onclick="switchTool('calendar', this)">
                     <span class="sidebar-icon calendar-icon">
-                        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                            <path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
                     </span>
                     <span class="sidebar-label">Calendar</span>
                 </button>
@@ -109,7 +157,10 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon todo-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>To-Do List</h1>
@@ -117,24 +168,37 @@
                         </div>
                     </div>
                     <div class="stats-pills">
-                        <span class="pill pill-total" title="Total tasks"><strong id="totalCount">0</strong> total</span>
-                        <span class="pill pill-done" title="Completed"><strong id="completedCount">0</strong> done</span>
-                        <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong> left</span>
+                        <span class="pill pill-total" title="Total tasks"><strong id="totalCount">0</strong>
+                            total</span>
+                        <span class="pill pill-done" title="Completed"><strong id="completedCount">0</strong>
+                            done</span>
+                        <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong>
+                            left</span>
                     </div>
-                    <button class="ghost-btn danger" onclick="clearCompleted()" title="Clear completed tasks">Clear Done</button>
+                    <button class="ghost-btn danger" onclick="clearCompleted()" title="Clear completed tasks">Clear
+                        Done</button>
                 </div>
                 <div class="panel-split">
                     <!-- Left: Task List -->
                     <div class="split-left" style="width: 100%; border-right: none; flex: 1;">
                         <div class="split-left-header">
                             <span class="split-left-title">All Tasks</span>
-                            <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task" aria-label="Add task">
-                                <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task"
+                                aria-label="Add task">
+                                <svg viewBox="0 0 20 20" fill="none">
+                                    <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" />
+                                </svg>
                             </button>
                         </div>
                         <ul class="todo-list scrollable" id="todoList"></ul>
                         <div class="empty-state" id="emptyState">
-                            <svg viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor"
+                                    stroke-width="2" />
+                                <path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
                             <p>No tasks yet.<br>Click <strong>+</strong> to start!</p>
                         </div>
                     </div>
@@ -148,7 +212,12 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon notes-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <path d="M4 4h12v9l-3 3H4V4z" stroke="currentColor" stroke-width="2"
+                                    stroke-linejoin="round" />
+                                <path d="M13 13v3l3-3h-3z" fill="currentColor" stroke="currentColor" stroke-width="1"
+                                    stroke-linejoin="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>Quick Notes</h1>
@@ -156,7 +225,10 @@
                         </div>
                     </div>
                     <button class="add-note-btn" id="addNoteBtn" onclick="addNewNote()">
-                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" />
+                        </svg>
                         New Note
                     </button>
                 </div>
@@ -172,29 +244,50 @@
                     <!-- Right: Note Editor -->
                     <div class="split-right">
                         <div class="split-right-empty" id="noteEditorEmpty">
-                            <svg viewBox="0 0 64 64" fill="none"><path d="M16 8h32v40l-10 10H16V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M38 48v10l10-10h-10z" fill="currentColor"/><path d="M24 24h16M24 32h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 64 64" fill="none">
+                                <path d="M16 8h32v40l-10 10H16V8z" stroke="currentColor" stroke-width="2"
+                                    stroke-linejoin="round" />
+                                <path d="M38 48v10l10-10h-10z" fill="currentColor" />
+                                <path d="M24 24h16M24 32h12" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
                             <p>Select a note to start editing<br>or click <strong>New Note</strong></p>
                         </div>
                         <div class="note-editor-panel" id="activeNoteEditor" style="display:none">
                             <div class="note-editor-topbar">
-                                <input class="note-title-big" id="activeNoteTitle" type="text" placeholder="Note title…" oninput="updateActiveNoteTitle(this.value)">
+                                <input class="note-title-big" id="activeNoteTitle" type="text" placeholder="Note title…"
+                                    oninput="updateActiveNoteTitle(this.value)">
                                 <div class="note-editor-controls">
-                                    <label class="clr-label" title="Accent color">&#9679;<input type="color" id="activeNoteThemeColor" value="#6C63FF" onchange="changeActiveNoteTheme(this.value)"></label>
+                                    <label class="clr-label" title="Accent color">&#9679;<input type="color"
+                                            id="activeNoteThemeColor" value="#6C63FF"
+                                            onchange="changeActiveNoteTheme(this.value)"></label>
                                     <button class="del-btn" onclick="deleteActiveNote()" title="Delete this note">
-                                        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        <svg viewBox="0 0 16 16" fill="none">
+                                            <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor"
+                                                stroke-width="1.5" stroke-linecap="round" />
+                                            <path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
                             <div class="note-toolbar">
-                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('bold')"><b>B</b></button>
-                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('italic')"><i>I</i></button>
-                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('underline')"><u>U</u></button>
-                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertUnorderedList')">&#8286;</button>
-                                <button class="tb-btn" onmousedown="event.preventDefault();execNoteCmd('insertOrderedList')">1.</button>
+                                <button class="tb-btn"
+                                    onmousedown="event.preventDefault();execNoteCmd('bold')"><b>B</b></button>
+                                <button class="tb-btn"
+                                    onmousedown="event.preventDefault();execNoteCmd('italic')"><i>I</i></button>
+                                <button class="tb-btn"
+                                    onmousedown="event.preventDefault();execNoteCmd('underline')"><u>U</u></button>
+                                <button class="tb-btn"
+                                    onmousedown="event.preventDefault();execNoteCmd('insertUnorderedList')">&#8286;</button>
+                                <button class="tb-btn"
+                                    onmousedown="event.preventDefault();execNoteCmd('insertOrderedList')">1.</button>
                                 <div class="tb-sep"></div>
-                                <label class="clr-label" title="Text color">A<input type="color" value="#000000" onchange="execNoteCmd('foreColor',this.value)"></label>
+                                <label class="clr-label" title="Text color">A<input type="color" value="#000000"
+                                        onchange="execNoteCmd('foreColor',this.value)"></label>
                             </div>
-                            <div class="note-content-editor scrollable" id="activeNoteContent" contenteditable="true" oninput="updateActiveNoteContent(this.innerHTML)"></div>
+                            <div class="note-content-editor scrollable" id="activeNoteContent" contenteditable="true"
+                                oninput="updateActiveNoteContent(this.innerHTML)"></div>
                         </div>
                     </div>
                 </div>
@@ -205,7 +298,13 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon calc-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor"
+                                    stroke-width="2" />
+                                <path d="M6 7h2M9.5 7h2M6 10.5h2M9.5 10.5h2M6 14h2M9.5 14h2M13 10.5v3.5"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <path d="M12 7h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>Calculator</h1>
@@ -218,16 +317,20 @@
                     <div class="calc-wrap">
                         <div class="calc-display-wrap">
                             <div class="calc-expression" id="calcExpression">&nbsp;</div>
-                            <input type="text" id="calcDisplay" class="calc-display" readonly value="0" aria-label="Calculator display">
+                            <input type="text" id="calcDisplay" class="calc-display" readonly value="0"
+                                aria-label="Calculator display">
                         </div>
                         <div class="calc-fn-row">
-                            <button class="calc-fn-btn" onclick="calcInput('sqrt(')" title="Square root">&#8730;</button>
+                            <button class="calc-fn-btn" onclick="calcInput('sqrt(')"
+                                title="Square root">&#8730;</button>
                             <button class="calc-fn-btn" onclick="calcSquare()" title="Square">x&#178;</button>
                             <button class="calc-fn-btn" onclick="calcPercent()" title="Percent">%</button>
                             <button class="calc-fn-btn" onclick="calcInput('^')" title="Power">x&#7511;</button>
                             <button class="calc-fn-btn" onclick="calcInput('sin(')" title="Sine (degrees)">sin</button>
-                            <button class="calc-fn-btn" onclick="calcInput('cos(')" title="Cosine (degrees)">cos</button>
-                            <button class="calc-fn-btn" onclick="calcInput('tan(')" title="Tangent (degrees)">tan</button>
+                            <button class="calc-fn-btn" onclick="calcInput('cos(')"
+                                title="Cosine (degrees)">cos</button>
+                            <button class="calc-fn-btn" onclick="calcInput('tan(')"
+                                title="Tangent (degrees)">tan</button>
                             <button class="calc-fn-btn" onclick="calcInput('π')" title="Pi">&#960;</button>
                         </div>
                         <div class="calc-grid">
@@ -260,7 +363,12 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon timer-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <circle cx="10" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                                <path d="M10 7v4l2.5 2.5" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                                <path d="M7.5 2.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>Focus Timer</h1>
@@ -275,12 +383,13 @@
                             <svg class="timer-ring" viewBox="0 0 140 140">
                                 <defs>
                                     <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#6C63FF"/>
-                                        <stop offset="100%" stop-color="#a78bfa"/>
+                                        <stop offset="0%" stop-color="#6C63FF" />
+                                        <stop offset="100%" stop-color="#a78bfa" />
                                     </linearGradient>
                                 </defs>
-                                <circle class="ring-bg" cx="70" cy="70" r="60"/>
-                                <circle class="ring-progress" id="timerRing" cx="70" cy="70" r="60" stroke="url(#timerGrad)"/>
+                                <circle class="ring-bg" cx="70" cy="70" r="60" />
+                                <circle class="ring-progress" id="timerRing" cx="70" cy="70" r="60"
+                                    stroke="url(#timerGrad)" />
                             </svg>
                             <div class="timer-center">
                                 <div id="timerDisplay" class="timer-display">25:00</div>
@@ -289,31 +398,50 @@
                         </div>
                         <div class="timer-controls">
                             <button class="timer-btn start-btn" id="startBtn" onclick="startTimer()">
-                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
                                 Start
                             </button>
-                            <button class="timer-btn pause-btn" id="pauseBtn" onclick="pauseTimer()" style="display:none">
-                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
+                            <button class="timer-btn pause-btn" id="pauseBtn" onclick="pauseTimer()"
+                                style="display:none">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z" />
+                                </svg>
                                 Pause
                             </button>
                             <button class="timer-btn reset-btn" onclick="resetTimer()">
-                                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z"
+                                        clip-rule="evenodd" />
+                                </svg>
                                 Reset
                             </button>
                         </div>
                         <div class="mode-chips">
-                            <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work · 25m</button>
-                            <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break · 5m</button>
-                            <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long Break · 15m</button>
-                            <button class="mode-chip" id="chip-custom" onclick="openCustomTimerModal(this)">Custom</button>
+                            <button class="mode-chip active" id="chip-25" onclick="setTimerMode(25,'Work',this)">Work ·
+                                25m</button>
+                            <button class="mode-chip" id="chip-5" onclick="setTimerMode(5,'Break',this)">Break ·
+                                5m</button>
+                            <button class="mode-chip" id="chip-15" onclick="setTimerMode(15,'Long Break',this)">Long
+                                Break · 15m</button>
+                            <button class="mode-chip" id="chip-custom"
+                                onclick="openCustomTimerModal(this)">Custom</button>
                         </div>
                         <div class="session-counter">
                             Sessions today: <strong id="sessionCount">0</strong>
                         </div>
                         <label class="timer-notif-toggle">
-                            <input type="checkbox" id="timerNotifToggle" checked onchange="toggleTimerNotifications(this.checked)">
+                            <input type="checkbox" id="timerNotifToggle" checked
+                                onchange="toggleTimerNotifications(this.checked)">
                             <span class="timer-notif-label">
-                                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                </svg>
                                 Browser notifications
                             </span>
                         </label>
@@ -326,7 +454,12 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon bmi-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <circle cx="10" cy="5" r="2.5" stroke="currentColor" stroke-width="2" />
+                                <path d="M5 19v-5a5 5 0 0110 0v5" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                                <path d="M7.5 14h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>BMI Calculator</h1>
@@ -342,26 +475,33 @@
                                 <label class="bmi-label">Height</label>
                                 <div class="bmi-height-cm" id="bmiHeightCmWrap">
                                     <div class="bmi-input-group">
-                                        <input type="number" id="bmiHeight" placeholder="e.g. 170" min="50" max="300" oninput="calcBMI()">
+                                        <input type="number" id="bmiHeight" placeholder="e.g. 170" min="50" max="300"
+                                            oninput="calcBMI()">
                                         <div class="unit-toggle-group">
-                                            <button class="unit-btn active" id="unitCm" onclick="setBmiHeightUnit('cm', this)">cm</button>
-                                            <button class="unit-btn" id="unitFtIn" onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
+                                            <button class="unit-btn active" id="unitCm"
+                                                onclick="setBmiHeightUnit('cm', this)">cm</button>
+                                            <button class="unit-btn" id="unitFtIn"
+                                                onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="bmi-height-ftin" id="bmiHeightFtInWrap" style="display:none">
                                     <div class="bmi-ftin-row">
                                         <div class="bmi-input-group bmi-ftin-group">
-                                            <input type="number" id="bmiHeightFt" placeholder="5" min="1" max="8" oninput="calcBMI()">
+                                            <input type="number" id="bmiHeightFt" placeholder="5" min="1" max="8"
+                                                oninput="calcBMI()">
                                             <span class="bmi-unit-suffix">ft</span>
                                         </div>
                                         <div class="bmi-input-group bmi-ftin-group">
-                                            <input type="number" id="bmiHeightIn" placeholder="7" min="0" max="11" step="0.1" oninput="calcBMI()">
+                                            <input type="number" id="bmiHeightIn" placeholder="7" min="0" max="11"
+                                                step="0.1" oninput="calcBMI()">
                                             <span class="bmi-unit-suffix">in</span>
                                         </div>
                                         <div class="unit-toggle-group">
-                                            <button class="unit-btn" id="unitCmAlt" onclick="setBmiHeightUnit('cm', document.getElementById('unitCm'))">cm</button>
-                                            <button class="unit-btn active" id="unitFtInAlt" onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
+                                            <button class="unit-btn" id="unitCmAlt"
+                                                onclick="setBmiHeightUnit('cm', document.getElementById('unitCm'))">cm</button>
+                                            <button class="unit-btn active" id="unitFtInAlt"
+                                                onclick="setBmiHeightUnit('ftin', this)">ft / in</button>
                                         </div>
                                     </div>
                                 </div>
@@ -369,17 +509,24 @@
                             <div class="bmi-field">
                                 <label class="bmi-label">Weight</label>
                                 <div class="bmi-input-group">
-                                    <input type="number" id="bmiWeight" placeholder="e.g. 70" min="1" max="500" oninput="calcBMI()">
+                                    <input type="number" id="bmiWeight" placeholder="e.g. 70" min="1" max="500"
+                                        oninput="calcBMI()">
                                     <div class="unit-toggle-group">
-                                        <button class="unit-btn active" id="unitKg" onclick="setBmiWeightUnit('kg', this)">kg</button>
-                                        <button class="unit-btn" id="unitLb" onclick="setBmiWeightUnit('lb', this)">lb</button>
+                                        <button class="unit-btn active" id="unitKg"
+                                            onclick="setBmiWeightUnit('kg', this)">kg</button>
+                                        <button class="unit-btn" id="unitLb"
+                                            onclick="setBmiWeightUnit('lb', this)">lb</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bmi-placeholder" id="bmiPlaceholder">
-                            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="14" r="8" stroke="currentColor" stroke-width="2"/><path d="M16 56v-12a16 16 0 0132 0v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 64 64" fill="none">
+                                <circle cx="32" cy="14" r="8" stroke="currentColor" stroke-width="2" />
+                                <path d="M16 56v-12a16 16 0 0132 0v12" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
                             <p>Enter your height &amp; weight<br>to calculate your BMI</p>
                         </div>
 
@@ -387,10 +534,12 @@
                             <div class="bmi-result-main">
                                 <div class="bmi-score-ring">
                                     <svg viewBox="0 0 120 120" width="120" height="120">
-                                        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="10"/>
-                                        <circle id="bmiRingArc" cx="60" cy="60" r="50" fill="none" stroke="#34d399" stroke-width="10" stroke-linecap="round"
-                                            stroke-dasharray="314" stroke-dashoffset="314"
-                                            style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1),stroke 0.5s"/>
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)"
+                                            stroke-width="10" />
+                                        <circle id="bmiRingArc" cx="60" cy="60" r="50" fill="none" stroke="#34d399"
+                                            stroke-width="10" stroke-linecap="round" stroke-dasharray="314"
+                                            stroke-dashoffset="314"
+                                            style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1),stroke 0.5s" />
                                     </svg>
                                     <div class="bmi-score-center">
                                         <span class="bmi-number" id="bmiNumber">--</span>
@@ -427,7 +576,12 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon weather-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <path d="M3 14a5 5 0 019.9-1A4 4 0 1117 18H3a3 3 0 010-6" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M10 4V2M14.24 5.76l1.42-1.42M16 10h2" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>Weather</h1>
@@ -443,9 +597,14 @@
                             <p>Detecting your location…</p>
                         </div>
                         <div class="weather-status weather-err" id="weatherError" style="display:none">
-                            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2"/><path d="M32 20v16M32 42v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 64 64" fill="none">
+                                <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2" />
+                                <path d="M32 20v16M32 42v2" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                            </svg>
                             <p id="weatherErrorMsg">Unable to get location.<br>Please allow location access.</p>
-                            <button class="btn-primary" onclick="fetchWeather()" style="margin-top:8px">Try Again</button>
+                            <button class="btn-primary" onclick="fetchWeather()" style="margin-top:8px">Try
+                                Again</button>
                         </div>
                         <div class="weather-content" id="weatherContent" style="display:none">
                             <div class="weather-hero">
@@ -490,7 +649,12 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon calendar-panel-icon">
-                            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor"
+                                    stroke-width="2" />
+                                <path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
                         </div>
                         <div>
                             <h1>Live Calendar</h1>
@@ -498,7 +662,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-single scrollable" style="padding: 24px; display: flex; flex-direction: column; height: 100%; overflow-y: auto;">
+                <div class="panel-single scrollable"
+                    style="padding: 24px; display: flex; flex-direction: column; height: 100%; overflow-y: auto;">
                     <div class="calendar-layout">
                         <!-- Calendar Main Body (Grid and Headers) -->
                         <div class="calendar-main">
@@ -508,12 +673,18 @@
                                     <select id="calYearSelect" onchange="changeCalendarMonthYear()"></select>
                                 </div>
                                 <div class="calendar-nav-arrows">
-                                    <button class="ghost-btn icon-btn-small" onclick="prevCalendarMonth()" title="Previous Month">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    <button class="ghost-btn icon-btn-small" onclick="prevCalendarMonth()"
+                                        title="Previous Month">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
                                     </button>
                                     <button class="ghost-btn" onclick="jumpToToday()">Today</button>
-                                    <button class="ghost-btn icon-btn-small" onclick="nextCalendarMonth()" title="Next Month">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    <button class="ghost-btn icon-btn-small" onclick="nextCalendarMonth()"
+                                        title="Next Month">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -528,7 +699,7 @@
                             </div>
                             <div class="calendar-days" id="calendarDaysGrid"></div>
                         </div>
-                        
+
                         <!-- Event/Notes Sidebar -->
                         <div class="calendar-event-sidebar">
                             <div class="selected-date-header">
@@ -553,15 +724,19 @@
                                     <span class="holiday-banner-name" id="calendarHolidayName"></span>
                                 </div>
                             </div>
-                            
+
                             <div class="notes-section">
                                 <h4>Events & Notes</h4>
                                 <div class="notes-list" id="calendarNotesList"></div>
-                                
+
                                 <div class="add-note-form">
-                                    <textarea id="calendarNoteInput" placeholder="Write a note/event for this day..." rows="3"></textarea>
+                                    <textarea id="calendarNoteInput" placeholder="Write a note/event for this day..."
+                                        rows="3"></textarea>
                                     <button class="btn-primary" onclick="addCalendarNote()">
-                                        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                                        <svg viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"
+                                                stroke-linecap="round" />
+                                        </svg>
                                         Add Note
                                     </button>
                                 </div>
@@ -587,19 +762,24 @@
             <div class="task-editor-header">
                 <span class="editor-badge" id="taskEditorBadge">New Task</span>
                 <button class="icon-btn" onclick="closeTaskEditor()" title="Close">
-                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg viewBox="0 0 20 20" fill="none">
+                        <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
                 </button>
             </div>
             <input type="text" id="todoInput" placeholder="Task title…" autocomplete="off" class="task-title-input">
             <textarea id="todoNote" placeholder="Add a note (optional)…" class="task-note-input" rows="3"></textarea>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="task-priority-row">
                     <span class="field-label">Priority</span>
                     <div class="priority-chips">
-                        <button class="priority-chip active" data-priority="low" onclick="setPriority('low',this)">Low</button>
-                        <button class="priority-chip" data-priority="medium" onclick="setPriority('medium',this)">Medium</button>
-                        <button class="priority-chip" data-priority="high" onclick="setPriority('high',this)">High</button>
+                        <button class="priority-chip active" data-priority="low"
+                            onclick="setPriority('low',this)">Low</button>
+                        <button class="priority-chip" data-priority="medium"
+                            onclick="setPriority('medium',this)">Medium</button>
+                        <button class="priority-chip" data-priority="high"
+                            onclick="setPriority('high',this)">High</button>
                     </div>
                 </div>
                 <div class="task-priority-row">
@@ -610,7 +790,9 @@
 
             <div class="task-editor-actions">
                 <button class="btn-primary" id="taskSaveBtn" onclick="saveTodo()">
-                    <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    <svg viewBox="0 0 20 20" fill="none">
+                        <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
                     Add Task
                 </button>
             </div>
@@ -623,14 +805,18 @@
             <div class="task-editor-header">
                 <span class="editor-badge" style="background: var(--brand);">Custom Timer</span>
                 <button class="icon-btn" onclick="closeCustomTimerModal()" title="Close">
-                    <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg viewBox="0 0 20 20" fill="none">
+                        <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
                 </button>
             </div>
-            
+
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <label class="field-label" for="customTimerInput">Duration (Minutes)</label>
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <input type="number" id="customTimerInput" min="1" max="1440" placeholder="25" class="task-title-input" style="flex: 1; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 12px;">
+                    <input type="number" id="customTimerInput" min="1" max="1440" placeholder="25"
+                        class="task-title-input"
+                        style="flex: 1; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 12px;">
                     <span style="font-weight: 600; font-size: 1.1rem; color: var(--txt-2);">minutes</span>
                 </div>
             </div>
@@ -688,7 +874,7 @@
         }
 
         // ─── TODO LIST ────────────────────────────────────────
-        const todoList   = document.getElementById('todoList');
+        const todoList = document.getElementById('todoList');
         const emptyState = document.getElementById('emptyState');
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let editingTodoIndex = -1;
@@ -713,8 +899,8 @@
         function addTodoElement(todo, index) {
             const li = document.createElement('li');
             const pColors = { low: 'var(--brand)', medium: 'var(--warn)', high: 'var(--danger)' };
-            const pColor  = pColors[todo.priority || 'low'];
-            
+            const pColor = pColors[todo.priority || 'low'];
+
             let dateHtml = '';
             if (todo.date) {
                 const d = new Date(todo.date);
@@ -733,7 +919,7 @@
                 <div class="todo-content" onclick="openEditTask(${index})">
                     <span class="todo-text">${escapeHtml(todo.text)}</span>
                     ${dateHtml}
-                    ${todo.note ? `<span class="todo-note-preview">${escapeHtml(todo.note.substring(0,60))}${todo.note.length > 60 ? '…' : ''}</span>` : ''}
+                    ${todo.note ? `<span class="todo-note-preview">${escapeHtml(todo.note.substring(0, 60))}${todo.note.length > 60 ? '…' : ''}</span>` : ''}
                 </div>
                 <span class="priority-dot" style="background:${pColor}" title="${todo.priority || 'low'} priority"></span>
                 <button class="del-btn" onclick="deleteTodo(${index})" title="Delete task">
@@ -825,7 +1011,7 @@
         document.getElementById('todoInput').addEventListener('keypress', e => { if (e.key === 'Enter') saveTodo(); });
 
         // ─── QUICK NOTES ──────────────────────────────────────
-        let notesArr   = JSON.parse(localStorage.getItem('advancedNotes')) || [];
+        let notesArr = JSON.parse(localStorage.getItem('advancedNotes')) || [];
         let activeNoteId = null;
 
         function renderNotesList() {
@@ -916,7 +1102,7 @@
 
         // ─── CALCULATOR ───────────────────────────────────────
         const calcDisplay = document.getElementById('calcDisplay');
-        const calcExpr    = document.getElementById('calcExpression');
+        const calcExpr = document.getElementById('calcExpression');
         let calcValue = '';
 
         function calcInput(v) {
@@ -963,12 +1149,12 @@
             try {
                 const expr = calcValue;
                 const prepared = calcPrepareExpr(expr);
-                const res  = calcSafeEval(prepared);
+                const res = calcSafeEval(prepared);
                 if (!isFinite(res)) throw new Error('Invalid');
                 calcExpr.textContent = expr + ' =';
                 calcValue = String(parseFloat(res.toFixed(10)));
                 calcDisplay.value = calcValue;
-            } catch(e) { calcValue = 'Error'; calcDisplay.value = 'Error'; calcExpr.innerHTML = '&nbsp;'; }
+            } catch (e) { calcValue = 'Error'; calcDisplay.value = 'Error'; calcExpr.innerHTML = '&nbsp;'; }
         }
         document.addEventListener('keydown', e => {
             if (currentTool !== 'calc') return;
@@ -987,9 +1173,9 @@
         let timerNotificationsEnabled = localStorage.getItem('timerNotifications') !== 'false';
         let titleFlashInterval = null;
         const timerDisplay = document.getElementById('timerDisplay');
-        const startBtn     = document.getElementById('startBtn');
-        const pauseBtn     = document.getElementById('pauseBtn');
-        const timerRing    = document.getElementById('timerRing');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const timerRing = document.getElementById('timerRing');
         const CIRC = 2 * Math.PI * 60;
         timerRing.style.strokeDasharray = CIRC;
         document.getElementById('sessionCount').textContent = sessionCount;
@@ -1036,7 +1222,7 @@
                     osc2.start(ctx.currentTime);
                     osc2.stop(ctx.currentTime + 0.5);
                 }, 200);
-            } catch (_) {}
+            } catch (_) { }
         }
 
         function flashDocumentTitle(message) {
@@ -1120,7 +1306,7 @@
             timerEndTime = Date.now() + timeLeft * 1000;
             startBtn.style.display = 'none';
             pauseBtn.style.display = 'inline-flex';
-            
+
             // Immediate update and start interval
             tickTimer();
             if (timerInterval) clearInterval(timerInterval);
@@ -1172,7 +1358,7 @@
                 showToast('Please enter a valid duration between 1 and 1440 minutes.', 'error');
                 return;
             }
-            
+
             setTimerMode(min, 'Custom', document.getElementById('chip-custom'));
             document.getElementById('chip-custom').textContent = `Custom · ${min}m`;
             closeCustomTimerModal();
@@ -1230,7 +1416,7 @@
                 return;
             }
             if (bmiWeightUnit === 'lb') w = w * 0.453592;
-            const hM  = h / 100;
+            const hM = h / 100;
             const bmi = w / (hM * hM);
             showBMIResult(bmi);
         }
@@ -1262,8 +1448,8 @@
 
             // Ring arc
             const circ = 2 * Math.PI * 50;
-            const pct  = Math.min(bmi / 40, 1);
-            const arc  = document.getElementById('bmiRingArc');
+            const pct = Math.min(bmi / 40, 1);
+            const arc = document.getElementById('bmiRingArc');
             arc.style.strokeDashoffset = circ * (1 - pct);
             arc.style.stroke = color;
 
@@ -1282,30 +1468,30 @@
 
         // ─── WEATHER ──────────────────────────────────────────
         const WMO = {
-            0:  { label:'Clear Sky',               icon:'☀️' },
-            1:  { label:'Mainly Clear',            icon:'🌤️' },
-            2:  { label:'Partly Cloudy',           icon:'⛅' },
-            3:  { label:'Overcast',                icon:'☁️' },
-            45: { label:'Foggy',                   icon:'🌫️' },
-            48: { label:'Icy Fog',                 icon:'🌫️' },
-            51: { label:'Light Drizzle',           icon:'🌦️' },
-            53: { label:'Moderate Drizzle',        icon:'🌦️' },
-            55: { label:'Dense Drizzle',           icon:'🌧️' },
-            61: { label:'Light Rain',              icon:'🌧️' },
-            63: { label:'Rain',                    icon:'🌧️' },
-            65: { label:'Heavy Rain',              icon:'🌧️' },
-            71: { label:'Light Snow',              icon:'🌨️' },
-            73: { label:'Snow',                    icon:'❄️' },
-            75: { label:'Heavy Snow',              icon:'❄️' },
-            77: { label:'Snow Grains',             icon:'🌨️' },
-            80: { label:'Light Showers',           icon:'🌦️' },
-            81: { label:'Showers',                 icon:'🌧️' },
-            82: { label:'Violent Showers',         icon:'⛈️' },
-            85: { label:'Snow Showers',            icon:'🌨️' },
-            86: { label:'Heavy Snow Showers',      icon:'❄️' },
-            95: { label:'Thunderstorm',            icon:'⛈️' },
-            96: { label:'Thunderstorm w/ Hail',    icon:'⛈️' },
-            99: { label:'Thunderstorm Heavy Hail', icon:'⛈️' }
+            0: { label: 'Clear Sky', icon: '☀️' },
+            1: { label: 'Mainly Clear', icon: '🌤️' },
+            2: { label: 'Partly Cloudy', icon: '⛅' },
+            3: { label: 'Overcast', icon: '☁️' },
+            45: { label: 'Foggy', icon: '🌫️' },
+            48: { label: 'Icy Fog', icon: '🌫️' },
+            51: { label: 'Light Drizzle', icon: '🌦️' },
+            53: { label: 'Moderate Drizzle', icon: '🌦️' },
+            55: { label: 'Dense Drizzle', icon: '🌧️' },
+            61: { label: 'Light Rain', icon: '🌧️' },
+            63: { label: 'Rain', icon: '🌧️' },
+            65: { label: 'Heavy Rain', icon: '🌧️' },
+            71: { label: 'Light Snow', icon: '🌨️' },
+            73: { label: 'Snow', icon: '❄️' },
+            75: { label: 'Heavy Snow', icon: '❄️' },
+            77: { label: 'Snow Grains', icon: '🌨️' },
+            80: { label: 'Light Showers', icon: '🌦️' },
+            81: { label: 'Showers', icon: '🌧️' },
+            82: { label: 'Violent Showers', icon: '⛈️' },
+            85: { label: 'Snow Showers', icon: '🌨️' },
+            86: { label: 'Heavy Snow Showers', icon: '❄️' },
+            95: { label: 'Thunderstorm', icon: '⛈️' },
+            96: { label: 'Thunderstorm w/ Hail', icon: '⛈️' },
+            99: { label: 'Thunderstorm Heavy Hail', icon: '⛈️' }
         };
 
         async function fetchWeatherData(lat, lon, fallbackCity = null) {
@@ -1324,25 +1510,25 @@
                         const gRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
                         const gData = await gRes.json();
                         cityName = gData.city || gData.locality || gData.principalSubdivision || cityName;
-                    } catch(_) {}
+                    } catch (_) { }
                 }
 
                 const wmo = WMO[c.weather_code] || { label: 'Unknown', icon: '🌡️' };
-                document.getElementById('weatherIconBig').textContent  = wmo.icon;
-                document.getElementById('weatherTempBig').textContent  = Math.round(c.temperature_2m);
-                document.getElementById('weatherCity').textContent     = cityName;
-                document.getElementById('weatherDesc').textContent     = wmo.label;
-                document.getElementById('weatherFeels').textContent    = Math.round(c.apparent_temperature) + '°C';
+                document.getElementById('weatherIconBig').textContent = wmo.icon;
+                document.getElementById('weatherTempBig').textContent = Math.round(c.temperature_2m);
+                document.getElementById('weatherCity').textContent = cityName;
+                document.getElementById('weatherDesc').textContent = wmo.label;
+                document.getElementById('weatherFeels').textContent = Math.round(c.apparent_temperature) + '°C';
                 document.getElementById('weatherHumidity').textContent = c.relative_humidity_2m + '%';
-                document.getElementById('weatherWind').textContent     = Math.round(c.wind_speed_10m);
-                document.getElementById('weatherUV').textContent       = c.uv_index !== undefined ? c.uv_index.toFixed(1) : '--';
-                document.getElementById('weatherUpdated').textContent  = 'Updated ' +
+                document.getElementById('weatherWind').textContent = Math.round(c.wind_speed_10m);
+                document.getElementById('weatherUV').textContent = c.uv_index !== undefined ? c.uv_index.toFixed(1) : '--';
+                document.getElementById('weatherUpdated').textContent = 'Updated ' +
                     new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
                 document.getElementById('weatherLoading').style.display = 'none';
                 document.getElementById('weatherContent').style.display = 'flex';
                 weatherFetched = true;
-            } catch(e) {
+            } catch (e) {
                 showWeatherError('Failed to fetch weather data. Check your connection and try again.');
             }
         }
@@ -1353,15 +1539,15 @@
                 const data = await res.json();
                 if (data.success) fetchWeatherData(data.latitude, data.longitude, data.city);
                 else throw new Error();
-            } catch(e) {
+            } catch (e) {
                 showWeatherError('Location access denied. Please allow location in your browser settings.');
             }
         }
 
         function fetchWeather() {
-            document.getElementById('weatherLoading').style.display  = 'flex';
-            document.getElementById('weatherError').style.display    = 'none';
-            document.getElementById('weatherContent').style.display  = 'none';
+            document.getElementById('weatherLoading').style.display = 'flex';
+            document.getElementById('weatherError').style.display = 'none';
+            document.getElementById('weatherContent').style.display = 'none';
 
             if (!navigator.geolocation) {
                 fetchWeatherIPFallback();
@@ -1386,7 +1572,7 @@
         let calendarEvents = JSON.parse(localStorage.getItem('calendar_events')) || {};
 
         const monthNames = [
-            "January", "February", "March", "April", "May", "June", 
+            "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
 
@@ -1533,10 +1719,10 @@
             try {
                 const fmtAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
                 const fmtEn = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-                
+
                 // For showing short number in cells
                 const fmtDayAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric' });
-                
+
                 return {
                     ar: fmtAr.format(date),
                     en: fmtEn.format(date),
@@ -1593,8 +1779,8 @@
             for (const key of Object.keys(BD_LUNAR_HOLIDAYS)) {
                 const yearMap = BD_LUNAR_HOLIDAYS[key];
                 if (yearMap[y] === dateStr) {
-                    if (key === 'durga_puja')    return 'Durga Puja – Bijoya Dashami';
-                    if (key === 'janmashtami')   return 'Janmashtami';
+                    if (key === 'durga_puja') return 'Durga Puja – Bijoya Dashami';
+                    if (key === 'janmashtami') return 'Janmashtami';
                     if (key === 'buddha_purnima') return 'Buddha Purnima (Vesak)';
                 }
             }
@@ -1607,19 +1793,19 @@
 
                 let hDay = 0, hMonth = 0, hYear = 0;
                 parts.forEach(p => {
-                    if (p.type === 'day')   hDay   = parseInt(p.value);
+                    if (p.type === 'day') hDay = parseInt(p.value);
                     if (p.type === 'month') hMonth = parseInt(p.value);
-                    if (p.type === 'year')  hYear  = parseInt(p.value);
+                    if (p.type === 'year') hYear = parseInt(p.value);
                 });
 
                 // Muharram 10 – Ashura
-                if (hMonth === 1  && hDay === 10) return 'Ashura (10 Muharram)';
+                if (hMonth === 1 && hDay === 10) return 'Ashura (10 Muharram)';
                 // Rabi al-Awwal 12 – Eid-e-Milad-un-Nabi
-                if (hMonth === 3  && hDay === 12) return 'Eid-e-Milad-un-Nabi (Prophet\'s Birthday)';
+                if (hMonth === 3 && hDay === 12) return 'Eid-e-Milad-un-Nabi (Prophet\'s Birthday)';
                 // Sha\'ban 15 – Shab-e-Barat
-                if (hMonth === 8  && hDay === 15) return 'Shab-e-Barat';
+                if (hMonth === 8 && hDay === 15) return 'Shab-e-Barat';
                 // Ramadan 27 – Laylat al-Qadr (Shab-e-Qadr)
-                if (hMonth === 9  && hDay === 27) return 'Laylat al-Qadr (Shab-e-Qadr)';
+                if (hMonth === 9 && hDay === 27) return 'Laylat al-Qadr (Shab-e-Qadr)';
                 // Shawwal 1,2,3 – Eid-ul-Fitr
                 if (hMonth === 10 && (hDay === 1 || hDay === 2 || hDay === 3)) {
                     if (hDay === 1) return 'Eid-ul-Fitr – Day 1';
@@ -1739,16 +1925,6 @@
             cell.appendChild(mainDay);
             cell.appendChild(bnDay);
             cell.appendChild(arDay);
-
-            // Holiday name chip (small label inside cell)
-            if (holidayName) {
-                const chip = document.createElement('span');
-                chip.className = 'cell-holiday-chip';
-                // Shorten very long names for display
-                const shortName = holidayName.length > 18 ? holidayName.substring(0, 16) + '…' : holidayName;
-                chip.textContent = shortName;
-                cell.appendChild(chip);
-            }
 
             if (cell.classList.contains('has-events')) {
                 const dot = document.createElement('div');
@@ -1890,7 +2066,7 @@
             const dark = document.body.classList.contains('dark-mode');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             document.querySelector('.icon-moon').style.display = dark ? 'none' : 'block';
-            document.querySelector('.icon-sun').style.display  = dark ? 'block' : 'none';
+            document.querySelector('.icon-sun').style.display = dark ? 'block' : 'none';
         }
 
         // ─── EXPORT ───────────────────────────────────────────
@@ -1912,7 +2088,7 @@
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.querySelector('.icon-moon').style.display = 'none';
-                document.querySelector('.icon-sun').style.display  = 'block';
+                document.querySelector('.icon-sun').style.display = 'block';
             }
             loadTodos();
             renderNotesList();
@@ -1921,4 +2097,5 @@
         };
     </script>
 </body>
+
 </html>
