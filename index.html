@@ -772,9 +772,18 @@
                             <p class="panel-subtitle">Track your daily progress throughout the year.</p>
                         </div>
                     </div>
-                    <div class="dg-year-selector">
-                        <select id="dgYearSelect" onchange="changeDgYear(this.value)">
-                        </select>
+                    <div class="calendar-nav-arrows">
+                        <button class="ghost-btn icon-btn-small" onclick="prevDgMonth()" title="Previous Month">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                        <span id="dgMonthYearDisplay" style="font-weight: 600; min-width: 140px; text-align: center;"></span>
+                        <button class="ghost-btn icon-btn-small" onclick="nextDgMonth()" title="Next Month">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 <div class="panel-single scrollable" style="padding: 24px; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; overflow-x: hidden;">
@@ -2202,6 +2211,7 @@
         // ─── DAILY GOALS TRACKER ──────────────────────────────────────
         let dgGoals = JSON.parse(localStorage.getItem('flowdesk_daily_goals')) || {};
         let dgCurrentYear = new Date().getFullYear();
+        let dgCurrentMonth = new Date().getMonth();
         let dgSelectedDateStr = null;
 
         function saveDgGoals() {
@@ -2209,20 +2219,26 @@
         }
 
         function initDailyGoals() {
-            const yearSelect = document.getElementById('dgYearSelect');
-            yearSelect.innerHTML = '';
-            for (let i = dgCurrentYear - 5; i <= dgCurrentYear + 5; i++) {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = i;
-                if (i === dgCurrentYear) opt.selected = true;
-                yearSelect.appendChild(opt);
+            renderDailyGoals();
+        }
+
+        function prevDgMonth() {
+            if (dgCurrentMonth === 0) {
+                dgCurrentMonth = 11;
+                dgCurrentYear--;
+            } else {
+                dgCurrentMonth--;
             }
             renderDailyGoals();
         }
 
-        function changeDgYear(yearStr) {
-            dgCurrentYear = parseInt(yearStr, 10);
+        function nextDgMonth() {
+            if (dgCurrentMonth === 11) {
+                dgCurrentMonth = 0;
+                dgCurrentYear++;
+            } else {
+                dgCurrentMonth++;
+            }
             renderDailyGoals();
         }
 
@@ -2239,91 +2255,86 @@
         }
 
         function renderDailyGoals() {
-            // Render Heatmap
             const container = document.getElementById('dgHeatmapContainer');
             container.innerHTML = '';
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             
-            // Get today's local date string in YYYY-MM-DD
+            document.getElementById('dgMonthYearDisplay').textContent = `${monthNames[dgCurrentMonth]} ${dgCurrentYear}`;
+            
             const dObjToday = new Date();
             const todayStr = [dObjToday.getFullYear(), String(dObjToday.getMonth() + 1).padStart(2, '0'), String(dObjToday.getDate()).padStart(2, '0')].join('-');
 
-            for (let m = 0; m < 12; m++) {
-                const monthWrapper = document.createElement('div');
-                monthWrapper.className = 'dg-month-wrapper';
-                
-                const header = document.createElement('div');
-                header.className = 'dg-month-header';
-                const title = document.createElement('div');
-                title.className = 'dg-month-title';
-                title.textContent = `${monthNames[m]} ${dgCurrentYear}`;
-                header.appendChild(title);
-                monthWrapper.appendChild(header);
+            const m = dgCurrentMonth;
+            const monthWrapper = document.createElement('div');
+            monthWrapper.className = 'dg-month-wrapper';
+            
+            const header = document.createElement('div');
+            header.className = 'dg-month-header';
+            
+            const weekdays = document.createElement('div');
+            weekdays.className = 'dg-weekdays';
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const d = document.createElement('div');
+                d.className = 'dg-weekday';
+                d.textContent = day;
+                weekdays.appendChild(d);
+            });
+            monthWrapper.appendChild(weekdays);
 
-                const weekdays = document.createElement('div');
-                weekdays.className = 'dg-weekdays';
-                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
-                    const d = document.createElement('div');
-                    d.className = 'dg-weekday';
-                    d.textContent = day;
-                    weekdays.appendChild(d);
-                });
-                monthWrapper.appendChild(weekdays);
+            const grid = document.createElement('div');
+            grid.className = 'dg-month-grid';
 
-                const grid = document.createElement('div');
-                grid.className = 'dg-month-grid';
+            const firstDayIndex = new Date(dgCurrentYear, m, 1).getDay(); // 0 is Sunday
+            const daysInMonth = new Date(dgCurrentYear, m + 1, 0).getDate();
 
-                const firstDayIndex = new Date(dgCurrentYear, m, 1).getDay(); // 0 is Sunday
-                const daysInMonth = new Date(dgCurrentYear, m + 1, 0).getDate();
-
-                for (let i = 0; i < firstDayIndex; i++) {
-                    const emptyCell = document.createElement('div');
-                    emptyCell.className = 'dg-day-cell empty-cell';
-                    grid.appendChild(emptyCell);
-                }
-
-                let monthCompleted = 0;
-                let monthTotal = 0;
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const cell = document.createElement('div');
-                    const dStr = [dgCurrentYear, String(m + 1).padStart(2, '0'), String(day).padStart(2, '0')].join('-');
-                    
-                    const level = getDgDayCompletionLevel(dStr);
-                    cell.className = `dg-day-cell dg-level-${level}`;
-                    if (dStr === todayStr) {
-                        cell.classList.add('is-today');
-                    }
-                    cell.textContent = day;
-                    
-                    const goalsForDay = dgGoals[dStr] || [];
-                    const compCount = goalsForDay.filter(g=>g.completed).length;
-                    const totCount = goalsForDay.length;
-                    
-                    monthCompleted += compCount;
-                    monthTotal += totCount;
-
-                    const pct = totCount > 0 ? Math.round((compCount/totCount)*100) : 0;
-                    
-                    if (totCount === 0) {
-                        cell.title = `${monthNames[m]} ${day}, ${dgCurrentYear}\nNo goals`;
-                    } else {
-                        cell.title = `${monthNames[m]} ${day}, ${dgCurrentYear}\n${compCount} of ${totCount} goals completed (${pct}%)`;
-                    }
-
-                    cell.onclick = () => openDgDay(dStr);
-                    grid.appendChild(cell);
-                }
-                
-                const subtitle = document.createElement('div');
-                subtitle.className = 'dg-month-subtitle';
-                const mPct = monthTotal > 0 ? Math.round((monthCompleted/monthTotal)*100) : 0;
-                subtitle.textContent = `${monthCompleted} completed / ${monthTotal} goals · ${mPct}%`;
-                header.appendChild(subtitle);
-
-                monthWrapper.appendChild(grid);
-                container.appendChild(monthWrapper);
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'dg-day-cell empty-cell';
+                grid.appendChild(emptyCell);
             }
+
+            let monthCompleted = 0;
+            let monthTotal = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                const dStr = [dgCurrentYear, String(m + 1).padStart(2, '0'), String(day).padStart(2, '0')].join('-');
+                
+                const level = getDgDayCompletionLevel(dStr);
+                cell.className = `dg-day-cell dg-level-${level}`;
+                if (dStr === todayStr) {
+                    cell.classList.add('is-today');
+                }
+                cell.textContent = day;
+                
+                const goalsForDay = dgGoals[dStr] || [];
+                const compCount = goalsForDay.filter(g=>g.completed).length;
+                const totCount = goalsForDay.length;
+                
+                monthCompleted += compCount;
+                monthTotal += totCount;
+
+                const pct = totCount > 0 ? Math.round((compCount/totCount)*100) : 0;
+                
+                if (totCount === 0) {
+                    cell.title = `${monthNames[m]} ${day}, ${dgCurrentYear}\nNo goals`;
+                } else {
+                    cell.title = `${monthNames[m]} ${day}, ${dgCurrentYear}\n${compCount} of ${totCount} goals completed (${pct}%)`;
+                }
+
+                cell.onclick = () => openDgDay(dStr);
+                grid.appendChild(cell);
+            }
+            
+            const subtitle = document.createElement('div');
+            subtitle.className = 'dg-month-subtitle';
+            const mPct = monthTotal > 0 ? Math.round((monthCompleted/monthTotal)*100) : 0;
+            subtitle.textContent = `${monthCompleted} completed / ${monthTotal} goals · ${mPct}%`;
+            header.appendChild(subtitle);
+
+            monthWrapper.insertBefore(header, monthWrapper.firstChild);
+            monthWrapper.appendChild(grid);
+            container.appendChild(monthWrapper);
             
             updateDgStats();
         }
