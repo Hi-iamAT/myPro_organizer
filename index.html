@@ -1717,6 +1717,10 @@
         // Custom Arabic/Hijri Converter
         function getHijriDate(date) {
             try {
+                // Adjust for Bangladesh (usually 1 day behind Umm al-Qura)
+                const adjustedDate = new Date(date);
+                adjustedDate.setDate(adjustedDate.getDate() - 1);
+
                 const fmtAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
                 const fmtEn = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -1724,9 +1728,9 @@
                 const fmtDayAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric' });
 
                 return {
-                    ar: fmtAr.format(date),
-                    en: fmtEn.format(date),
-                    dayAr: fmtDayAr.format(date)
+                    ar: fmtAr.format(adjustedDate),
+                    en: fmtEn.format(adjustedDate),
+                    dayAr: fmtDayAr.format(adjustedDate)
                 };
             } catch (e) {
                 return { ar: '--', en: '--', dayAr: '' };
@@ -1787,9 +1791,13 @@
 
             // ── 3. Hijri-based Islamic Holidays ──────────────────
             try {
+                // Adjust for Bangladesh (usually 1 day behind Umm al-Qura)
+                const adjustedDate = new Date(date);
+                adjustedDate.setDate(adjustedDate.getDate() - 1);
+
                 const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
                     day: 'numeric', month: 'numeric', year: 'numeric'
-                }).formatToParts(date);
+                }).formatToParts(adjustedDate);
 
                 let hDay = 0, hMonth = 0, hYear = 0;
                 parts.forEach(p => {
