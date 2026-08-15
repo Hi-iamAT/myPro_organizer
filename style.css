@@ -2688,18 +2688,19 @@ input[type="number"].task-title-input::-webkit-outer-spin-button {
 
 /* Heatmap Container */
 .dg-heatmap-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 24px;
+    display: flex;
+    justify-content: center;
     margin-bottom: 32px;
 }
 
 /* Month Grid */
 .dg-month-wrapper {
+    width: 100%;
+    max-width: 500px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r-md);
-    padding: 16px;
+    padding: 24px;
     box-shadow: var(--shadow-sm);
 }
 
@@ -2727,7 +2728,7 @@ input[type="number"].task-title-input::-webkit-outer-spin-button {
 }
 
 .dg-weekday {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--txt-2);
     text-align: center;
@@ -2736,13 +2737,13 @@ input[type="number"].task-title-input::-webkit-outer-spin-button {
 .dg-month-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 8px;
 }
 
 /* Day Cells */
 .dg-day-cell {
     aspect-ratio: 1 / 1;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: var(--surface-2);
     border: 1px solid var(--border);
     cursor: pointer;
@@ -2750,7 +2751,7 @@ input[type="number"].task-title-input::-webkit-outer-spin-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: var(--txt-2);
     position: relative;
 }

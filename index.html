@@ -2246,11 +2246,10 @@
             const goals = dgGoals[dateStr] || [];
             if (goals.length === 0) return 0;
             const completed = goals.filter(g => g.completed).length;
-            const percentage = (completed / goals.length) * 100;
-            if (percentage === 0) return 0;
-            if (percentage <= 25) return 1;
-            if (percentage <= 50) return 2;
-            if (percentage <= 75) return 3;
+            if (completed === 0) return 0;
+            if (completed === 1) return 1;
+            if (completed === 2) return 2;
+            if (completed === 3) return 3;
             return 4;
         }
 
