@@ -14,7 +14,7 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
 
 ### 🖥️ Main Dashboard Overview
 <p align="center">
-  <img src="screenshots/dashboard_UI.png" alt="FlowDesk Main Dashboard" width="100%" style="border-radius: 8px;">
+  <img src="screenshots/dashboard_UI.png" alt="FlowDesk Main Dashboard" height="400px" style="border-radius: 8px;">
 </p>
 
 ### 🛠️ Feature & Widget Showcase
@@ -48,6 +48,16 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
     <td width="50%" align="center" valign="top">
       <h4>🌤️ Weather Forecast</h4>
       <img src="screenshots/weather_UI.png" alt="Weather Widget" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <h4>⚖️ Live Calendar</h4>
+      <img src="screenshots/calendar_UI.png" alt="Live Calendar Widget" width="100%">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <h4>🌤️ Daily Goals</h4>
+      <img src="screenshots/dailygoals_UI.png" alt="Daily Goals Widget" width="100%">
     </td>
   </tr>
 </table>
