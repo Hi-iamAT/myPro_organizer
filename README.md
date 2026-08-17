@@ -73,7 +73,9 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
 | **🧮 Calculator** | Full expression evaluator with backspace, parentheses support, and keyboard input. |
 | **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. |
 | **⚖️ BMI Calculator** | Easily check body mass index with category indicators. |
-| **🌤️ Weather Widget** | Check live local weather updates. |
+| **🌤️ Weather Forecast** | Check live local weather updates. |
+| **⚖️ Live Calendar** | Check live calendar in English/ Bengali/ Hijri and add events. |
+| **🌤️ Daily Goals** | Add your daily goals and track your progress. |
 
 ### Extras
 - 🌙 / ☀️ **Dark / Light mode** — persisted across sessions
