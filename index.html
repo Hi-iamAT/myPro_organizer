@@ -185,14 +185,22 @@
                         <span class="pill pill-left" title="Remaining"><strong id="remainingCount">0</strong>
                             left</span>
                     </div>
-                    <button class="ghost-btn danger" onclick="clearCompleted()" title="Clear completed tasks">Clear
-                        Done</button>
+                    <div class="todo-header-actions">
+                        <button class="done-tasks-toggle-btn" id="doneTasksToggleBtn" onclick="toggleDoneTasksPanel()" title="View completed tasks">
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Done Tasks
+                            <span class="done-count-badge" id="doneCountBadge">0</span>
+                        </button>
+                        <button class="ghost-btn danger" onclick="clearCompleted()" title="Clear completed tasks">Clear Done</button>
+                    </div>
                 </div>
                 <div class="panel-split">
-                    <!-- Left: Task List -->
-                    <div class="split-left" style="width: 100%; border-right: none; flex: 1;">
+                    <!-- Active Tasks Section -->
+                    <div class="split-left" style="width: 100%; border-right: none; flex: 1;" id="activeTodoSection">
                         <div class="split-left-header">
-                            <span class="split-left-title">All Tasks</span>
+                            <span class="split-left-title">Active Tasks</span>
                             <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task"
                                 aria-label="Add task">
                                 <svg viewBox="0 0 20 20" fill="none">
@@ -209,9 +217,34 @@
                                 <path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" />
                             </svg>
-                            <p>No tasks yet.<br>Click <strong>+</strong> to start!</p>
+                            <p>No active tasks.<br>Click <strong>+</strong> to add one!</p>
                         </div>
                     </div>
+
+                    <!-- Done Tasks Section (hidden by default) -->
+                    <div class="done-tasks-section" id="doneTasksSection" style="display:none;">
+                        <div class="split-left-header done-tasks-header">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <svg viewBox="0 0 20 20" fill="none" style="width:16px;height:16px;color:var(--success)">
+                                    <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="split-left-title" style="color:var(--success);">Completed Tasks</span>
+                            </div>
+                            <button class="icon-btn" onclick="toggleDoneTasksPanel()" title="Close" style="width:28px;height:28px;">
+                                <svg viewBox="0 0 20 20" fill="none">
+                                    <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <ul class="todo-list scrollable" id="doneTasksList"></ul>
+                        <div class="empty-state" id="doneEmptyState" style="display:none;">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <path d="M10 24l8 8 16-16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <p>No completed tasks yet.<br>Check off tasks to see them here!</p>
+                        </div>
+                    </div>
+
                     <!-- Right: Task Detail/Add -->
                     <div class="split-right" style="display: none;"></div>
                 </div>
@@ -976,26 +1009,50 @@
         // ─── FOOTER YEAR ──────────────────────────────────────
         document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-        // ─── TOOL SWITCHER ────────────────────────────────────
+        // ─── TOOL SWITCHER & SWIPE ────────────────────────────
         let currentTool = 'todo';
         let weatherFetched = false;
+        const tools = ['todo', 'notes', 'calc', 'timer', 'bmi', 'weather', 'calendar', 'daily-goals'];
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            const diffX = e.changedTouches[0].screenX - touchStartX;
+            const diffY = e.changedTouches[0].screenY - touchStartY;
+            // Only swipe if horizontal movement is dominant and sufficient
+            if (Math.abs(diffX) < 60 || Math.abs(diffY) > Math.abs(diffX) * 0.8) return;
+            let idx = tools.indexOf(currentTool);
+            if (diffX > 0 && idx > 0) {
+                const t = tools[idx - 1];
+                switchTool(t, document.getElementById('nav-' + t));
+            } else if (diffX < 0 && idx < tools.length - 1) {
+                const t = tools[idx + 1];
+                switchTool(t, document.getElementById('nav-' + t));
+            }
+        }, { passive: true });
 
         function switchTool(tool, btn) {
             if (currentTool === tool) return;
             document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
             document.getElementById('panel-' + tool).classList.add('active');
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
             currentTool = tool;
             if (tool === 'weather' && !weatherFetched) fetchWeather();
         }
 
-        // ─── TODO LIST ────────────────────────────────────────
+        // ─── TODO LIST ──────────────────────────────────────
         const todoList = document.getElementById('todoList');
         const emptyState = document.getElementById('emptyState');
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let editingTodoIndex = -1;
         let selectedPriority = 'low';
+        let showDoneTasksPanel = false;
 
         function loadTodos() {
             // Sort by date: tasks with dates first (earliest to latest), then tasks without dates.
@@ -1007,13 +1064,31 @@
             });
             saveData('todos', todos);
 
+            const activeTodos = todos.filter(t => !t.completed);
+            const doneTodos = todos.filter(t => t.completed);
+
+            // Render active tasks
             todoList.innerHTML = '';
-            emptyState.style.display = todos.length === 0 ? 'flex' : 'none';
-            todos.forEach((todo, i) => addTodoElement(todo, i));
+            emptyState.style.display = activeTodos.length === 0 ? 'flex' : 'none';
+            activeTodos.forEach((todo) => {
+                const originalIndex = todos.indexOf(todo);
+                addTodoElement(todo, originalIndex, todoList);
+            });
+
+            // Render done tasks
+            const doneList = document.getElementById('doneTasksList');
+            const doneEmpty = document.getElementById('doneEmptyState');
+            doneList.innerHTML = '';
+            doneEmpty.style.display = doneTodos.length === 0 ? 'flex' : 'none';
+            doneTodos.forEach((todo) => {
+                const originalIndex = todos.indexOf(todo);
+                addTodoElement(todo, originalIndex, doneList);
+            });
+
             updateStats();
         }
 
-        function addTodoElement(todo, index) {
+        function addTodoElement(todo, index, targetList) {
             const li = document.createElement('li');
             const pColors = { low: 'var(--brand)', medium: 'var(--warn)', high: 'var(--danger)' };
             const pColor = pColors[todo.priority || 'low'];
@@ -1042,7 +1117,24 @@
                 <button class="del-btn" onclick="deleteTodo(${index})" title="Delete task">
                     <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>`;
-            todoList.appendChild(li);
+            targetList.appendChild(li);
+        }
+
+        function toggleDoneTasksPanel() {
+            showDoneTasksPanel = !showDoneTasksPanel;
+            const section = document.getElementById('doneTasksSection');
+            const btn = document.getElementById('doneTasksToggleBtn');
+            if (showDoneTasksPanel) {
+                section.style.display = 'block';
+                section.classList.add('done-panel-visible');
+                btn.classList.add('active');
+                // Smooth scroll to the done section
+                setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+            } else {
+                section.classList.remove('done-panel-visible');
+                btn.classList.remove('active');
+                setTimeout(() => section.style.display = 'none', 300);
+            }
         }
 
         function openAddTask() {
@@ -1116,6 +1208,14 @@
             const n = todos.filter(t => t.completed).length;
             if (!n) { showToast('No completed tasks', 'warn'); return; }
             todos = todos.filter(t => !t.completed);
+            // Also close done panel if open
+            if (showDoneTasksPanel) {
+                showDoneTasksPanel = false;
+                const section = document.getElementById('doneTasksSection');
+                section.classList.remove('done-panel-visible');
+                document.getElementById('doneTasksToggleBtn').classList.remove('active');
+                setTimeout(() => section.style.display = 'none', 300);
+            }
             saveData('todos', todos); loadTodos();
             showToast(`Cleared ${n} task${n > 1 ? 's' : ''}`, 'success');
         }
@@ -1124,6 +1224,9 @@
             document.getElementById('totalCount').textContent = todos.length;
             document.getElementById('completedCount').textContent = done;
             document.getElementById('remainingCount').textContent = todos.length - done;
+            // Update done badge
+            document.getElementById('doneCountBadge').textContent = done;
+            document.getElementById('doneCountBadge').style.display = done > 0 ? 'inline-flex' : 'none';
         }
         document.getElementById('todoInput').addEventListener('keypress', e => { if (e.key === 'Enter') saveTodo(); });
 
