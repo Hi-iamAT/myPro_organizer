@@ -1935,23 +1935,108 @@
         }
 
         // Custom Arabic/Hijri Converter
+        // Pure algorithmic Gregorian → Hijri (Umm al-Qura approximation)
+        // Used as fallback when Intl.DateTimeFormat doesn't support islamic calendar
+        function _gregorianToHijriAlgorithmic(gYear, gMonth, gDay) {
+            // Convert Gregorian to Julian Day Number
+            const a = Math.floor((14 - gMonth) / 12);
+            const y = gYear + 4800 - a;
+            const m = gMonth + 12 * a - 3;
+            const jdn = gDay + Math.floor((153 * m + 2) / 5) + 365 * y
+                       + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+
+            // Convert Julian Day Number to Hijri (Tabular Islamic calendar, close to Umm al-Qura)
+            const l = jdn - 1948440 + 10632;
+            const n = Math.floor((l - 1) / 10631);
+            const remainder = l - 10631 * n + 354;
+            const j = Math.floor((10985 - remainder) / 5316)
+                    * Math.floor((50 * remainder) / 17719)
+                    + Math.floor(remainder / 5670)
+                    * Math.floor((43 * remainder) / 15238);
+            const remaining = remainder - Math.floor((30 - j) / 15)
+                            * Math.floor((17719 * j) / 50)
+                            - Math.floor(j / 16)
+                            * Math.floor((15238 * j) / 43) + 29;
+            const hMonth = Math.floor((24 * remaining) / 709);
+            const hDay = remaining - Math.floor((709 * hMonth) / 24);
+            const hYear = 30 * n + j - 30;
+
+            return { year: hYear, month: hMonth, day: hDay };
+        }
+
+        const HIJRI_MONTH_NAMES_EN = [
+            '', 'Muharram', 'Safar', "Rabi' I", "Rabi' II",
+            'Jumada I', 'Jumada II', 'Rajab', "Sha'ban",
+            'Ramadan', 'Shawwal', "Dhul Qi'dah", 'Dhul Hijjah'
+        ];
+        const HIJRI_MONTH_NAMES_AR = [
+            '', 'محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر',
+            'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
+            'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+        ];
+
+        // Convert number to Eastern Arabic numerals
+        function _toArabicNumerals(num) {
+            const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+            return String(num).replace(/\d/g, d => arabicDigits[d]);
+        }
+
+        // Check if Intl actually produces a valid Islamic calendar result
+        function _intlSupportsIslamicCalendar() {
+            try {
+                const testDate = new Date(2024, 0, 1); // Jan 1, 2024
+                const fmt = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+                const parts = fmt.formatToParts(testDate);
+                // Check if the year part gives a reasonable Hijri year (1400-1500 range for 2024)
+                const yearPart = parts.find(p => p.type === 'year');
+                if (yearPart) {
+                    const yr = parseInt(yearPart.value);
+                    if (yr >= 1400 && yr <= 1500) return true;
+                }
+                // Also check the formatted string doesn't contain "BC" or negative years
+                const result = fmt.format(testDate);
+                if (result.includes('BC') || result.includes('B.C')) return false;
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        const _useIntlHijri = _intlSupportsIslamicCalendar();
+
         function getHijriDate(date) {
             try {
                 // Adjust for Bangladesh (usually 1 day behind Umm al-Qura)
                 const adjustedDate = new Date(date);
                 adjustedDate.setDate(adjustedDate.getDate() - 1);
 
-                const fmtAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-                const fmtEn = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                if (_useIntlHijri) {
+                    // Browser supports Islamic calendar natively
+                    const fmtAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const fmtEn = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const fmtDayAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric' });
 
-                // For showing short number in cells
-                const fmtDayAr = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric' });
+                    return {
+                        ar: fmtAr.format(adjustedDate),
+                        en: fmtEn.format(adjustedDate),
+                        dayAr: fmtDayAr.format(adjustedDate)
+                    };
+                }
 
-                return {
-                    ar: fmtAr.format(adjustedDate),
-                    en: fmtEn.format(adjustedDate),
-                    dayAr: fmtDayAr.format(adjustedDate)
-                };
+                // Fallback: pure algorithmic conversion
+                const h = _gregorianToHijriAlgorithmic(
+                    adjustedDate.getFullYear(),
+                    adjustedDate.getMonth() + 1,
+                    adjustedDate.getDate()
+                );
+
+                const enStr = `${HIJRI_MONTH_NAMES_EN[h.month]} ${h.day}, ${h.year} AH`;
+                const arStr = `${_toArabicNumerals(h.day)} ${HIJRI_MONTH_NAMES_AR[h.month]} ${_toArabicNumerals(h.year)} هـ`;
+                const dayArStr = _toArabicNumerals(h.day);
+
+                return { ar: arStr, en: enStr, dayAr: dayArStr };
             } catch (e) {
                 return { ar: '--', en: '--', dayAr: '' };
             }
