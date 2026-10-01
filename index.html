@@ -1098,7 +1098,7 @@
                 const d = new Date(todo.date);
                 dateHtml = `<span class="todo-date-preview" style="font-size:0.75rem; color:var(--brand); display:flex; align-items:center; gap:4px; margin-top:2px;">
                     <svg viewBox="0 0 20 20" fill="currentColor" style="width:12px; height:12px;"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-                    ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    ${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>`;
             }
 
