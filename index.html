@@ -42,6 +42,17 @@
             <span id="liveClock" class="live-clock"></span>
         </div>
         <div class="navbar-menu">
+            <!-- Hidden file input for import -->
+            <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(event)">
+            <button class="nav-action-btn" onclick="document.getElementById('importFileInput').click()" title="Import data from JSON">
+                <svg viewBox="0 0 20 20" fill="none">
+                    <path d="M10 17V8M7 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                </svg>
+                Import
+            </button>
             <button class="nav-action-btn" onclick="exportData()" title="Export all data">
                 <svg viewBox="0 0 20 20" fill="none">
                     <path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -2420,7 +2431,7 @@
         // ─── EXPORT ───────────────────────────────────────────
         function exportData() {
             const blob = new Blob(
-                [JSON.stringify({ todos, notes: notesArr, calendarEvents, exported: new Date().toISOString() }, null, 2)],
+                [JSON.stringify({ todos, notes: notesArr, calendarEvents, dgGoals: dgGoals || {}, exported: new Date().toISOString() }, null, 2)],
                 { type: 'application/json' }
             );
             const a = Object.assign(document.createElement('a'), {
@@ -2429,6 +2440,205 @@
             });
             a.click(); URL.revokeObjectURL(a.href);
             showToast('Data exported!', 'success');
+        }
+
+        // ─── IMPORT ───────────────────────────────────────────
+        let _pendingImport = null;
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            // Reset so same file can be re-imported if needed
+            event.target.value = '';
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let parsed;
+                try {
+                    parsed = JSON.parse(e.target.result);
+                } catch {
+                    showToast('Invalid JSON file.', 'error');
+                    return;
+                }
+
+                // Validate that it looks like a FlowDesk export
+                if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    showToast('Unrecognised file format.', 'error');
+                    return;
+                }
+
+                _pendingImport = parsed;
+                showImportModal(parsed);
+            };
+            reader.readAsText(file);
+        }
+
+        function showImportModal(data) {
+            const todoCount     = Array.isArray(data.todos)          ? data.todos.length          : 0;
+            const noteCount     = Array.isArray(data.notes)          ? data.notes.length          : 0;
+            const eventCount    = (data.calendarEvents && typeof data.calendarEvents === 'object')
+                                    ? Object.values(data.calendarEvents).flat().length : 0;
+            const dgCount       = (data.dgGoals && typeof data.dgGoals === 'object')
+                                    ? Object.keys(data.dgGoals).length : 0;
+            const exportedOn    = data.exported
+                                    ? new Date(data.exported).toLocaleString()
+                                    : 'Unknown';
+
+            // Build / reuse modal
+            let modal = document.getElementById('importModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'importModal';
+                modal.style.cssText = `
+                    position:fixed; inset:0; z-index:9999;
+                    display:flex; align-items:center; justify-content:center;
+                    background:rgba(0,0,0,0.55); backdrop-filter:blur(6px);
+                    animation:fadeIn 0.18s ease;
+                `;
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div style="
+                    background:var(--surface-2,var(--surface));
+                    border:1px solid var(--border);
+                    border-radius:16px;
+                    padding:28px 32px;
+                    width:min(440px,90vw);
+                    box-shadow:0 24px 64px rgba(0,0,0,0.45);
+                    animation:slideUp 0.22s cubic-bezier(.4,0,.2,1);
+                ">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                        <svg viewBox="0 0 24 24" fill="none" style="width:26px;height:26px;color:var(--brand);flex-shrink:0">
+                            <path d="M12 16V7M9 10l3-3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5 17v1a2 2 0 002 2h10a2 2 0 002-2v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <h2 style="margin:0;font-size:1.15rem;font-weight:700;color:var(--text)">Import Data</h2>
+                    </div>
+
+                    <p style="margin:0 0 14px;font-size:0.82rem;color:var(--text-muted)">Exported on: <strong>${exportedOn}</strong></p>
+
+                    <div style="
+                        display:grid; grid-template-columns:1fr 1fr;
+                        gap:10px; margin-bottom:20px;
+                    ">
+                        ${[
+                            ['📝 To-Dos',       todoCount],
+                            ['🗒️ Notes',        noteCount],
+                            ['📅 Calendar',     eventCount + ' events'],
+                            ['🎯 Daily Goals',  dgCount + ' days'],
+                        ].map(([label, val]) => `
+                            <div style="
+                                background:var(--surface); border:1px solid var(--border);
+                                border-radius:10px; padding:10px 14px;
+                            ">
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:3px">${label}</div>
+                                <div style="font-size:1.1rem;font-weight:700;color:var(--text)">${val}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <p style="margin:0 0 20px;font-size:0.83rem;color:var(--text-muted);
+                        background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);
+                        border-radius:8px;padding:10px 12px;">
+                        ⚠️ <strong>Merge</strong> will add imported items alongside your existing data.<br>
+                        <strong>Replace</strong> will overwrite everything with the imported file.
+                    </p>
+
+                    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                        <button onclick="closeImportModal()" style="
+                            padding:9px 18px;border-radius:8px;border:1px solid var(--border);
+                            background:transparent;color:var(--text);cursor:pointer;font-size:0.88rem;
+                        ">Cancel</button>
+                        <button onclick="applyImport('replace')" style="
+                            padding:9px 18px;border-radius:8px;border:none;
+                            background:var(--danger,#e74c3c);color:#fff;cursor:pointer;font-size:0.88rem;font-weight:600;
+                        ">Replace All</button>
+                        <button onclick="applyImport('merge')" style="
+                            padding:9px 18px;border-radius:8px;border:none;
+                            background:var(--brand);color:#fff;cursor:pointer;font-size:0.88rem;font-weight:600;
+                        ">Merge</button>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeImportModal() {
+            const modal = document.getElementById('importModal');
+            if (modal) modal.style.display = 'none';
+            _pendingImport = null;
+        }
+
+        function applyImport(mode) {
+            if (!_pendingImport) return;
+            const data = _pendingImport;
+
+            // ── Todos ──
+            if (Array.isArray(data.todos)) {
+                if (mode === 'replace') {
+                    todos = data.todos;
+                } else {
+                    // Merge: avoid duplicate IDs
+                    const existingIds = new Set(todos.map(t => t.id));
+                    data.todos.forEach(t => { if (!existingIds.has(t.id)) todos.push(t); });
+                }
+                saveData('todos', todos);
+                loadTodos();
+            }
+
+            // ── Notes ──
+            if (Array.isArray(data.notes)) {
+                if (mode === 'replace') {
+                    notesArr = data.notes;
+                } else {
+                    const existingIds = new Set(notesArr.map(n => n.id));
+                    data.notes.forEach(n => { if (!existingIds.has(n.id)) notesArr.push(n); });
+                }
+                saveData('advancedNotes', notesArr);
+                renderNotesList();
+            }
+
+            // ── Calendar events ──
+            if (data.calendarEvents && typeof data.calendarEvents === 'object') {
+                if (mode === 'replace') {
+                    calendarEvents = data.calendarEvents;
+                } else {
+                    Object.entries(data.calendarEvents).forEach(([dateKey, evts]) => {
+                        if (!calendarEvents[dateKey]) {
+                            calendarEvents[dateKey] = evts;
+                        } else {
+                            const existingIds = new Set(calendarEvents[dateKey].map(ev => ev.id));
+                            evts.forEach(ev => { if (!existingIds.has(ev.id)) calendarEvents[dateKey].push(ev); });
+                        }
+                    });
+                }
+                localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
+                if (typeof renderCalendar === 'function') renderCalendar();
+            }
+
+            // ── Daily Goals ──
+            if (data.dgGoals && typeof data.dgGoals === 'object') {
+                if (mode === 'replace') {
+                    dgGoals = data.dgGoals;
+                } else {
+                    Object.entries(data.dgGoals).forEach(([dateKey, goals]) => {
+                        if (!dgGoals[dateKey]) {
+                            dgGoals[dateKey] = goals;
+                        } else {
+                            const existingIds = new Set(dgGoals[dateKey].map(g => g.id));
+                            goals.forEach(g => { if (!existingIds.has(g.id)) dgGoals[dateKey].push(g); });
+                        }
+                    });
+                }
+                saveDgGoals();
+                if (typeof renderDailyGoals === 'function') renderDailyGoals();
+            }
+
+            closeImportModal();
+            const modeLabel = mode === 'replace' ? 'replaced' : 'merged';
+            showToast(`Data ${modeLabel} successfully! ✓`, 'success');
         }
 
         // ─── DAILY GOALS TRACKER ──────────────────────────────────────
