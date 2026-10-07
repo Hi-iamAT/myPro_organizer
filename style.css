@@ -662,6 +662,17 @@ nav#mainNav {
     text-decoration: line-through;
 }
 
+/* ── Segment task coloring ──────────────────────── */
+.todo-item.has-segment:not(.urgent):not(.completed) {
+    border-left: 4px solid var(--seg-color);
+    background: color-mix(in srgb, var(--seg-color) 8%, transparent);
+}
+
+.todo-item.has-segment:not(.urgent):not(.completed):hover {
+    border-color: var(--seg-color);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--seg-color) 15%, transparent);
+}
+
 /* ── Urgent / overdue flash ─────────────────────── */
 @keyframes urgentFlash {
     0%, 100% {
@@ -947,6 +958,37 @@ nav#mainNav {
     background: rgba(244, 63, 94, 0.1);
     color: var(--danger);
     border-color: var(--danger);
+}
+
+/* Segment active states */
+.priority-chip[data-segment="Other"].active {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+    border-color: #6b7280;
+}
+
+.priority-chip[data-segment="CT"].active {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+.priority-chip[data-segment="Mid"].active {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+    border-color: #ec4899;
+}
+
+.priority-chip[data-segment="Final"].active {
+    background: rgba(245, 158, 11, 0.1); /* Amber instead of red */
+    color: #f59e0b;
+    border-color: #f59e0b;
+}
+
+.priority-chip[data-segment="Custom"].active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: #10b981;
 }
 
 .task-editor-actions {
