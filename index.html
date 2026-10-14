@@ -1149,8 +1149,11 @@
                 const due = new Date(todo.date);
                 const today = new Date();
                 const diffMs = due - today;
+                const totalHoursLeft = Math.floor(diffMs / (1000 * 60 * 60));
+                const totalMinsLeft = Math.floor(diffMs / (1000 * 60));
                 const daysLeft = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                const hoursLeft = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const remainingHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const remainingMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
                 let countdownLabel = '';
                 let badgeClass = '';
@@ -1159,17 +1162,23 @@
                     countdownLabel = `Overdue`;
                     badgeClass = 'overdue-badge';
                     isUrgent = true;
-                } else if (daysLeft < 1) {
-                    countdownLabel = `${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''} left`;
+                } else if (totalMinsLeft < 60) {
+                    // Less than 1 hour — show minutes
+                    countdownLabel = `${totalMinsLeft} min left`;
                     badgeClass = 'urgent-badge';
                     isUrgent = true;
-                } else if (daysLeft === 1) {
-                    countdownLabel = '1 day left';
+                } else if (totalHoursLeft < 24) {
+                    // Less than 24 hours — show hours and minutes
+                    countdownLabel = remainingMins > 0
+                        ? `${totalHoursLeft} hr${totalHoursLeft !== 1 ? 's' : ''} ${remainingMins} min left`
+                        : `${totalHoursLeft} hr${totalHoursLeft !== 1 ? 's' : ''} left`;
+                    badgeClass = 'urgent-badge';
+                    isUrgent = true;
+                } else if (totalHoursLeft < 72) {
+                    // Less than 3 days — show total hours countdown
+                    countdownLabel = `${totalHoursLeft} hrs left`;
                     badgeClass = 'warning-badge';
                     isUrgent = true;
-                } else if (daysLeft <= 3) {
-                    countdownLabel = `${daysLeft} days left`;
-                    badgeClass = 'warning-badge';
                 } else {
                     countdownLabel = `${daysLeft} days left`;
                     badgeClass = 'safe-badge';
