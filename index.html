@@ -211,7 +211,7 @@
                     <!-- Active Tasks Section -->
                     <div class="split-left" style="width: 100%; border-right: none; flex: 1;" id="activeTodoSection">
                         <div class="split-left-header">
-                            <span class="split-left-title">Active Tasks</span>
+                            <span class="split-left-title" id="listViewTitle">Active Tasks</span>
                             <button class="add-btn-sm" id="addTaskBtn" onclick="openAddTask()" title="Add new task"
                                 aria-label="Add task">
                                 <svg viewBox="0 0 20 20" fill="none">
@@ -221,38 +221,14 @@
                             </button>
                         </div>
                         <ul class="todo-list scrollable" id="todoList"></ul>
-                        <div class="empty-state" id="emptyState">
+                        <div class="empty-state" id="emptyState" style="display:none;">
                             <svg viewBox="0 0 48 48" fill="none">
                                 <rect x="8" y="8" width="32" height="36" rx="4" stroke="currentColor"
                                     stroke-width="2" />
                                 <path d="M16 20h16M16 27h10M16 34h12" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" />
                             </svg>
-                            <p>No active tasks.<br>Click <strong>+</strong> to add one!</p>
-                        </div>
-                    </div>
-
-                    <!-- Done Tasks Section (hidden by default) -->
-                    <div class="done-tasks-section" id="doneTasksSection" style="display:none;">
-                        <div class="split-left-header done-tasks-header">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <svg viewBox="0 0 20 20" fill="none" style="width:16px;height:16px;color:var(--success)">
-                                    <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span class="split-left-title" style="color:var(--success);">Completed Tasks</span>
-                            </div>
-                            <button class="icon-btn" onclick="toggleDoneTasksPanel()" title="Close" style="width:28px;height:28px;">
-                                <svg viewBox="0 0 20 20" fill="none">
-                                    <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <ul class="todo-list scrollable" id="doneTasksList"></ul>
-                        <div class="empty-state" id="doneEmptyState" style="display:none;">
-                            <svg viewBox="0 0 48 48" fill="none">
-                                <path d="M10 24l8 8 16-16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <p>No completed tasks yet.<br>Check off tasks to see them here!</p>
+                            <p id="emptyStateMsg">No active tasks.<br>Click <strong>+</strong> to add one!</p>
                         </div>
                     </div>
 
@@ -972,7 +948,9 @@
         </div>
     </div>
 
+
     <!-- Custom Timer Modal -->
+
     <div class="modal-overlay" id="customTimerModal">
         <div class="modal-content">
             <div class="task-editor-header">
@@ -1109,22 +1087,14 @@
             const activeTodos = todos.filter(t => !t.completed);
             const doneTodos = todos.filter(t => t.completed);
 
-            // Render active tasks
+            // Render whichever view is currently active into the single list
             todoList.innerHTML = '';
-            emptyState.style.display = activeTodos.length === 0 ? 'flex' : 'none';
-            activeTodos.forEach((todo) => {
+            const viewTodos = showDoneTasksPanel ? doneTodos : activeTodos;
+            const isEmpty = viewTodos.length === 0;
+            emptyState.style.display = isEmpty ? 'flex' : 'none';
+            viewTodos.forEach((todo) => {
                 const originalIndex = todos.indexOf(todo);
                 addTodoElement(todo, originalIndex, todoList);
-            });
-
-            // Render done tasks
-            const doneList = document.getElementById('doneTasksList');
-            const doneEmpty = document.getElementById('doneEmptyState');
-            doneList.innerHTML = '';
-            doneEmpty.style.display = doneTodos.length === 0 ? 'flex' : 'none';
-            doneTodos.forEach((todo) => {
-                const originalIndex = todos.indexOf(todo);
-                addTodoElement(todo, originalIndex, doneList);
             });
 
             updateStats();
@@ -1220,19 +1190,22 @@
 
         function toggleDoneTasksPanel() {
             showDoneTasksPanel = !showDoneTasksPanel;
-            const section = document.getElementById('doneTasksSection');
             const btn = document.getElementById('doneTasksToggleBtn');
+            const titleEl = document.getElementById('listViewTitle');
+            const addBtn = document.getElementById('addTaskBtn');
+            const emptyMsg = document.getElementById('emptyStateMsg');
             if (showDoneTasksPanel) {
-                section.style.display = 'block';
-                section.classList.add('done-panel-visible');
                 btn.classList.add('active');
-                // Smooth scroll to the done section
-                setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+                titleEl.textContent = 'Completed Tasks';
+                addBtn.style.display = 'none';
+                emptyMsg.innerHTML = 'No completed tasks yet.<br>Check off a task to see it here!';
             } else {
-                section.classList.remove('done-panel-visible');
                 btn.classList.remove('active');
-                setTimeout(() => section.style.display = 'none', 300);
+                titleEl.textContent = 'Active Tasks';
+                addBtn.style.display = '';
+                emptyMsg.innerHTML = 'No active tasks.<br>Click <strong>+</strong> to add one!';
             }
+            loadTodos();
         }
 
         function openAddTask() {
@@ -1283,6 +1256,7 @@
             document.getElementById('taskModal').style.display = 'none';
             editingTodoIndex = -1;
         }
+
 
         function setPriority(p, btn) {
             selectedPriority = p;
@@ -1338,13 +1312,13 @@
             const n = todos.filter(t => t.completed).length;
             if (!n) { showToast('No completed tasks', 'warn'); return; }
             todos = todos.filter(t => !t.completed);
-            // Also close done panel if open
+            // Switch back to active view if currently showing done
             if (showDoneTasksPanel) {
                 showDoneTasksPanel = false;
-                const section = document.getElementById('doneTasksSection');
-                section.classList.remove('done-panel-visible');
                 document.getElementById('doneTasksToggleBtn').classList.remove('active');
-                setTimeout(() => section.style.display = 'none', 300);
+                document.getElementById('listViewTitle').textContent = 'Active Tasks';
+                document.getElementById('addTaskBtn').style.display = '';
+                document.getElementById('emptyStateMsg').innerHTML = 'No active tasks.<br>Click <strong>+</strong> to add one!';
             }
             saveData('todos', todos); loadTodos();
             showToast(`Cleared ${n} task${n > 1 ? 's' : ''}`, 'success');
