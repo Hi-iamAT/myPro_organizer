@@ -344,51 +344,31 @@
                         </div>
                         <div>
                             <h1>Calculator</h1>
-                            <p class="panel-subtitle">Arithmetic, scientific &amp; expressions</p>
+                            <p class="panel-subtitle">Scientific calculator · keyboard ready</p>
                         </div>
                     </div>
                     <button class="ghost-btn danger" onclick="calcClear()" id="calcAcBtn">AC</button>
                 </div>
                 <div class="panel-single">
-                    <div class="calc-wrap">
-                        <div class="calc-display-wrap">
-                            <div class="calc-expression" id="calcExpression">&nbsp;</div>
-                            <input type="text" id="calcDisplay" class="calc-display" readonly value="0"
-                                aria-label="Calculator display">
+                    <div class="sci-calc" id="sciCalc">
+                        <div class="sci-screen" aria-live="polite">
+                            <div class="sci-status">
+                                <span id="calcIndShift" class="ind">S</span>
+                                <span id="calcIndHyp" class="ind">HYP</span>
+                                <span id="calcIndMem" class="ind">M</span>
+                                <span id="calcIndAngle" class="ind on">D</span>
+                                <span id="calcIndFrac" class="ind">FRAC</span>
+                            </div>
+                            <div class="sci-expr" id="calcExpression" aria-label="Expression"><span id="calcExprText"></span><span class="sci-cursor"></span></div>
+                            <output class="sci-result" id="calcDisplay" aria-label="Result">0</output>
                         </div>
-                        <div class="calc-fn-row">
-                            <button class="calc-fn-btn" onclick="calcInput('sqrt(')"
-                                title="Square root">&#8730;</button>
-                            <button class="calc-fn-btn" onclick="calcSquare()" title="Square">x&#178;</button>
-                            <button class="calc-fn-btn" onclick="calcPercent()" title="Percent">%</button>
-                            <button class="calc-fn-btn" onclick="calcInput('^')" title="Power">x&#7511;</button>
-                            <button class="calc-fn-btn" onclick="calcInput('sin(')" title="Sine (degrees)">sin</button>
-                            <button class="calc-fn-btn" onclick="calcInput('cos(')"
-                                title="Cosine (degrees)">cos</button>
-                            <button class="calc-fn-btn" onclick="calcInput('tan(')"
-                                title="Tangent (degrees)">tan</button>
-                            <button class="calc-fn-btn" onclick="calcInput('π')" title="Pi">&#960;</button>
-                        </div>
-                        <div class="calc-grid">
-                            <button class="calc-btn fn-btn" onclick="calcBackspace()">&#9003;</button>
-                            <button class="calc-btn fn-btn" onclick="calcInput('(')">(</button>
-                            <button class="calc-btn fn-btn" onclick="calcInput(')')">)</button>
-                            <button class="calc-btn op-btn" onclick="calcInput('/')">&#247;</button>
-                            <button class="calc-btn" onclick="calcInput('7')">7</button>
-                            <button class="calc-btn" onclick="calcInput('8')">8</button>
-                            <button class="calc-btn" onclick="calcInput('9')">9</button>
-                            <button class="calc-btn op-btn" onclick="calcInput('*')">&#215;</button>
-                            <button class="calc-btn" onclick="calcInput('4')">4</button>
-                            <button class="calc-btn" onclick="calcInput('5')">5</button>
-                            <button class="calc-btn" onclick="calcInput('6')">6</button>
-                            <button class="calc-btn op-btn" onclick="calcInput('-')">&#8722;</button>
-                            <button class="calc-btn" onclick="calcInput('1')">1</button>
-                            <button class="calc-btn" onclick="calcInput('2')">2</button>
-                            <button class="calc-btn" onclick="calcInput('3')">3</button>
-                            <button class="calc-btn op-btn" onclick="calcInput('+')">+</button>
-                            <button class="calc-btn zero-btn" onclick="calcInput('0')">0</button>
-                            <button class="calc-btn" onclick="calcInput('.')">.</button>
-                            <button class="calc-btn eq-btn" onclick="calcCalculate()">=</button>
+                        <div class="sci-keys" id="calcKeys"></div>
+                        <div class="sci-history">
+                            <div class="sci-history-head">
+                                <span>History</span>
+                                <button class="ghost-btn" type="button" onclick="calcClearHistory()">Clear</button>
+                            </div>
+                            <ol class="sci-history-list" id="calcHistory"></ol>
                         </div>
                     </div>
                 </div>
@@ -1430,74 +1410,7 @@
         }
         function execNoteCmd(cmd, val = null) { document.execCommand(cmd, false, val); }
 
-        // ─── CALCULATOR ───────────────────────────────────────
-        const calcDisplay = document.getElementById('calcDisplay');
-        const calcExpr = document.getElementById('calcExpression');
-        let calcValue = '';
-
-        function calcInput(v) {
-            if (calcValue === 'Error') calcValue = '';
-            calcValue += v;
-            calcDisplay.value = calcValue;
-            calcExpr.innerHTML = '&nbsp;';
-        }
-        function calcBackspace() {
-            calcValue = calcValue === 'Error' ? '' : calcValue.slice(0, -1);
-            calcDisplay.value = calcValue || '0';
-            calcExpr.innerHTML = '&nbsp;';
-        }
-        function calcClear() { calcValue = ''; calcDisplay.value = '0'; calcExpr.innerHTML = '&nbsp;'; }
-        function calcSquare() {
-            if (calcValue === 'Error' || !calcValue) return;
-            calcValue += '**2';
-            calcDisplay.value = calcValue;
-            calcExpr.innerHTML = '&nbsp;';
-        }
-        function calcPercent() {
-            if (calcValue === 'Error' || !calcValue) return;
-            calcValue += '/100';
-            calcDisplay.value = calcValue;
-            calcExpr.innerHTML = '&nbsp;';
-        }
-        function calcPrepareExpr(raw) {
-            let e = raw.replace(/π/g, 'PI').replace(/\^/g, '**');
-            e = e.replace(/(\d+\.?\d*)\*\*2/g, '($1)**2');
-            e = e.replace(/sin\(/g, 'SIN(').replace(/cos\(/g, 'COS(').replace(/tan\(/g, 'TAN(');
-            e = e.replace(/sqrt\(/g, 'SQRT(');
-            return e;
-        }
-        function calcSafeEval(expr) {
-            const PI = Math.PI;
-            const SIN = deg => Math.sin(deg * Math.PI / 180);
-            const COS = deg => Math.cos(deg * Math.PI / 180);
-            const TAN = deg => Math.tan(deg * Math.PI / 180);
-            const SQRT = Math.sqrt;
-            // Defence in depth: only allow digits, operators and the whitelisted helpers.
-            if (!/^(?:[0-9+\-*/().\s]|PI|SIN|COS|TAN|SQRT)*$/.test(expr)) throw new Error('Invalid expression');
-            return Function('PI', 'SIN', 'COS', 'TAN', 'SQRT', '"use strict"; return (' + expr + ')')(PI, SIN, COS, TAN, SQRT);
-        }
-        function calcCalculate() {
-            if (!calcValue || calcValue === 'Error') return;
-            try {
-                const expr = calcValue;
-                const prepared = calcPrepareExpr(expr);
-                const res = calcSafeEval(prepared);
-                if (!isFinite(res)) throw new Error('Invalid');
-                calcExpr.textContent = expr + ' =';
-                calcValue = String(parseFloat(res.toFixed(10)));
-                calcDisplay.value = calcValue;
-            } catch (e) { calcValue = 'Error'; calcDisplay.value = 'Error'; calcExpr.innerHTML = '&nbsp;'; }
-        }
-        document.addEventListener('keydown', e => {
-            if (currentTool !== 'calc') return;
-            const active = document.activeElement;
-            if (active && (active.matches('input, textarea, select, [contenteditable="true"]') && active.id !== 'calcDisplay')) return;
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
-            if ('0123456789.+-*/()'.includes(e.key) && e.key.length === 1) calcInput(e.key);
-            else if (e.key === 'Enter' || e.key === '=') calcCalculate();
-            else if (e.key === 'Backspace') calcBackspace();
-            else if (e.key === 'Escape') calcClear();
-        });
+        // ─── CALCULATOR ─── (see calc.js)
 
         // ─── FOCUS TIMER ──────────────────────────────────────
         let timerInterval, timeLeft = 25 * 60, totalTime = 25 * 60, isRunning = false;
@@ -3028,6 +2941,7 @@
             initDailyGoals();
         };
     </script>
+    <script src="calc.js"></script>
 </body>
 
 </html>

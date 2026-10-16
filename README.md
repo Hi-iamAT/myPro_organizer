@@ -141,6 +141,17 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 
 ---
 
+## 🧮 Scientific Calculator
+
+fx-991ES-style calculator (`calc.js`) with a safe recursive-descent parser — no `eval`/`Function`.
+
+- sin/cos/tan + inverses (SHIFT), hyperbolic (HYP), DEG / RAD / GRAD
+- x², x³, xʸ, √, ³√, ʸ√x, x⁻¹, log, ln, 10ˣ, eˣ, x!, nPr, nCr, %, Abs, π, e, EXP, Ans
+- Memory (M+, M−, MR, MC), two-line display, history (click to reuse), S⇔D fraction toggle
+- Implicit multiplication (`2π`, `3(4)`), auto-closing brackets, `Math ERROR` / `Syntax ERROR`
+- Keyboard: digits `+ - * / ^ ( ) ! % .`, Enter/=, Backspace, Esc (AC), `s c t` (sin cos tan), `S O T` (inverse), `h` HYP, `l` log, `n` ln, `r` √, `R` ³√, `q` x², `i` x⁻¹, `b` Abs, `p` π, `e` e, `x` EXP, `a` Ans, `m` M, `P`/`C` nPr/nCr, `d` angle mode, `f` S⇔D
+- State (angle, Ans, memory, history) stored in `localStorage` key `flowdesk_calc`
+
 ## ♿ Accessibility & Polish
 
 - Dark theme is the default (an explicit Light choice is remembered) and applied before first paint — no white flash.
