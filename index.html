@@ -9,7 +9,8 @@
         content="FlowDesk is a sleek, all-in-one productivity dashboard with To-Do lists, Quick Notes, Calculator, Focus Timer, BMI Calculator, and Weather — all in one beautiful place.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.svg">
-    <meta name="theme-color" content="#6C63FF">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="color-scheme" content="dark light">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -19,10 +20,15 @@
 </head>
 
 <body>
+    <script>
+        // Apply theme before first paint (avoids light flash). Dark is default; an explicit 'light' choice is respected.
+        if (localStorage.getItem('theme') !== 'light') document.body.classList.add('dark-mode');
+    </script>
     <!-- ── Navbar ── -->
     <nav id="mainNav">
         <div class="navbar-brand" onclick="switchTool('todo', document.getElementById('nav-todo'))"
-            style="cursor: pointer;" title="Go to To-Do">
+            style="cursor: pointer;" title="Go to To-Do" role="button" tabindex="0"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
             <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="32" height="32" rx="8" fill="url(#brandGrad)" />
                 <path d="M8 10h10M8 16h8M8 22h12" stroke="white" stroke-width="2.5" stroke-linecap="round" />
@@ -39,28 +45,28 @@
             <span class="brand-name">FlowDesk</span>
         </div>
         <div class="navbar-center">
-            <span id="liveClock" class="live-clock"></span>
+            <span id="liveClock" class="live-clock" aria-live="off"></span>
         </div>
         <div class="navbar-menu">
             <!-- Hidden file input for import -->
             <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(event)">
-            <button class="nav-action-btn" onclick="document.getElementById('importFileInput').click()" title="Import data from JSON">
+            <button class="nav-action-btn" onclick="document.getElementById('importFileInput').click()" title="Import data from JSON" aria-label="Import data">
                 <svg viewBox="0 0 20 20" fill="none">
                     <path d="M10 17V8M7 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                         stroke-linejoin="round" />
                     <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" />
                 </svg>
-                Import
+                <span class="nav-btn-label">Import</span>
             </button>
-            <button class="nav-action-btn" onclick="exportData()" title="Export all data">
+            <button class="nav-action-btn" onclick="exportData()" title="Export all data" aria-label="Export data">
                 <svg viewBox="0 0 20 20" fill="none">
                     <path d="M10 3v9M7 9l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                         stroke-linejoin="round" />
                     <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" />
                 </svg>
-                Export
+                <span class="nav-btn-label">Export</span>
             </button>
             <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode"
                 aria-label="Toggle theme">
@@ -1180,7 +1186,7 @@
                     ${dateHtml}
                     ${todo.note ? `<span class="todo-note-preview">${escapeHtml(todo.note.substring(0, 60))}${todo.note.length > 60 ? '…' : ''}</span>` : ''}
                 </div>
-                <span class="priority-dot" style="background:${pColor}" title="${todo.priority || 'low'} priority"></span>
+                <span class="priority-dot" style="background:${pColor}" title="${escapeHtml(todo.priority || 'low')} priority"></span>
                 <button class="del-btn" onclick="deleteTodo(${index})" title="Delete task">
                     <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>`;
@@ -1466,6 +1472,8 @@
             const COS = deg => Math.cos(deg * Math.PI / 180);
             const TAN = deg => Math.tan(deg * Math.PI / 180);
             const SQRT = Math.sqrt;
+            // Defence in depth: only allow digits, operators and the whitelisted helpers.
+            if (!/^(?:[0-9+\-*/().\s]|PI|SIN|COS|TAN|SQRT)*$/.test(expr)) throw new Error('Invalid expression');
             return Function('PI', 'SIN', 'COS', 'TAN', 'SQRT', '"use strict"; return (' + expr + ')')(PI, SIN, COS, TAN, SQRT);
         }
         function calcCalculate() {
@@ -1483,7 +1491,8 @@
         document.addEventListener('keydown', e => {
             if (currentTool !== 'calc') return;
             const active = document.activeElement;
-            if (active && (active.id === 'todoInput' || active.classList.contains('note-title-big') || active.classList.contains('note-content-editor'))) return;
+            if (active && (active.matches('input, textarea, select, [contenteditable="true"]') && active.id !== 'calcDisplay')) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
             if ('0123456789.+-*/()'.includes(e.key) && e.key.length === 1) calcInput(e.key);
             else if (e.key === 'Enter' || e.key === '=') calcCalculate();
             else if (e.key === 'Backspace') calcBackspace();
@@ -1825,7 +1834,9 @@
                     `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,uv_index` +
                     `&wind_speed_unit=kmh&timezone=auto`
                 );
+                if (!wRes.ok) throw new Error('Weather HTTP ' + wRes.status);
                 const wData = await wRes.json();
+                if (!wData || !wData.current) throw new Error('Malformed weather response');
                 const c = wData.current;
 
                 let cityName = fallbackCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
@@ -1860,6 +1871,7 @@
         async function fetchWeatherIPFallback() {
             try {
                 const res = await fetch('https://ipwho.is/');
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 if (data.success) fetchWeatherData(data.latitude, data.longitude, data.city);
                 else throw new Error();
@@ -1886,7 +1898,7 @@
 
         function showWeatherError(msg) {
             document.getElementById('weatherLoading').style.display = 'none';
-            document.getElementById('weatherErrorMsg').innerHTML = msg;
+            document.getElementById('weatherErrorMsg').textContent = msg;
             document.getElementById('weatherError').style.display = 'flex';
         }
 
@@ -2574,7 +2586,7 @@
                         <h2 style="margin:0;font-size:1.15rem;font-weight:700;color:var(--text)">Import Data</h2>
                     </div>
 
-                    <p style="margin:0 0 14px;font-size:0.82rem;color:var(--text-muted)">Exported on: <strong>${exportedOn}</strong></p>
+                    <p style="margin:0 0 14px;font-size:0.82rem;color:var(--text-muted)">Exported on: <strong>${escapeHtml(exportedOn)}</strong></p>
 
                     <div style="
                         display:grid; grid-template-columns:1fr 1fr;
@@ -3005,8 +3017,7 @@
 
         // ─── INIT ─────────────────────────────────────────────
         window.onload = () => {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
                 document.querySelector('.icon-moon').style.display = 'none';
                 document.querySelector('.icon-sun').style.display = 'block';
             }

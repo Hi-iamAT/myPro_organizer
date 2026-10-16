@@ -141,6 +141,13 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 
 ---
 
+## ♿ Accessibility & Polish
+
+- Dark theme is the default (an explicit Light choice is remembered) and applied before first paint — no white flash.
+- Visible keyboard focus rings on all controls; brand logo is keyboard-activatable.
+- Respects `prefers-reduced-motion`.
+- Compact icon-only navbar actions on phones so nothing overflows.
+
 ## 🛠️ Tech Stack
 
 - **HTML5** — semantic markup

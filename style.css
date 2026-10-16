@@ -3414,3 +3414,72 @@ body.dark-mode .done-tasks-modal-header {
         padding: 16px 18px;
     }
 }
+/* ============================================================
+   REFINEMENTS (v1.2) — polish layer; overrides earlier rules
+   ============================================================ */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body.dark-mode {
+    --bg: #0b0d17;
+    --surface: #141726;
+    --border: rgba(255, 255, 255, 0.07);
+    color-scheme: dark;
+}
+
+.live-clock {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Consistent, clearly visible keyboard focus on all interactive controls */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[contenteditable="true"]:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.2);
+}
+
+.app-footer {
+    flex-wrap: wrap;
+    text-align: center;
+    padding: 0 12px;
+}
+
+@media (max-width: 600px) {
+    /* Navbar: icon-only actions so nothing overflows the viewport */
+    .nav-btn-label { display: none; }
+    .nav-action-btn { padding: 8px; min-width: 36px; justify-content: center; }
+    .navbar-menu { gap: 6px; flex-shrink: 0; }
+    .live-clock { font-size: 0.78rem; }
+    .brand-name { font-size: 1.05rem; }
+    .app-footer {
+        height: auto;
+        min-height: 40px;
+        padding: 6px 12px;
+        gap: 4px 10px;
+        font-size: 0.72rem;
+    }
+    .footer-divider { display: none; }
+}
+
+@media (max-width: 360px) {
+    .brand-name { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
