@@ -88,7 +88,18 @@
         <!-- ── Sidebar ── -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <button class="sidebar-item active" id="nav-todo" onclick="switchTool('todo', this)">
+                <button class="sidebar-item active" id="nav-dashboard" onclick="switchTool('dashboard', this)">
+                    <span class="sidebar-icon dash-icon">
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="2" />
+                            <rect x="11" y="3" width="6" height="4" rx="1.5" stroke="currentColor" stroke-width="2" />
+                            <rect x="11" y="9" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="2" />
+                            <rect x="3" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-label">Dashboard</span>
+                </button>
+                <button class="sidebar-item" id="nav-todo" onclick="switchTool('todo', this)">
                     <span class="sidebar-icon todo-icon">
                         <svg viewBox="0 0 20 20" fill="none">
                             <path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="2"
@@ -179,8 +190,32 @@
         <!-- ── Main Panel ── -->
         <main class="main-panel">
 
+            <!-- ════ DASHBOARD PANEL (rendered by enhance.js) ════ -->
+            <div class="tool-panel active" id="panel-dashboard">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon dash-icon">
+                            <svg viewBox="0 0 20 20" fill="none">
+                                <rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="2" />
+                                <rect x="11" y="3" width="6" height="4" rx="1.5" stroke="currentColor" stroke-width="2" />
+                                <rect x="11" y="9" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="2" />
+                                <rect x="3" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 id="dashGreeting">Dashboard</h1>
+                            <p class="panel-subtitle" id="dashDate">Your day at a glance</p>
+                        </div>
+                    </div>
+                    <button class="ghost-btn" type="button" onclick="FlowEnh.openPalette()" title="Command palette (Ctrl+K)">
+                        <span class="kbd">Ctrl</span><span class="kbd">K</span> Commands
+                    </button>
+                </div>
+                <div class="dash-body scrollable" id="dashBody"></div>
+            </div>
+
             <!-- ════ TO-DO PANEL ════ -->
-            <div class="tool-panel active" id="panel-todo">
+            <div class="tool-panel" id="panel-todo">
                 <div class="panel-header">
                     <div class="panel-title">
                         <div class="panel-icon todo-icon">
@@ -225,6 +260,17 @@
                                         stroke-linecap="round" />
                                 </svg>
                             </button>
+                        </div>
+                        <div class="list-toolbar" id="todoToolbar">
+                            <input type="search" id="todoSearch" class="list-search" placeholder="Search tasks…  ( / )"
+                                aria-label="Search tasks" oninput="loadTodos()">
+                            <div class="chip-group" role="group" aria-label="Filter tasks">
+                                <button type="button" class="filter-chip active" data-filter="all" onclick="FlowEnh.setTodoFilter('all', this)">All</button>
+                                <button type="button" class="filter-chip" data-filter="today" onclick="FlowEnh.setTodoFilter('today', this)">Today</button>
+                                <button type="button" class="filter-chip" data-filter="week" onclick="FlowEnh.setTodoFilter('week', this)">7 days</button>
+                                <button type="button" class="filter-chip" data-filter="high" onclick="FlowEnh.setTodoFilter('high', this)">High</button>
+                                <button type="button" class="filter-chip" data-filter="nodate" onclick="FlowEnh.setTodoFilter('nodate', this)">No date</button>
+                            </div>
                         </div>
                         <ul class="todo-list scrollable" id="todoList"></ul>
                         <div class="empty-state" id="emptyState" style="display:none;">
@@ -275,6 +321,8 @@
                             <span class="split-left-title">All Notes</span>
                             <span class="count-badge" id="noteCount">0</span>
                         </div>
+                        <div class="list-toolbar"><input type="search" id="notesSearch" class="list-search" placeholder="Search notes…"
+                            aria-label="Search notes" oninput="renderNotesList()"></div>
                         <div id="notesList" class="notes-list scrollable"></div>
                     </div>
                     <!-- Right: Note Editor -->
@@ -448,8 +496,9 @@
                                 onclick="openCustomTimerModal(this)">Custom</button>
                         </div>
                         <div class="session-counter">
-                            Sessions today: <strong id="sessionCount">0</strong>
+                            All-time sessions: <strong id="sessionCount">0</strong>
                         </div>
+                        <div class="focus-stats" id="focusStats" aria-label="Focus statistics"></div>
                         <label class="timer-notif-toggle">
                             <input type="checkbox" id="timerNotifToggle" checked
                                 onchange="toggleTimerNotifications(this.checked)">
@@ -654,6 +703,7 @@
                                     <span class="wc-label">UV Index</span>
                                 </div>
                             </div>
+                            <div class="weather-extra" id="weatherExtra"></div>
                             <div class="weather-updated" id="weatherUpdated"></div>
                         </div>
                     </div>
@@ -997,9 +1047,9 @@
         document.getElementById('footerYear').textContent = new Date().getFullYear();
 
         // ─── TOOL SWITCHER & SWIPE ────────────────────────────
-        let currentTool = 'todo';
+        let currentTool = 'dashboard';
         let weatherFetched = false;
-        const tools = ['todo', 'notes', 'calc', 'timer', 'bmi', 'weather', 'calendar', 'daily-goals'];
+        const tools = ['dashboard', 'todo', 'notes', 'calc', 'timer', 'bmi', 'weather', 'calendar', 'daily-goals'];
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -1031,6 +1081,7 @@
             if (btn) btn.classList.add('active');
             currentTool = tool;
             if (tool === 'weather' && !weatherFetched) fetchWeather();
+            if (window.FlowEnh) FlowEnh.onToolChange(tool);
         }
 
         // ─── TODO LIST ──────────────────────────────────────
@@ -1075,7 +1126,8 @@
 
             // Render whichever view is currently active into the single list
             todoList.innerHTML = '';
-            const viewTodos = showDoneTasksPanel ? doneTodos : activeTodos;
+            const viewTodos = (showDoneTasksPanel ? doneTodos : activeTodos)
+                .filter(t => !window.FlowEnh || FlowEnh.todoMatches(t));
             const isEmpty = viewTodos.length === 0;
             emptyState.style.display = isEmpty ? 'flex' : 'none';
             viewTodos.forEach((todo) => {
@@ -1334,7 +1386,14 @@
                     <p>No notes yet.<br>Click <strong>New Note</strong>!</p></div>`;
                 return;
             }
-            notesArr.forEach(note => {
+            const q = (document.getElementById('notesSearch')?.value || '').trim().toLowerCase();
+            const strip = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return d.textContent; };
+            // Pinned notes first (stable), then optional search filter.
+            const visible = notesArr
+                .map((n, i) => [n, i]).sort((a, b) => (!!b[0].pinned - !!a[0].pinned) || (a[1] - b[1])).map(x => x[0])
+                .filter(n => !q || (n.title || '').toLowerCase().includes(q) || strip(n.content).toLowerCase().includes(q));
+            if (!visible.length) { list.innerHTML = '<div class="notes-empty-state" style="padding:16px;text-align:center;opacity:.7">No matching notes.</div>'; }
+            visible.forEach(note => {
                 const btn = document.createElement('button');
                 btn.className = 'note-list-item' + (note.id === activeNoteId ? ' active' : '');
                 btn.style.setProperty('--nc', note.theme || '#6C63FF');
@@ -1344,7 +1403,7 @@
                 btn.innerHTML = `
                     <span class="note-list-accent"></span>
                     <div class="note-list-info">
-                        <span class="note-list-title">${escapeHtml(note.title) || '<em>Untitled Note</em>'}</span>
+                        <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml(note.title) || '<em>Untitled Note</em>'}</span>
                         <span class="note-list-date">${dateStr}</span>
                     </div>`;
                 btn.onclick = () => openNote(note.id);
@@ -1539,6 +1598,7 @@
                     sessionCount++;
                     localStorage.setItem('sessionCount', sessionCount);
                     document.getElementById('sessionCount').textContent = sessionCount;
+                    if (window.FlowEnh) FlowEnh.logFocus(Math.round(totalTime / 60));
                 }
                 notifyTimerComplete(currentModeLabel + ' session complete! 🎉');
                 resetTimer();
@@ -1671,6 +1731,7 @@
             document.getElementById('bmiPlaceholder').style.display = 'none';
             document.getElementById('bmiResult').style.display = 'flex';
             document.getElementById('bmiNumber').textContent = bmi.toFixed(1);
+            if (window.FlowEnh) FlowEnh.bmiExtra(bmi);
 
             let cls, desc, color, needlePos;
             if (bmi < 18.5) {
@@ -1745,6 +1806,7 @@
                 const wRes = await fetch(
                     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
                     `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,uv_index` +
+                    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&forecast_days=6` +
                     `&wind_speed_unit=kmh&timezone=auto`
                 );
                 if (!wRes.ok) throw new Error('Weather HTTP ' + wRes.status);
@@ -1776,6 +1838,7 @@
                 document.getElementById('weatherLoading').style.display = 'none';
                 document.getElementById('weatherContent').style.display = 'flex';
                 weatherFetched = true;
+                if (window.FlowEnh) FlowEnh.renderWeatherExtra(wData, WMO, cityName);
             } catch (e) {
                 showWeatherError('Failed to fetch weather data. Check your connection and try again.');
             }
@@ -2414,7 +2477,8 @@
         // ─── EXPORT ───────────────────────────────────────────
         function exportData() {
             const blob = new Blob(
-                [JSON.stringify({ todos, notes: notesArr, calendarEvents, dgGoals: dgGoals || {}, exported: new Date().toISOString() }, null, 2)],
+                [JSON.stringify({ todos, notes: notesArr, calendarEvents, dgGoals: dgGoals || {},
+                    focusLog: JSON.parse(localStorage.getItem('flowdesk_focus_log') || '{}'), exported: new Date().toISOString() }, null, 2)],
                 { type: 'application/json' }
             );
             const a = Object.assign(document.createElement('a'), {
@@ -2564,8 +2628,10 @@
                     todos = data.todos;
                 } else {
                     // Merge: avoid duplicate IDs
-                    const existingIds = new Set(todos.map(t => t.id));
-                    data.todos.forEach(t => { if (!existingIds.has(t.id)) todos.push(t); });
+                    // Todos historically have no id, so de-duplicate by id when present, else by content.
+                    const sig = t => t && t.id != null ? 'id:' + t.id : 'c:' + [t.text, t.date, t.note].join('|');
+                    const existing = new Set(todos.map(sig));
+                    data.todos.forEach(t => { if (t && !existing.has(sig(t))) { todos.push(t); existing.add(sig(t)); } });
                 }
                 saveData('todos', todos);
                 loadTodos();
@@ -2619,7 +2685,22 @@
                 if (typeof renderDailyGoals === 'function') renderDailyGoals();
             }
 
+            // ── Focus log (added in v3; optional so older backups still import) ──
+            if (data.focusLog && typeof data.focusLog === 'object' && !Array.isArray(data.focusLog)) {
+                let log = {};
+                try { log = JSON.parse(localStorage.getItem('flowdesk_focus_log')) || {}; } catch (_) { }
+                if (mode === 'replace') log = {};
+                Object.entries(data.focusLog).forEach(([d, v]) => {
+                    if (!v || typeof v !== 'object') return;
+                    const cur = log[d] || { sessions: 0, minutes: 0 };
+                    log[d] = mode === 'replace' ? { sessions: +v.sessions || 0, minutes: +v.minutes || 0 }
+                        : { sessions: Math.max(cur.sessions, +v.sessions || 0), minutes: Math.max(cur.minutes, +v.minutes || 0) };
+                });
+                localStorage.setItem('flowdesk_focus_log', JSON.stringify(log));
+            }
+
             closeImportModal();
+            if (window.FlowEnh) FlowEnh.refreshDashboard();
             const modeLabel = mode === 'replace' ? 'replaced' : 'merged';
             showToast(`Data ${modeLabel} successfully! ✓`, 'success');
         }
@@ -2942,6 +3023,7 @@
         };
     </script>
     <script src="calc.js"></script>
+    <script src="enhance.js"></script>
 </body>
 
 </html>

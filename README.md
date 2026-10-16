@@ -141,6 +141,17 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 
 ---
 
+## 🚀 v3 Highlights
+
+- **Dashboard** (new home): greeting, KPIs (open tasks, due today, goals, focus minutes, notes), up-next tasks, goal ring, focus sparkline, upcoming events, weather snapshot, recent/pinned notes, quick actions.
+- **Command palette** — `Ctrl/⌘ + K`; `Alt + 1…9` jumps between tools; `/` searches (To-Do/Notes); `N` new task; `?` shortcut help.
+- **To-Do**: live search + filters (All / Today / 7 days / High / No date).
+- **Notes**: search titles & content, pin notes to the top.
+- **Weather**: 5-day forecast, rain chance, sunrise/sunset, daily high/low.
+- **Focus timer**: per-day focus log → today / 7-day / streak stats and a 7-day chart (`flowdesk_focus_log`).
+- **BMI**: healthy weight range for your height (kg or lb).
+- Export/Import now includes the focus log (optional, so older backups still import).
+
 ## 🧮 Scientific Calculator
 
 fx-991ES-style calculator (`calc.js`) with a safe recursive-descent parser — no `eval`/`Function`.
