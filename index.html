@@ -339,6 +339,12 @@
                         </div>
                         <div class="note-editor-panel" id="activeNoteEditor" style="display:none">
                             <div class="note-editor-topbar">
+                                <button class="mobile-back-btn" onclick="closeNoteMobile()" title="Back to list">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 16l-4-4 4-4" />
+                                    </svg>
+                                    Back
+                                </button>
                                 <input class="note-title-big" id="activeNoteTitle" type="text" placeholder="Note title…"
                                     oninput="updateActiveNoteTitle(this.value)">
                                 <div class="note-editor-controls">
@@ -1403,7 +1409,7 @@
                 btn.innerHTML = `
                     <span class="note-list-accent"></span>
                     <div class="note-list-info">
-                        <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml(note.title) || '<em>Untitled Note</em>'}</span>
+                        <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml(note.title) || '<span class="untitled-note">Untitled Note</span>'}</span>
                         <span class="note-list-date">${dateStr}</span>
                     </div>`;
                 btn.onclick = () => openNote(note.id);
@@ -1417,6 +1423,7 @@
                 renderNotesList();
                 document.getElementById('activeNoteEditor').style.display = 'none';
                 document.getElementById('noteEditorEmpty').style.display = 'flex';
+                document.querySelector('.panel-split').classList.remove('mobile-editor-active');
                 return;
             }
             activeNoteId = id;
@@ -1429,6 +1436,7 @@
             document.getElementById('activeNoteContent').innerHTML = note.content || '';
             document.getElementById('activeNoteThemeColor').value = note.theme || '#6C63FF';
             document.getElementById('activeNoteEditor').style.setProperty('--nc', note.theme || '#6C63FF');
+            document.querySelector('.panel-split').classList.add('mobile-editor-active');
         }
 
         function addNewNote() {
@@ -1439,6 +1447,15 @@
             renderNotesList();
             setTimeout(() => { const t = document.getElementById('activeNoteTitle'); if (t) t.focus(); }, 50);
         }
+
+        function closeNoteMobile() {
+            activeNoteId = null;
+            document.getElementById('activeNoteEditor').style.display = 'none';
+            document.getElementById('noteEditorEmpty').style.display = 'flex';
+            document.querySelector('.panel-split').classList.remove('mobile-editor-active');
+            renderNotesList();
+        }
+
 
         function updateActiveNoteTitle(v) {
             const n = notesArr.find(n => n.id === activeNoteId);

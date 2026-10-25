@@ -499,6 +499,7 @@ nav#mainNav {
     display: flex;
     flex-direction: column;
     background: var(--surface-2);
+    transition: all 0.3s ease;
 }
 
 .split-right {
@@ -507,6 +508,81 @@ nav#mainNav {
     flex-direction: column;
     background: var(--surface);
     position: relative;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .panel-split {
+        flex-direction: column;
+    }
+    .split-left {
+        width: 100% !important;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        height: 100%;
+    }
+    .split-right {
+        width: 100% !important;
+        height: 100%;
+        display: none; /* Hidden by default on mobile */
+    }
+    .panel-split.mobile-editor-active .split-left {
+        display: none;
+    }
+    .panel-split.mobile-editor-active .split-right {
+        display: flex;
+    }
+    .mobile-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        color: var(--txt);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .mobile-back-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+    .mobile-back-btn:hover {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+    }
+    .note-title-big {
+        font-size: 1.4rem;
+    }
+    .note-list-item {
+        padding: 16px;
+        margin-bottom: 8px;
+        background: var(--surface-2);
+        border-color: var(--border);
+        border-radius: var(--r-md);
+    }
+    .note-list-info {
+        gap: 6px;
+    }
+    .note-list-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--txt);
+    }
+    .note-list-date {
+        font-size: 0.75rem;
+        opacity: 0.6;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-back-btn {
+        display: none;
+    }
 }
 
 .split-left-header {
@@ -516,6 +592,8 @@ nav#mainNav {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
 }
+
+
 
 .split-left-title {
     font-weight: 600;
@@ -539,20 +617,27 @@ nav#mainNav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 20px;
     color: var(--txt-2);
     text-align: center;
+    padding: 40px;
 }
 
 .split-right-empty svg {
-    width: 64px;
-    height: 64px;
-    opacity: 0.3;
+    width: 80px;
+    height: 80px;
+    opacity: 0.2;
+    transition: transform 0.3s ease;
+}
+
+.split-right-empty:hover svg {
+    transform: scale(1.1) rotate(-5deg);
 }
 
 .split-right-empty p {
-    line-height: 1.5;
-    font-size: 0.95rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    max-width: 300px;
 }
 
 /* ── Single Panel Layout (For Calc, Timer, etc.) ── */
@@ -1051,13 +1136,16 @@ nav#mainNav {
 }
 
 .note-list-item:hover {
-    border-color: var(--nc);
-    transform: translateX(2px);
+    border-color: var(--accent);
+    background: var(--surface-2);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
 }
 
 .note-list-item.active {
-    background: linear-gradient(to right, var(--surface), var(--surface-2));
-    border-color: var(--nc);
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.1), var(--surface));
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .note-list-accent {
@@ -1066,7 +1154,8 @@ nav#mainNav {
     left: 0;
     top: 0;
     bottom: 0;
-    background: var(--nc);
+    background: var(--accent);
+    transition: background 0.3s;
 }
 
 .note-list-info {
@@ -1085,6 +1174,12 @@ nav#mainNav {
     text-overflow: ellipsis;
 }
 
+.untitled-note {
+    font-style: normal;
+    font-weight: 400;
+    opacity: 0.5;
+}
+
 .note-list-date {
     font-size: 0.75rem;
     color: var(--txt-2);
@@ -1100,19 +1195,20 @@ nav#mainNav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px 32px 16px;
+    padding: 32px 40px 20px;
     border-bottom: 1px solid var(--border);
 }
 
 .note-title-big {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 800;
     color: var(--txt);
     border: none;
     background: transparent;
     padding: 0;
     outline: none;
     flex: 1;
+    letter-spacing: -0.5px;
 }
 
 .note-title-big::placeholder {
@@ -1129,30 +1225,31 @@ nav#mainNav {
 .note-toolbar {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 12px 32px;
+    gap: 8px;
+    padding: 10px 40px;
     background: var(--surface-2);
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
 }
 
 .tb-btn {
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: var(--r-sm);
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--txt-2);
-    font-size: 0.9rem;
-    transition: all 0.15s;
-    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
 }
 
 .tb-btn:hover {
-    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    background: var(--brand);
     color: #fff;
-    border-color: transparent;
+    border-color: var(--brand);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(108, 99, 255, 0.3);
+    box-shadow: 0 4px 8px rgba(108, 99, 255, 0.2);
 }
 
 .tb-sep {
@@ -1165,16 +1262,23 @@ nav#mainNav {
 .clr-label {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     font-size: 0.8rem;
+    font-weight: 600;
     color: var(--txt-2);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: var(--r-sm);
     background: var(--surface);
     border: 1px solid var(--border);
     position: relative;
     overflow: hidden;
+    transition: all 0.2s;
+}
+
+.clr-label:hover {
+    border-color: var(--brand);
+    background: var(--surface-2);
 }
 
 .clr-label input[type="color"] {
@@ -1187,11 +1291,14 @@ nav#mainNav {
 
 .note-content-editor {
     flex: 1;
-    padding: 32px;
-    font-size: 1rem;
-    line-height: 1.7;
+    padding: 40px;
+    font-size: 1.1rem;
+    line-height: 1.8;
     color: var(--txt);
     outline: none;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .note-content-editor ul,
