@@ -516,6 +516,58 @@
                                 Browser notifications
                             </span>
                         </label>
+
+                        <!-- ── Live-time Interval Alerts ── -->
+                        <div class="reminder-block">
+                            <div class="reminder-head">
+                                <span class="reminder-title">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="reminder-title-icon">
+                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                    </svg>
+                                    Interval Alerts
+                                </span>
+                                <label class="reminder-switch">
+                                    <input type="checkbox" id="intervalAlertToggle"
+                                        onchange="toggleIntervalAlerts(this.checked)">
+                                    <span class="reminder-slider"></span>
+                                </label>
+                            </div>
+                            <p class="reminder-sub">Synced with your live clock — recurring pings every 15 / 30 / 60 min (on the 15s, 30s, hour).</p>
+                            <div class="reminder-chips" id="intervalChips">
+                                <button type="button" class="mode-chip" data-min="15" onclick="setIntervalChoice(15, this)">15 min</button>
+                                <button type="button" class="mode-chip" data-min="30" onclick="setIntervalChoice(30, this)">30 min</button>
+                                <button type="button" class="mode-chip" data-min="60" onclick="setIntervalChoice(60, this)">1 hour</button>
+                            </div>
+                            <div class="reminder-next" id="intervalNext"></div>
+                        </div>
+
+                        <!-- ── Custom Time Reminders ── -->
+                        <div class="reminder-block">
+                            <div class="reminder-head">
+                                <span class="reminder-title">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="reminder-title-icon">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2 2a1 1 0 001.414-1.414L11 9.586V6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Custom Reminders
+                                </span>
+                                <span class="reminder-count" id="reminderCount">0</span>
+                            </div>
+                            <form class="reminder-form" id="reminderForm" onsubmit="addReminder(event)">
+                                <input type="time" id="reminderTime" class="reminder-time-input" required>
+                                <input type="text" id="reminderMsg" class="reminder-msg-input" maxlength="120"
+                                    placeholder="e.g. Take a walk, drink water…" required>
+                                <button type="submit" class="add-btn-sm" title="Add reminder" aria-label="Add reminder">
+                                    <svg viewBox="0 0 20 20" fill="none">
+                                        <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                </button>
+                            </form>
+                            <ul class="reminder-list" id="reminderList"></ul>
+                            <div class="reminder-empty" id="reminderEmpty">No reminders yet — add one above ⏰</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1693,6 +1745,231 @@
                 tickTimer();
             }
         });
+
+        // ─── LIVE-TIME INTERVAL ALERTS & CUSTOM REMINDERS ────────
+        // Interval alerts: recurring notification every 15/30/60 min, synced with
+        // the real clock (fires at :15 / :30 / :45 / :00 multiples — not offsets).
+        // Custom reminders: user-defined time + message, fires once per day.
+        let intervalAlerts = (() => {
+            try {
+                const v = JSON.parse(localStorage.getItem('flowdesk_interval_alerts'));
+                return (v && typeof v === 'object') ? v : { enabled: false, interval: 30 };
+            } catch (_) { return { enabled: false, interval: 30 }; }
+        })();
+        let customReminders = (() => {
+            try {
+                const v = JSON.parse(localStorage.getItem('flowdesk_reminders'));
+                return Array.isArray(v) ? v : [];
+            } catch (_) { return []; }
+        })();
+
+        let lastReminderMinute = null; // minute-of-day last processed
+
+        const saveIntervalAlerts = () => localStorage.setItem('flowdesk_interval_alerts', JSON.stringify(intervalAlerts));
+        const saveReminders = () => localStorage.setItem('flowdesk_reminders', JSON.stringify(customReminders));
+        const timeStr = d => d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }).slice(0, 5);
+
+        function toggleIntervalAlerts(enabled) {
+            intervalAlerts.enabled = enabled;
+            intervalAlerts.lastFiredSlot = null; // reset so the next slot after enabling fires cleanly
+            saveIntervalAlerts();
+            renderIntervalAlerts();
+            if (enabled) {
+                requestTimerNotificationPermission().then(granted => {
+                    showToast(granted
+                        ? `Interval alerts ON — every ${intervalAlerts.interval < 60 ? intervalAlerts.interval + ' min' : 'hour'} ⏰`
+                        : 'Interval alerts ON — allow notifications in your browser for desktop pings', granted ? 'success' : 'warn');
+                });
+            } else {
+                showToast('Interval alerts off', 'info');
+            }
+        }
+
+        function setIntervalChoice(min, chip) {
+            intervalAlerts.interval = min;
+            intervalAlerts.lastFiredSlot = null;
+            saveIntervalAlerts();
+            renderIntervalAlerts();
+            if (intervalAlerts.enabled) showToast(`Now alerting every ${min === 60 ? 'hour' : min + ' minutes'}`, 'success');
+        }
+
+        function renderIntervalAlerts() {
+            const toggle = document.getElementById('intervalAlertToggle');
+            toggle.checked = intervalAlerts.enabled;
+            document.querySelectorAll('#intervalChips .mode-chip').forEach(c =>
+                c.classList.toggle('active', intervalAlerts.enabled && +c.dataset.min === intervalAlerts.interval));
+            const nextEl = document.getElementById('intervalNext');
+            if (!intervalAlerts.enabled) {
+                nextEl.textContent = 'Turn on to start receiving alerts';
+                return;
+            }
+            const now = new Date();
+            const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+            const step = intervalAlerts.interval;
+            const nextSlot = (Math.floor(nowMin / step) + 1) * step;
+            let nextDate;
+            if (nextSlot >= 1440) {
+                nextDate = new Date(now); nextDate.setDate(nextDate.getDate() + 1);
+                nextDate.setHours(0, 0, 0, 0);
+            } else {
+                nextDate = new Date(now); nextDate.setHours(Math.floor(nextSlot / 60), nextSlot % 60, 0, 0);
+            }
+            const minsTo = Math.round((nextDate - now) / 60000);
+            nextEl.textContent =
+                `Next alert at ${timeStr(nextDate)} (${minsTo < 1 ? '<1' : minsTo} min from now) · every ${step === 60 ? 'hour' : step + ' min'}`;
+        }
+
+        function addReminder(e) {
+            e.preventDefault();
+            const timeInput = document.getElementById('reminderTime');
+            const msgInput = document.getElementById('reminderMsg');
+            const msg = msgInput.value.trim();
+            if (!timeInput.value || !msg) { showToast('Please set a time and message', 'warn'); return; }
+            customReminders.push({
+                id: 'r' + Date.now(),
+                time: timeInput.value,      // "HH:MM"
+                message: msg,
+                firedOn: null               // last "YYYY-MM-DD" it fired on
+            });
+            saveReminders();
+            timeInput.value = ''; msgInput.value = '';
+            renderReminders();
+            requestTimerNotificationPermission();
+            showToast('Reminder added ✓', 'success');
+        }
+
+        function deleteReminder(id) {
+            customReminders = customReminders.filter(r => r.id !== id);
+            saveReminders();
+            renderReminders();
+            showToast('Reminder deleted', 'info');
+        }
+
+        function renderReminders() {
+            const list = document.getElementById('reminderList');
+            const empty = document.getElementById('reminderEmpty');
+            const countEl = document.getElementById('reminderCount');
+            countEl.textContent = customReminders.length;
+            empty.style.display = customReminders.length ? 'none' : 'block';
+            list.innerHTML = '';
+            const sorted = [...customReminders].sort((a, b) => a.time.localeCompare(b.time));
+            sorted.forEach(r => {
+                const today = dayKeyStr(new Date());
+                const fired = r.firedOn === today;
+                const li = document.createElement('li');
+                li.className = 'reminder-item' + (fired ? ' fired' : '');
+
+                const timeChip = document.createElement('span');
+                timeChip.className = 'reminder-item-time';
+                timeChip.textContent = fmtTime12(r.time);
+
+                const msg = document.createElement('span');
+                msg.className = 'reminder-item-msg';
+                msg.textContent = r.message;
+                msg.title = r.message;
+
+                const status = document.createElement('span');
+                status.className = 'reminder-item-status';
+                status.textContent = fired ? '✓ done today' : nextInLabel(r.time, fired);
+
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'reminder-item-del';
+                del.innerHTML = '&#10005;';
+                del.title = 'Delete reminder';
+                del.setAttribute('aria-label', 'Delete reminder');
+                del.onclick = () => deleteReminder(r.id);
+
+                li.append(timeChip, msg, status, del);
+                list.appendChild(li);
+            });
+        }
+
+        function fmtTime12(hhmm) {
+            const [h, m] = hhmm.split(':').map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const hh = h % 12 === 0 ? 12 : h % 12;
+            return `${hh}:${String(m).padStart(2, '0')} ${ampm}`;
+        }
+
+        function nextInLabel(remTime, fired) {
+            if (fired) return '';
+            const [h, m] = remTime.split(':').map(Number);
+            const now = new Date();
+            let remDate = new Date(); remDate.setHours(h, m, 0, 0);
+            if (remDate < now) remDate.setDate(remDate.getDate() + 1);
+            const mins = Math.round((remDate - now) / 60000);
+            if (mins < 60) return `in ${mins}m`;
+            const hrs = Math.floor(mins / 60);
+            return `in ${hrs}h ${mins % 60}m`;
+        }
+
+        // Clock-driven checker: runs every second alongside the navbar clock tick
+        function checkReminders() {
+            const now = new Date();
+            const minuteOfDay = now.getHours() * 60 + now.getMinutes();
+            if (minuteOfDay === lastReminderMinute) { // only evaluate new minutes (skips throttled double ticks)
+                renderIntervalAlerts(); // keep the "next alert" countdown fresh
+                return;
+            }
+            lastReminderMinute = minuteOfDay;
+            const today = dayKeyStr(now);
+
+            // 1) Interval alerts — fire exactly when minuteOfDay is a multiple of the interval
+            if (intervalAlerts.enabled) {
+                const slotKey = `${today}#${minuteOfDay}`;
+                if (minuteOfDay % intervalAlerts.interval === 0 && intervalAlerts.lastFiredSlot !== slotKey) {
+                    intervalAlerts.lastFiredSlot = slotKey;
+                    saveIntervalAlerts();
+                    const step = intervalAlerts.interval;
+                    const label = step === 60 ? 'an hour' : `${step} minutes`;
+                    fireReminder(`⏰ ${fmtTime12(timeStr(now))} — your ${label} interval alert!`, `${timeStr(now)} — your ${label} interval alert from FlowDesk`);
+                }
+            }
+
+            // 2) Custom reminders — fire at exact time, or catch-up within 5 min (e.g. laptop asleep)
+            customReminders.forEach(r => {
+                if (r.firedOn === today) return;
+                const [h, m] = r.time.split(':').map(Number);
+                const rMin = h * 60 + m;
+                const late = minuteOfDay - rMin;
+                if (late >= 0 && late <= 5) {
+                    r.firedOn = today;
+                    saveReminders();
+                    fireReminder(r.message, `Reminder at ${fmtTime12(r.time)}${late > 0 ? ' (slightly late)' : ''}`);
+                }
+            });
+
+            renderReminders(); // refresh countdowns / fired states
+        }
+
+        function dayKeyStr(d) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        // Shared firing pipeline: toast + sound + title flash + browser notification
+        function fireReminder(toastMsg, notifBody) {
+            showToast(toastMsg, 'success');
+            playTimerSound();
+            flashDocumentTitle('⏰ Reminder!');
+            showFlowNotification('FlowDesk Reminder', notifBody);
+        }
+
+        function showFlowNotification(title, body) {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const n = new Notification(title, {
+                body,
+                icon: 'favicon.svg',
+                tag: 'flowdesk-reminder',
+                requireInteraction: false
+            });
+            n.onclick = () => { window.focus(); n.close(); };
+        }
+
+        setInterval(checkReminders, 1000);
+        renderIntervalAlerts();
+        renderReminders();
 
         // ─── BMI CALCULATOR ───────────────────────────────────
         let bmiHeightUnit = 'cm';
