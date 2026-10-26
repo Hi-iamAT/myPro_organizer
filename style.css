@@ -4244,3 +4244,118 @@ body.dark-mode .sidebar-item.active {
     .reminder-item { flex-wrap: wrap; }
     .reminder-item-status { order: 4; width: 100%; text-align: right; }
 }
+
+/* ══ BMI Panel: Daily Unit Converter ══ */
+.conv-wrap {
+    gap: 20px;              /* tighter than .bmi-wrap's 32px — converter is denser */
+    max-width: 540px;
+}
+
+.conv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.conv-head-txt { display: flex; flex-direction: column; gap: 2px; }
+
+.conv-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--txt);
+}
+
+.conv-title-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--brand);
+    flex: none;
+}
+
+.conv-sub {
+    font-size: 0.78rem;
+    color: var(--txt-2);
+}
+
+/* Category chips — reuse .chip-group / .filter-chip (same as To-Do filters) */
+#convCats { margin-top: -4px; }
+
+/* From/To rows */
+.conv-rows {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+}
+
+.conv-equals {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--brand);
+    text-align: center;
+    user-select: none;
+}
+
+/* Unit dropdown inside the .bmi-input-group pill */
+.conv-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 150px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border);
+    color: var(--txt);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 6px;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.2s;
+}
+
+.conv-select:hover,
+.conv-select:focus-visible { color: var(--brand); }
+
+.conv-select option {
+    color-scheme: dark;
+    background: var(--surface);
+    color: var(--txt);
+    font-weight: 500;
+}
+
+#convOut {
+    color: var(--brand);
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 1;               /* keep brand color readable despite readonly */
+}
+
+/* Quick-reference cards — reuse .weather-card look, dense grid of 2 */
+.conv-quick {
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 0;
+    gap: 10px;
+}
+
+.conv-card .wc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+    .conv-rows { grid-template-columns: 1fr; }
+    .conv-equals { transform: rotate(90deg); margin: -4px 0; }
+    .conv-select { max-width: 130px; }
+    .conv-quick { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 400px) {
+    .conv-quick { grid-template-columns: 1fr; }
+}

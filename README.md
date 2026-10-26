@@ -72,7 +72,7 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
 | **📌 Quick Notes** | Multi-note rich-text editor. Bold, italic, bullet lists, custom text colour, per-note accent colour. |
 | **🧮 Calculator** | Full expression evaluator with backspace, parentheses support, and keyboard input. |
 | **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. Plus **live-clock interval alerts** and **custom time reminders** (see [Focus Timer Extras](#️-focus-timer-extras--interval-alerts--custom-reminders)). |
-| **⚖️ BMI Calculator** | Easily check body mass index with category indicators. |
+| **⚖️ BMI Calculator** | Easily check body mass index with category indicators — plus a built-in **Daily Unit Converter** (see [Unit Converter](#️-daily-unit-converter)). |
 | **🌤️ Weather Forecast** | Check live local weather updates. |
 | **⚖️ Live Calendar** | Check live calendar in English/ Bengali/ Hijri and add events. |
 | **🌤️ Daily Goals** | Add your daily goals and track your progress. |
@@ -154,6 +154,23 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 - **BMI**: healthy weight range for your height (kg or lb).
 - Export/Import now includes the focus log (optional, so older backups still import).
 - **Focus tab extras**: live-clock interval alerts (15/30/60 min) + custom time reminders with your own message, both synced with the live clock, plus a live tab title that shows the next alert / countdown.
+
+## ⚖️ Daily Unit Converter
+
+Lives inside the **BMI & Converters** tab, right under the BMI tool — everyday conversions, live & offline:
+
+| Category | Units |
+|----------|-------|
+| 🌡️ **Temperature** | °C · °F · K (real formulas, not linear factors) |
+| 📏 **Length** | mm · cm · m · km · in · ft · yd · mi |
+| ⚖️ **Weight** | g · kg · t · oz · lb · st |
+| 🥛 **Volume** | ml · L · fl oz · cup · pt · qt · gal (US) |
+| 🏃 **Speed** | km/h · m/s · mph · kn |
+
+- Type a value → **both the To-field and a quick-reference card grid** update instantly (one card per unit of the category)
+- **⇄ Swap** button flips "From" and "To" in one click
+- Last-used category & units are remembered (`localStorage` key `flowdesk_converter`)
+- Styles reuse the same design tokens as the BMI tool (`.bmi-input-group` pills, `.unit-btn`-grade chips, `.weather-card` quick cards) — dark & light themes included
 
 ## ⏰ Focus Timer Extras — Interval Alerts & Custom Reminders
 

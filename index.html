@@ -589,8 +589,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h1>BMI Calculator</h1>
-                            <p class="panel-subtitle">Body Mass Index checker</p>
+                            <h1>BMI &amp; Converters</h1>
+                            <p class="panel-subtitle">Body Mass Index + everyday unit conversions</p>
                         </div>
                     </div>
                     <button class="ghost-btn" onclick="resetBMI()" id="bmiResetBtn">Reset</button>
@@ -694,6 +694,53 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- ── Daily Unit Converter ── -->
+                    <div class="bmi-wrap conv-wrap" id="convWrap">
+                        <div class="conv-head">
+                            <div class="conv-head-txt">
+                                <h2 class="conv-title">
+                                    <svg viewBox="0 0 20 20" fill="none" class="conv-title-icon">
+                                        <path d="M4 6h10M4 6l2-2M4 6l2 2M16 14H6M16 14l-2-2M16 14l-2 2"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Unit Converter
+                                </h2>
+                                <p class="conv-sub">Everyday conversions — live &amp; offline</p>
+                            </div>
+                            <button class="ghost-btn icon-btn-small" onclick="convSwap()" id="convSwapBtn"
+                                title="Swap units" aria-label="Swap units">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="chip-group" role="group" aria-label="Converter category" id="convCats"></div>
+                        <div class="conv-rows">
+                            <div class="bmi-field">
+                                <label class="bmi-label" for="convVal">From</label>
+                                <div class="bmi-input-group">
+                                    <input type="number" id="convVal" value="1" step="any" inputmode="decimal"
+                                        oninput="convConvert()" aria-label="Value to convert">
+                                    <select id="convFrom" class="conv-select" onchange="convConvert()"
+                                        aria-label="From unit"></select>
+                                </div>
+                            </div>
+                            <div class="conv-equals" aria-hidden="true">=</div>
+                            <div class="bmi-field">
+                                <label class="bmi-label" for="convOut">To</label>
+                                <div class="bmi-input-group">
+                                    <input type="number" id="convOut" readonly placeholder="0"
+                                        aria-label="Converted value">
+                                    <select id="convTo" class="conv-select" onchange="convConvert()"
+                                        aria-label="To unit"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="weather-cards conv-quick" id="convQuick" aria-label="All conversions for this value"></div>
                     </div>
                 </div>
             </div>
@@ -2107,6 +2154,197 @@
             document.getElementById('bmiResult').style.display = 'none';
             document.getElementById('bmiPlaceholder').style.display = 'flex';
         }
+
+        // ─── DAILY UNIT CONVERTER ─────────────────────────────
+        // Categories tuned for everyday use. Linear categories convert via a
+        // base-unit factor; temperature uses dedicated to/from formulas.
+        const convCategories = {
+            temperature: {
+                label: 'Temperature', icon: '🌡️',
+                units: {
+                    '°C': { name: 'Celsius (°C)', toBase: v => v, fromBase: v => v },
+                    '°F': { name: 'Fahrenheit (°F)', toBase: v => (v - 32) * 5 / 9, fromBase: v => v * 9 / 5 + 32 },
+                    'K': { name: 'Kelvin (K)', toBase: v => v - 273.15, fromBase: v => v + 273.15 }
+                }
+            },
+            length: {
+                label: 'Length', icon: '📏',
+                base: 'm',
+                units: {
+                    'mm': { name: 'Millimeter (mm)', f: 0.001 },
+                    'cm': { name: 'Centimeter (cm)', f: 0.01 },
+                    'm': { name: 'Meter (m)', f: 1 },
+                    'km': { name: 'Kilometer (km)', f: 1000 },
+                    'in': { name: 'Inch (in)', f: 0.0254 },
+                    'ft': { name: 'Foot (ft)', f: 0.3048 },
+                    'yd': { name: 'Yard (yd)', f: 0.9144 },
+                    'mi': { name: 'Mile (mi)', f: 1609.344 }
+                }
+            },
+            weight: {
+                label: 'Weight', icon: '⚖️',
+                base: 'g',
+                units: {
+                    'g': { name: 'Gram (g)', f: 1 },
+                    'kg': { name: 'Kilogram (kg)', f: 1000 },
+                    't': { name: 'Metric ton (t)', f: 1e6 },
+                    'oz': { name: 'Ounce (oz)', f: 28.349523125 },
+                    'lb': { name: 'Pound (lb)', f: 453.59237 },
+                    'st': { name: 'Stone (st)', f: 6350.29318 }
+                }
+            },
+            volume: {
+                label: 'Volume', icon: '🥛',
+                base: 'ml',
+                units: {
+                    'ml': { name: 'Milliliter (ml)', f: 1 },
+                    'l': { name: 'Liter (L)', f: 1000 },
+                    'fl oz': { name: 'Fluid ounce (fl oz)', f: 29.5735295625 },
+                    'cup': { name: 'Cup (US)', f: 236.5882365 },
+                    'pt': { name: 'Pint (US)', f: 473.176473 },
+                    'qt': { name: 'Quart (US)', f: 946.352946 },
+                    'gal': { name: 'Gallon (US)', f: 3785.411784 }
+                }
+            },
+            speed: {
+                label: 'Speed', icon: '🏃',
+                base: 'km/h',
+                units: {
+                    'km/h': { name: 'Kilometers per hour (km/h)', f: 1 },
+                    'm/s': { name: 'Meters per second (m/s)', f: 3.6 },
+                    'mph': { name: 'Miles per hour (mph)', f: 1.609344 },
+                    'kn': { name: 'Knot (kn)', f: 1.852 }
+                }
+            }
+        };
+
+        let convState = (() => {
+            try {
+                const v = JSON.parse(localStorage.getItem('flowdesk_converter'));
+                return (v && typeof v === 'object') ? v : { cat: 'temperature', from: '°F', to: '°C', value: '1' };
+            } catch (_) {
+                return { cat: 'temperature', from: '°F', to: '°C', value: '1' };
+            }
+        })();
+
+        const saveConvState = () => localStorage.setItem('flowdesk_converter', JSON.stringify(convState));
+
+        function convIsLinear(cat) { return 'base' in convCategories[cat]; }
+
+        // Convert value between units of a category
+        function convCalc(cat, val, from, to) {
+            const u = convCategories[cat].units;
+            if (!u[from] || !u[to]) return NaN;
+            if (convIsLinear(cat)) return val * u[from].f / u[to].f;
+            return u[to].fromBase(u[from].toBase(val));
+        }
+
+        function convDefaultUnits(cat) {
+            const u = convCategories[cat].units;
+            const keys = Object.keys(u);
+            const from = keys.includes(convState.from) ? convState.from : keys[0];
+            let to = keys.includes(convState.to) ? convState.to : keys[1] || keys[0];
+            to = (from === to && keys[1]) ? keys[1] : to; // avoid from==to when possible
+            return { from, to };
+        }
+
+        function renderConvCats() {
+            const host = document.getElementById('convCats');
+            host.innerHTML = '';
+            Object.entries(convCategories).forEach(([key, c]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'filter-chip' + (key === convState.cat ? ' active' : '');
+                btn.textContent = `${c.icon} ${c.label}`;
+                btn.onclick = () => {
+                    convState.cat = key;
+                    const { from, to } = convDefaultUnits(key);
+                    convState.from = from; convState.to = to;
+                    saveConvState();
+                    renderConvCats();
+                    renderConvUnits();
+                    convConvert();
+                };
+                host.appendChild(btn);
+            });
+        }
+
+        function renderConvUnits() {
+            const cat = convCategories[convState.cat];
+            const fromSel = document.getElementById('convFrom');
+            const toSel = document.getElementById('convTo');
+            [fromSel, toSel].forEach(sel => {
+                sel.innerHTML = '';
+                Object.entries(cat.units).forEach(([key, u]) => {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = u.name;
+                    sel.appendChild(opt);
+                });
+            });
+            fromSel.value = convState.from;
+            toSel.value = convState.to;
+        }
+
+        function fmtConvNumber(n) {
+            if (!isFinite(n)) return '--';
+            const abs = Math.abs(n);
+            if (abs !== 0 && (abs >= 1e6 || abs < 1e-6)) return n.toExponential(3).replace('e', 'e');
+            return n.toLocaleString('en-US', { maximumFractionDigits: 4 });
+        }
+
+        function convConvert() {
+            const cat = convState.cat;
+            const valInput = document.getElementById('convVal');
+            const outInput = document.getElementById('convOut');
+            convState.from = document.getElementById('convFrom').value;
+            convState.to = document.getElementById('convTo').value;
+            convState.value = valInput.value;
+            saveConvState();
+
+            const val = parseFloat(convState.value);
+            if (isNaN(val)) { outInput.value = ''; document.getElementById('convQuick').innerHTML = ''; return; }
+            outInput.value = fmtConvNumber(convCalc(cat, val, convState.from, convState.to));
+            renderConvQuick(val);
+        }
+
+        // Quick cards: the entered value in every other unit of the category
+        function renderConvQuick(val) {
+            const host = document.getElementById('convQuick');
+            host.innerHTML = '';
+            const cat = convCategories[convState.cat];
+            Object.entries(cat.units).forEach(([key, u]) => {
+                if (key === convState.from) return;
+                const out = convCalc(convState.cat, val, convState.from, key);
+                if (!isFinite(out)) return;
+                const card = document.createElement('div');
+                card.className = 'weather-card conv-card';
+                const icon = document.createElement('div');
+                icon.className = 'wc-icon';
+                icon.textContent = cat.icon;
+                const value = document.createElement('span');
+                value.className = 'wc-value';
+                value.textContent = `${fmtConvNumber(out)} ${key}`;
+                const label = document.createElement('span');
+                label.className = 'wc-label';
+                label.textContent = u.name;
+                value.title = `${label.textContent}: ${fmtConvNumber(out)} ${key}`;
+                card.append(icon, value, label);
+                host.appendChild(card);
+            });
+        }
+
+        function convSwap() {
+            [convState.from, convState.to] = [convState.to, convState.from];
+            saveConvState();
+            renderConvUnits();
+            convConvert();
+        }
+
+        renderConvCats();
+        renderConvUnits();
+        document.getElementById('convVal').value = convState.value || '1';
+        convConvert();
 
         // ─── WEATHER ──────────────────────────────────────────
         const WMO = {
