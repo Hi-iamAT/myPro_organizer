@@ -4256,15 +4256,35 @@ body.dark-mode .sidebar-item.active {
     align-items: stretch;
     gap: 24px;
     width: 100%;
-    max-width: 1100px;                     /* two 520px cards + gap on desktop */
+    max-width: min(1100px, 100%);          /* never wider than the panel → no sideways scroll */
     margin-inline: auto;
+    overflow-x: hidden;                     /* hard guarantee: nothing escapes horizontally */
     text-align: left;
 }
 
+/* Grid & flex items must be free to shrink — default min-width:auto keeps
+   long content (wide selects, mono numbers) from blowing out the cards */
 .bmi-layout > .bmi-wrap {
     width: 100%;
     max-width: 540px;                      /* matches original BMI card scale */
     margin: 0;
+    min-width: 0;
+}
+
+/* BMI tab never scrolls sideways — vertical only, like every other tab */
+.panel-bmi .panel-single {
+    overflow-x: hidden;
+}
+
+.bmi-inputs > .bmi-field,
+.conv-rows > .bmi-field,
+.bmi-input-group,
+.weather-card {
+    min-width: 0;
+}
+
+.bmi-layout .unit-toggle-group {
+    flex-shrink: 0;                        /* unit chips (cm / ft-in) keep readable size */
 }
 
 /* Compact screens step the gap down so nothing feels cramped */
@@ -4344,11 +4364,15 @@ body.dark-mode .sidebar-item.active {
     user-select: none;
 }
 
-/* Unit dropdown inside the .bmi-input-group pill */
+/* ── unit dropdown inside the .bmi-input-group pill ──
+   must be allowed to shrink: select's natural width follows its LONGEST option
+   text, which otherwise forces the grid column wider than the card →
+   horizontal scrollbar on small AND big screens */
 .conv-select {
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    width: 0;
     min-width: 0;
-    max-width: 150px;
+    max-width: 45%;
     background: transparent;
     border: none;
     border-left: 1px solid var(--border);
@@ -4360,6 +4384,7 @@ body.dark-mode .sidebar-item.active {
     cursor: pointer;
     outline: none;
     transition: color 0.2s;
+    text-overflow: ellipsis;
 }
 
 .conv-select:hover,
@@ -4380,9 +4405,7 @@ body.dark-mode .sidebar-item.active {
 
 /* Quick-reference cards — reuse .weather-card look, dense grid of 2 */
 .conv-quick {
-    grid-template-columns: 1fr 1fr;
-    margin-bottom: 0;
-    gap: 10px;
+    grid-template-columns: 1fr;
 }
 
 .conv-card .wc-value {
@@ -4395,22 +4418,13 @@ body.dark-mode .sidebar-item.active {
 
 /* ── small screens ───────────────────────────────────────────── */
 
-@media (max-width: 768px) {
-    /* keep both cards full-width and identical max width, stacked */
-    .bmi-layout > .bmi-wrap,
-    .conv-wrap { max-width: 540px; }
+@media (min-width: 561px) {
+    .conv-quick { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
 
 @media (max-width: 560px) {
     .conv-wrap { padding: 24px; gap: 18px; }
     .conv-rows { grid-template-columns: 1fr; }
     .conv-equals { transform: rotate(90deg); margin: -6px 0; }
-    .conv-select { max-width: 132px; }
-    .conv-quick { grid-template-columns: 1fr 1fr; }
     .conv-title { font-size: 1rem; }
-}
-
-@media (max-width: 400px) {
-    .conv-quick { grid-template-columns: 1fr; }
-    .conv-rows .conv-equals { font-size: 1.1rem; }
 }
