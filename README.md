@@ -187,7 +187,7 @@ Two clock-synced alerting systems built into the Focus tab:
 ### ⏱️ Interval Alerts
 - Toggle switch in the Focus tab — recurring pings **synced to your live clock** (aligned to wall-clock slots, not offsets): every 15 min → `:00 / :15 / :30 / :45`, every 30 min → `:00 / :30`, hourly → on the hour.
 - Chips for **15 min / 30 min / 1 hour**; an always-on banner shows **"Next alert at … (N min from now)"**.
-- Each alert delivers a toast + chime + browser notification + flashing tab title.
+- Each alert delivers a toast + chime + browser notification + flashing tab title. Messages are clock-style: the hour sounds like a clock chime — *"It's 10 o'clock"* — and in-between slots as *"It's 10:15 AM"*.
 - Catch-up: if the tab/page slept past a slot, it re-fires on the next alignment instead of skipping.
 - State persists across restarts (`localStorage` key `flowdesk_interval_alerts`).
 

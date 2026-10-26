@@ -1982,9 +1982,8 @@
                 if (minuteOfDay % intervalAlerts.interval === 0 && intervalAlerts.lastFiredSlot !== slotKey) {
                     intervalAlerts.lastFiredSlot = slotKey;
                     saveIntervalAlerts();
-                    const step = intervalAlerts.interval;
-                    const label = step === 60 ? 'an hour' : `${step} minutes`;
-                    fireReminder(`⏰ ${fmtTime12(timeStr(now))} — your ${label} interval alert!`, `${timeStr(now)} — your ${label} interval alert from FlowDesk`);
+                    const msg = intervalAlertMessage(now);
+                    fireReminder(msg, msg);
                 }
             }
 
@@ -2003,6 +2002,15 @@
 
             renderReminders(); // refresh countdowns / fired states
         }
+        // Clock-chime style interval message: exact hours read like a clock ("It's 10 o'clock"),
+        // in-between slots read as digital time ("It's 10:15 AM").
+        function intervalAlertMessage(now) {
+            const h = now.getHours(), m = now.getMinutes();
+            const h12 = h % 12 === 0 ? 12 : h % 12;
+            if (m === 0) return `It's ${h12} o'clock`;
+            return `It's ${h12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+        }
+
         function dayKeyStr(d) {
             const pad = n => String(n).padStart(2, '0');
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
