@@ -3928,6 +3928,52 @@ body.dark-mode .sidebar-item.active {
 .panel-single { overflow-y: auto; align-items: safe center; }
 .panel-single > * { margin-block: auto; }
 
+/* Timer panel: timer column (left) and reminders column (right) */
+.timer-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 480px;
+}
+
+.timer-reminders {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+
+/* Wide screens: place interval alerts & custom reminders side-by-side with the timer */
+@media (min-width: 1025px) {
+    .timer-body-wrap {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        max-width: 880px;
+        padding: 40px;
+        gap: 40px;
+    }
+
+    .timer-main {
+        flex: 0 0 340px;
+        max-width: 480px;
+    }
+
+    .timer-reminders {
+        flex: 1 1 340px;
+        min-width: 320px;
+        max-width: 420px;
+    }
+
+    .reminder-block {
+        max-width: none;
+        width: 100%;
+    }
+}
+
 /* ══ Timer: Interval Alerts & Custom Reminders ══ */
 .reminder-block {
     background: var(--surface);

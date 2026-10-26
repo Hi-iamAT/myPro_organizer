@@ -449,7 +449,8 @@
                 </div>
                 <div class="panel-single">
                     <div class="timer-body-wrap">
-                        <div class="timer-ring-wrap">
+                        <div class="timer-main">
+                            <div class="timer-ring-wrap">
                             <svg class="timer-ring" viewBox="0 0 140 140">
                                 <defs>
                                     <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -516,7 +517,9 @@
                                 Browser notifications
                             </span>
                         </label>
+                        </div><!-- /timer-main -->
 
+                        <div class="timer-reminders">
                         <!-- ── Live-time Interval Alerts ── -->
                         <div class="reminder-block">
                             <div class="reminder-head">
@@ -568,6 +571,7 @@
                             <ul class="reminder-list" id="reminderList"></ul>
                             <div class="reminder-empty" id="reminderEmpty">No reminders yet — add one above ⏰</div>
                         </div>
+                        </div><!-- /timer-reminders -->
                     </div>
                 </div>
             </div>
@@ -1697,7 +1701,7 @@
             if (timerInterval) clearInterval(timerInterval);
             startBtn.style.display = 'inline-flex';
             pauseBtn.style.display = 'none';
-            document.title = 'FlowDesk — Your Personal Productivity Hub';
+            updateTabTitle(); // falls back to next-alert / default title
         }
 
         function resetTimer() {
@@ -1792,7 +1796,6 @@
             renderIntervalAlerts();
             if (intervalAlerts.enabled) showToast(`Now alerting every ${min === 60 ? 'hour' : min + ' minutes'}`, 'success');
         }
-
         function renderIntervalAlerts() {
             const toggle = document.getElementById('intervalAlertToggle');
             toggle.checked = intervalAlerts.enabled;
@@ -1817,6 +1820,7 @@
             const minsTo = Math.round((nextDate - now) / 60000);
             nextEl.textContent =
                 `Next alert at ${timeStr(nextDate)} (${minsTo < 1 ? '<1' : minsTo} min from now) · every ${step === 60 ? 'hour' : step + ' min'}`;
+            updateTabTitle();
         }
 
         function addReminder(e) {
@@ -1883,6 +1887,7 @@
                 li.append(timeChip, msg, status, del);
                 list.appendChild(li);
             });
+            updateTabTitle();
         }
 
         function fmtTime12(hhmm) {
@@ -1936,13 +1941,12 @@
                 if (late >= 0 && late <= 5) {
                     r.firedOn = today;
                     saveReminders();
-                    fireReminder(r.message, `Reminder at ${fmtTime12(r.time)}${late > 0 ? ' (slightly late)' : ''}`);
+                    fireReminder(`⏰ ${fmtTime12(r.time)} — ${r.message}`, r.message);
                 }
             });
 
             renderReminders(); // refresh countdowns / fired states
         }
-
         function dayKeyStr(d) {
             const pad = n => String(n).padStart(2, '0');
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -1954,6 +1958,43 @@
             playTimerSound();
             flashDocumentTitle('⏰ Reminder!');
             showFlowNotification('FlowDesk Reminder', notifBody);
+        }
+
+        // Live tab title: reflects Focus Timer features.
+        // - Timer running → countdown + mode (handled by updateTimerDisplay)
+        // - Idle → next interval alert or custom reminder, e.g. "⏰ 2:30 PM (12m) — FlowDesk"
+        // - Nothing scheduled → default title
+        function updateTabTitle() {
+            if (isRunning || titleFlashInterval) return; // countdown/flash titles take precedence
+            let nextDate = null;
+
+            if (intervalAlerts.enabled) {
+                const now = new Date();
+                const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                const step = intervalAlerts.interval;
+                const slot = (Math.floor(nowMin / step) + 1) * step;
+                nextDate = new Date(now);
+                if (slot >= 1440) { nextDate.setDate(nextDate.getDate() + 1); nextDate.setHours(0, 0, 0, 0); }
+                else nextDate.setHours(Math.floor(slot / 60), slot % 60, 0, 0);
+            }
+
+            const today = dayKeyStr(new Date());
+            customReminders.forEach(r => {
+                if (r.firedOn === today) return;
+                const [h, m] = r.time.split(':').map(Number);
+                const rDate = new Date(); rDate.setHours(h, m, 0, 0);
+                if (rDate <= new Date()) rDate.setDate(rDate.getDate() + 1);
+                if (!nextDate || rDate < nextDate) nextDate = rDate;
+            });
+
+            let title;
+            if (nextDate) {
+                const mins = Math.max(1, Math.round((nextDate - new Date()) / 60000));
+                title = `⏰ ${fmtTime12(timeStr(nextDate))} · ${mins < 60 ? mins + 'm' : Math.floor(mins / 60) + 'h' + (mins % 60 ? ' ' + (mins % 60) + 'm' : '')} — FlowDesk`;
+            } else {
+                title = 'FlowDesk — Your Personal Productivity Hub';
+            }
+            if (document.title !== title) document.title = title;
         }
 
         function showFlowNotification(title, body) {

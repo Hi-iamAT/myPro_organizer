@@ -71,7 +71,7 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
 | **📝 To-Do List** | Add, complete, and delete tasks. Stats pills show total / done / remaining at a glance. |
 | **📌 Quick Notes** | Multi-note rich-text editor. Bold, italic, bullet lists, custom text colour, per-note accent colour. |
 | **🧮 Calculator** | Full expression evaluator with backspace, parentheses support, and keyboard input. |
-| **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. |
+| **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. Plus **live-clock interval alerts** and **custom time reminders** (see [Focus Timer Extras](#️-focus-timer-extras--interval-alerts--custom-reminders)). |
 | **⚖️ BMI Calculator** | Easily check body mass index with category indicators. |
 | **🌤️ Weather Forecast** | Check live local weather updates. |
 | **⚖️ Live Calendar** | Check live calendar in English/ Bengali/ Hijri and add events. |
@@ -116,11 +116,13 @@ python3 -m http.server 5500
 
 ```
 myPro_organizer/
-├── index.html              # Main HTML entry point
+├── index.html              # Main HTML entry point (panels + inline feature logic)
 ├── style.css               # Design system, tokens, layout & widget styles
+├── calc.js                 # fx-991ES-style scientific calculator (safe parser)
+├── enhance.js              # v3 dashboard, command palette & shortcut enhancements
 ├── favicon.svg             # Tab & app branding icon
-├── screenshots/
-│   └── dashboard_preview.png # Application UI screenshot
+├── screenshots/            # README UI screenshots
+│   └── *.png
 └── README.md               # Project documentation
 ```
 
@@ -151,6 +153,33 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 - **Focus timer**: per-day focus log → today / 7-day / streak stats and a 7-day chart (`flowdesk_focus_log`).
 - **BMI**: healthy weight range for your height (kg or lb).
 - Export/Import now includes the focus log (optional, so older backups still import).
+- **Focus tab extras**: live-clock interval alerts (15/30/60 min) + custom time reminders with your own message, both synced with the live clock, plus a live tab title that shows the next alert / countdown.
+
+## ⏰ Focus Timer Extras — Interval Alerts & Custom Reminders
+
+Two clock-synced alerting systems built into the Focus tab:
+
+### ⏱️ Interval Alerts
+- Toggle switch in the Focus tab — recurring pings **synced to your live clock** (aligned to wall-clock slots, not offsets): every 15 min → `:00 / :15 / :30 / :45`, every 30 min → `:00 / :30`, hourly → on the hour.
+- Chips for **15 min / 30 min / 1 hour**; an always-on banner shows **"Next alert at … (N min from now)"**.
+- Each alert delivers a toast + chime + browser notification + flashing tab title.
+- Catch-up: if the tab/page slept past a slot, it re-fires on the next alignment instead of skipping.
+- State persists across restarts (`localStorage` key `flowdesk_interval_alerts`).
+
+### 🗒 Custom Reminders
+- Add a reminder for **a specific time + your own message** (e.g. *10:00 AM — Drink water*).
+- List view (sorted by time, AM/PM chips) with a live **"in 2h 15m"** countdown and a **✓ done today** state — fires once per day, re-arms tomorrow.
+- The browser notification body shows **your exact custom message**.
+- Late catch-up: fired within a 5-minute grace window if the page was closed at the due time.
+- Manageable: add / delete anytime; persisted (`localStorage` key `flowdesk_reminders`).
+
+### 🪧 Live tab title
+The browser tab always tells you what's happening in the Focus tab:
+| State | Tab title |
+|-------|-----------|
+| Timer running | `(25:11) FlowDesk — Work` (live countdown + mode) |
+| Idle, alert scheduled | `⏰ 2:30 PM · 13m — FlowDesk` (nearest upcoming alert or reminder) |
+| Idle, nothing scheduled | `FlowDesk — Your Personal Productivity Hub` |
 
 ## 🧮 Scientific Calculator
 
