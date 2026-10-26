@@ -166,10 +166,18 @@ Lives inside the **BMI & Converters** tab, right under the BMI tool — everyday
 | ⚖️ **Weight** | g · kg · t · oz · lb · st |
 | 🥛 **Volume** | ml · L · fl oz · cup · pt · qt · gal (US) |
 | 🏃 **Speed** | km/h · m/s · mph · kn |
+| 💱 **Currency** | **Live rates** (USD base) for ~160 currencies via open.er-api.com, Frankfurter/ECB fallback, 1-hour cache, offline-stale support |
 
 - Type a value → **both the To-field and a quick-reference card grid** update instantly (one card per unit of the category)
 - **⇄ Swap** button flips "From" and "To" in one click
 - Last-used category & units are remembered (`localStorage` key `flowdesk_converter`)
+
+### 💱 Live Currency (wall-clock independent)
+- Select the **💱 Currency** chip → any two of ~160 currencies convert using **live exchange rates**
+- **Free & keyless**: primary `open.er-api.com`, automatic fallback to `api.frankfurter.app`; rates cached for 1 hour (`flowdesk_currency_rates`) so the panel still works **offline** with slightly stale rates
+- Status line shows *"USD base · live · updated 12 min ago"* with a **↻ Refresh rates** button
+- Quick-card grid shows popular currencies (EUR, GBP, JPY, INR, PKR, BDT, SAR, AED…) — the entered amount in each at once
+- Cross-rates are computed directly (e.g. BDT → INR) with no manual two-step conversion
 - Styles reuse the same design tokens as the BMI tool (`.bmi-input-group` pills, `.unit-btn`-grade chips, `.weather-card` quick cards) — dark & light themes included
 
 ## ⏰ Focus Timer Extras — Interval Alerts & Custom Reminders

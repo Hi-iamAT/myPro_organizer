@@ -721,6 +721,11 @@
                             </button>
                         </div>
                         <div class="chip-group" role="group" aria-label="Converter category" id="convCats"></div>
+                        <div class="conv-rate-bar" id="convRateBar" style="display:none">
+                            <span class="conv-rate-status" id="convRateStatus">…</span>
+                            <button type="button" class="conv-rate-refresh" id="convRateRefresh"
+                                onclick="convRefreshRates()" title="Refresh exchange rates">&#8635; Refresh rates</button>
+                        </div>
                         <div class="conv-rows">
                             <div class="bmi-field">
                                 <label class="bmi-label" for="convVal">From</label>
@@ -2255,7 +2260,9 @@
         function renderConvCats() {
             const host = document.getElementById('convCats');
             host.innerHTML = '';
-            Object.entries(convCategories).forEach(([key, c]) => {
+            // 5 static categories + the live Currency category
+            const entries = Object.entries(convCategories);
+            entries.forEach(([key, c]) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'filter-chip' + (key === convState.cat ? ' active' : '');
@@ -2271,15 +2278,64 @@
                 };
                 host.appendChild(btn);
             });
+            // Currency chip (live rates)
+            const curBtn = document.createElement('button');
+            curBtn.type = 'button';
+            curBtn.className = 'filter-chip' + (convState.cat === 'currency' ? ' active' : '');
+            curBtn.textContent = '💱 Currency';
+            curBtn.onclick = async () => {
+                convState.cat = 'currency';
+                if (!readCachedRates()) { convState.from = 'USD'; convState.to = 'BDT'; }
+                saveConvState();
+                renderConvCats();
+                updateConvRateStatus('💱 Fetching live rates…');
+                await convFetchRates(false);
+                renderConvUnits();
+                convConvert();
+                updateConvRateStatus();
+            };
+            host.appendChild(curBtn);
         }
 
         function renderConvUnits() {
-            const cat = convCategories[convState.cat];
+            const cat = convState.cat;
             const fromSel = document.getElementById('convFrom');
             const toSel = document.getElementById('convTo');
-            [fromSel, toSel].forEach(sel => {
-                sel.innerHTML = '';
-                Object.entries(cat.units).forEach(([key, u]) => {
+            fromSel.innerHTML = ''; toSel.innerHTML = '';
+
+            if (cat === 'currency') {
+                const build = rates => {
+                    currencyCodeList(rates).forEach(code => {
+                        [fromSel, toSel].forEach(sel => {
+                            const opt = document.createElement('option');
+                            opt.value = code;
+                            opt.textContent = curOptionLabel(code);
+                            sel.appendChild(opt);
+                        });
+                    });
+                    fromSel.value = convState.from || 'USD';
+                    toSel.value = convState.to || 'BDT';
+                };
+                if (convRates) build(convRates.rates);
+                else {
+                    // placeholder until rates arrive
+                    ['USD', 'BDT', 'EUR', 'GBP', 'INR', 'PKR'].forEach(code => {
+                        [fromSel, toSel].forEach(sel => {
+                            const opt = document.createElement('option');
+                            opt.value = code;
+                            opt.textContent = CUR_NAMES[code] ? `${code} · ${CUR_NAMES[code]}` : code;
+                            sel.appendChild(opt);
+                        });
+                    });
+                    fromSel.value = convState.from || 'USD';
+                    toSel.value = convState.to || 'BDT';
+                }
+                return;
+            }
+
+            const c = convCategories[cat];
+            Object.entries(c.units).forEach(([key, u]) => {
+                [fromSel, toSel].forEach(sel => {
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.textContent = u.name;
@@ -2298,9 +2354,9 @@
         }
 
         function convConvert() {
-            const cat = convState.cat;
             const valInput = document.getElementById('convVal');
             const outInput = document.getElementById('convOut');
+            const sameCat = convState.cat;
             convState.from = document.getElementById('convFrom').value;
             convState.to = document.getElementById('convTo').value;
             convState.value = valInput.value;
@@ -2308,7 +2364,15 @@
 
             const val = parseFloat(convState.value);
             if (isNaN(val)) { outInput.value = ''; document.getElementById('convQuick').innerHTML = ''; return; }
-            outInput.value = fmtConvNumber(convCalc(cat, val, convState.from, convState.to));
+
+            if (sameCat === 'currency') {
+                if (!convRates) { outInput.value = ''; document.getElementById('convQuick').innerHTML = ''; return; }
+                outInput.value = fmtConvNumber(convCalcCurrency(val, convState.from, convState.to));
+                renderConvQuick(val);
+                return;
+            }
+
+            outInput.value = fmtConvNumber(convCalc(sameCat, val, convState.from, convState.to));
             renderConvQuick(val);
         }
 
@@ -2316,6 +2380,31 @@
         function renderConvQuick(val) {
             const host = document.getElementById('convQuick');
             host.innerHTML = '';
+
+            if (convState.cat === 'currency') {
+                if (!convRates) return;
+                POPULAR_CURRENCIES.forEach(code => {
+                    if (code === convState.from) return;
+                    const out = convCalcCurrency(val, convState.from, code);
+                    if (!isFinite(out)) return;
+                    const card = document.createElement('div');
+                    card.className = 'weather-card conv-card';
+                    const icon = document.createElement('div');
+                    icon.className = 'wc-icon';
+                    icon.textContent = '💱';
+                    const value = document.createElement('span');
+                    value.className = 'wc-value';
+                    value.textContent = `${fmtConvNumber(out)} ${code}`;
+                    const label = document.createElement('span');
+                    label.className = 'wc-label';
+                    label.textContent = CUR_NAMES[code] || code;
+                    value.title = `${label.textContent}: ${fmtConvNumber(out)} ${code}`;
+                    card.append(icon, value, label);
+                    host.appendChild(card);
+                });
+                return;
+            }
+
             const cat = convCategories[convState.cat];
             Object.entries(cat.units).forEach(([key, u]) => {
                 if (key === convState.from) return;
@@ -2345,10 +2434,116 @@
             convConvert();
         }
 
+        // ─── LIVE CURRENCY (6th converter category, runtime-backed) ──
+        // Primary API: open.er-api.com (free, no key, ~160 currencies).
+        // Fallback: Frankfurter/ECB. Rates cached in localStorage for 1 h so
+        // the converter also works offline with slightly stale rates.
+        const CONV_CURRENCY_KEY = 'flowdesk_currency_rates';
+        const CUR_TTL = 60 * 60 * 1000;
+        const POPULAR_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'INR', 'PKR', 'BDT', 'SAR', 'AED', 'CNY'];
+        const CUR_NAMES = {
+            USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen',
+            AUD: 'Australian Dollar', CAD: 'Canadian Dollar', CHF: 'Swiss Franc',
+            INR: 'Indian Rupee', PKR: 'Pakistani Rupee', BDT: 'Bangladeshi Taka',
+            SAR: 'Saudi Riyal', AED: 'UAE Dirham', CNY: 'Chinese Yuan', RUB: 'Russian Ruble',
+            MYR: 'Malaysian Ringgit', SGD: 'Singapore Dollar', TRY: 'Turkish Lira',
+            NZD: 'New Zealand Dollar', LKR: 'Sri Lankan Rupee', NPR: 'Nepalese Rupee',
+            KRW: 'South Korean Won', THB: 'Thai Baht', IDR: 'Indonesian Rupiah',
+            PHP: 'Philippine Peso', VND: 'Vietnamese Dong', SEK: 'Swedish Krona',
+            NOK: 'Norwegian Krone', DKK: 'Danish Krone', PLN: 'Polish Zloty',
+            ZAR: 'South African Rand', BRL: 'Brazilian Real', MXN: 'Mexican Peso',
+            EGP: 'Egyptian Pound', NGN: 'Nigerian Naira', QAR: 'Qatari Riyal',
+            KWD: 'Kuwaiti Dinar', OMR: 'Omani Rial', BHD: 'Bahraini Dinar'
+        };
+
+        let convRates = null;        // { base:'USD', rates:{CODE:v}, ts }
+        let convRatesLoading = false;
+
+        function readCachedRates() {
+            try {
+                const v = JSON.parse(localStorage.getItem(CONV_CURRENCY_KEY));
+                if (v && v.rates && v.rates.USD) return v;
+            } catch (_) { }
+            return null;
+        }
+
+        async function convFetchRates(force) {
+            if (convRatesLoading) return convRates;
+            const cached = readCachedRates();
+            if (!force && cached && Date.now() - cached.ts < CUR_TTL) { convRates = cached; return convRates; }
+            convRatesLoading = true;
+            try {
+                const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                const data = await res.json();
+                if (!data || data.result !== 'success' || !data.rates) throw new Error('bad payload');
+                convRates = { base: 'USD', rates: data.rates, ts: Date.now() };
+                localStorage.setItem(CONV_CURRENCY_KEY, JSON.stringify(convRates));
+            } catch (_) {
+                try {
+                    // Fallback: Frankfurter (ECB) — fewer currencies, still free/no-key
+                    const res2 = await fetch('https://api.frankfurter.app/latest?from=USD');
+                    const data2 = await res2.json();
+                    if (!data2 || !data2.rates) throw new Error('bad payload');
+                    convRates = { base: 'USD', rates: { USD: 1, ...data2.rates }, ts: Date.now(), partial: true };
+                    localStorage.setItem(CONV_CURRENCY_KEY, JSON.stringify(convRates));
+                } catch (__) {
+                    convRates = cached; // gracefully go offline with stale rates
+                }
+            }
+            convRatesLoading = false;
+            return convRates;
+        }
+
+        async function convRefreshRates() {
+            showToast('Refreshing exchange rates…', 'info');
+            await convFetchRates(true);
+            if (convState.cat === 'currency') { renderConvUnits(); convConvert(); }
+            updateConvRateStatus();
+            if (convRates) showToast('Rates updated ✓', 'success');
+            else showToast('Could not load rates — check your connection', 'error');
+        }
+
+        function updateConvRateStatus(mode) {
+            const bar = document.getElementById('convRateBar');
+            const status = document.getElementById('convRateStatus');
+            if (!bar) return;
+            if (convState.cat !== 'currency') { bar.style.display = 'none'; return; }
+            bar.style.display = 'flex';
+            if (mode) { status.textContent = mode; return; }
+            if (!convRates) { status.textContent = 'No rates yet — hit "Refresh rates" to load them'; return; }
+            const ageMin = Math.round((Date.now() - convRates.ts) / 60000);
+            const when = ageMin < 1 ? 'just now' : ageMin < 60 ? `${ageMin} min ago` : `${Math.round(ageMin / 60)}h ago`;
+            const note = convRates.partial ? 'ECB subset' : 'live';
+            status.textContent = `💱 USD base · ${note} · updated ${when}`;
+        }
+
+        function currencyCodeList(rates) {
+            const codes = Object.keys(rates).filter(c => c.length === 3 && /^[A-Z]{3}$/.test(c));
+            codes.sort((a, b) =>
+                (POPULAR_CURRENCIES.indexOf(b) !== -1) - (POPULAR_CURRENCIES.indexOf(a) !== -1) ||
+                a.localeCompare(b));
+            return codes;
+        }
+
+        function convCalcCurrency(val, from, to) {
+            if (!convRates || !convRates.rates[from] || !convRates.rates[to]) return NaN;
+            return val / convRates.rates[from] * convRates.rates[to];
+        }
+
+        function curOptionLabel(code) {
+            const name = CUR_NAMES[code];
+            return name ? `${code} · ${name}` : code;
+        }
+
         renderConvCats();
         renderConvUnits();
         document.getElementById('convVal').value = convState.value || '1';
         convConvert();
+        // Warm the currency cache in the background so 💱 is instant on first use
+        convFetchRates(false).then(rates => {
+            if (rates && convState.cat === 'currency') { renderConvUnits(); convConvert(); }
+            updateConvRateStatus();
+        });
 
         // ─── WEATHER ──────────────────────────────────────────
         const WMO = {
