@@ -1678,19 +1678,20 @@
             showBrowserNotification(message);
         }
 
-        function showBrowserNotification(message) {
+        function showBrowserNotification(message, title = 'Focus Timer') {
             if (!timerNotificationsEnabled || !('Notification' in window)) return;
             if (Notification.permission === 'granted') {
-                const n = new Notification('Focus Timer', {
+                const n = new Notification(title, {
                     body: message,
                     icon: 'favicon.svg',
-                    tag: 'flowdesk-timer',
+                    // Unique per alert — same replace-vs-stack reasoning as showFlowNotification
+                    tag: 'flowdesk-timer-' + Date.now(),
                     requireInteraction: false
                 });
                 n.onclick = () => { window.focus(); n.close(); };
             } else if (Notification.permission !== 'denied') {
                 requestTimerNotificationPermission().then(granted => {
-                    if (granted) showBrowserNotification(message);
+                    if (granted) showBrowserNotification(message, title);
                 });
             }
         }
@@ -2063,7 +2064,12 @@
             const n = new Notification(title, {
                 body,
                 icon: 'favicon.svg',
-                tag: 'flowdesk-reminder',
+                // Unique tag per alert: a constant tag makes the OS try to REPLACE
+                // the previous notification (replaces_id), which some Linux
+                // daemons (e.g. SwayNotificationCenter/mako) swallow when the
+                // old one hasn't been cleared — the new alert never appears.
+                // A unique tag posts each chime as its own notification instead.
+                tag: 'flowdesk-reminder-' + Date.now(),
                 requireInteraction: false
             });
             n.onclick = () => { window.focus(); n.close(); };
