@@ -3063,6 +3063,127 @@ body.dark-mode .calendar-day-cell.today {
     color: var(--surface);
 }
 
+/* ── View chips (This/Next month) — same language as mode-chip ── */
+.prayer-view-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pv-chip {
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.pv-chip:focus {
+    outline: none;
+}
+
+/* ── Monthly timetable (this / next month) ── */
+.prayer-month {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.prayer-m-table {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.prayer-m-row {
+    display: grid;
+    grid-template-columns: 2.2em repeat(6, minmax(0, 1fr));
+    align-items: center;
+    gap: 3px;
+    padding: 5px 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    flex-shrink: 0;
+    min-width: 0;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.prayer-m-row:not(.head):hover {
+    border-color: var(--brand);
+}
+
+.prayer-m-row.head {
+    position: sticky;
+    top: -2px;
+    z-index: 2;
+    background: var(--surface-3);
+}
+
+.prayer-m-row.today {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.08);
+    box-shadow: 0 0 0 1px var(--success) inset;
+}
+
+.prayer-m-day {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    min-width: 0;
+}
+
+.prayer-m-day b {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--txt);
+}
+
+.prayer-m-day i {
+    font-style: normal;
+    font-size: 0.54rem;
+    color: var(--txt-2);
+    text-transform: uppercase;
+}
+
+.prayer-m-h {
+    font-size: 0.54rem;
+    font-weight: 700;
+    color: var(--txt-2);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.prayer-m-t {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.57rem;
+    color: var(--txt-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+}
+
+.prayer-m-row.today .prayer-m-t,
+.prayer-m-row.today .prayer-m-day b {
+    color: var(--txt);
+    font-weight: 600;
+}
+
+.prayer-m-row.today .prayer-m-day i {
+    color: var(--success);
+    font-weight: 700;
+}
+
 .prayer-updated {
     font-size: 0.72rem;
     color: var(--txt-2);
@@ -3179,6 +3300,21 @@ body.dark-mode .calendar-day-cell {
     .prayer-method-select {
         max-width: none;
         flex: 1 1 auto;
+    }
+
+    /* Monthly table stays fully readable — no sideways scroll */
+    .prayer-m-row {
+        grid-template-columns: 2em repeat(6, minmax(0, 1fr));
+        gap: 2px;
+        padding: 4px 6px;
+    }
+
+    .prayer-m-t {
+        font-size: 0.52rem;
+    }
+
+    .prayer-m-h {
+        font-size: 0.48rem;
     }
 }
 

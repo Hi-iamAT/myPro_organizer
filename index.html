@@ -946,9 +946,22 @@
                                         style="display:none">Try Again</button>
                                 </div>
 
+                                <!-- View chips — same design language as mode-chip -->
+                                <div class="prayer-view-chips" role="tablist" aria-label="Prayer view">
+                                    <button type="button" class="mode-chip pv-chip" id="pv-today"
+                                        onclick="prayerSetView('today')">Today</button>
+                                    <button type="button" class="mode-chip pv-chip" id="pv-this"
+                                        onclick="prayerSetView('this')">This Month</button>
+                                    <button type="button" class="mode-chip pv-chip" id="pv-next"
+                                        onclick="prayerSetView('next')">Next Month</button>
+                                </div>
+
                                 <div class="prayer-schedule" id="prayerSchedule"></div>
-                                <p class="prayer-mini-title">Prohibited Prayer Times</p>
+                                <p class="prayer-mini-title" id="prayerMiniTitle">Prohibited Prayer Times</p>
                                 <div class="prayer-schedule prayer-proh" id="prayerProh"></div>
+
+                                <!-- Monthly timetable (this / next month) -->
+                                <div class="prayer-month" id="prayerMonthWrap" style="display:none"></div>
                                 <div class="prayer-updated" id="prayerUpdated"></div>
                             </div>
                         </div>
@@ -3256,6 +3269,17 @@
         })();
         let prayerData = null;   // { dateKey, method, timings: {Fajr:'HH:MM',...}, locLabel, ts, stale }
         let prayerLoading = false;
+        // Monthly timetable state
+        const PRAYER_MONTH_KEY = 'flowdesk_prayer_month';
+        const PRAYER_VIEW_KEY = 'flowdesk_prayer_view';
+        let prayerView = localStorage.getItem(PRAYER_VIEW_KEY) || 'today';   // today | this | next
+        let prayerMonthLoading = false;
+
+        // "05:03 (BST)" → "05:03" ; invalid → null (shared by daily + monthly loaders)
+        function prayerStripTiming(v) {
+            const m = (v || '').match(/(\d{1,2}:\d{2})/);
+            return m ? m[1] : null;
+        }
 
         const prayerMinute = t => { const m = (t || '').match(/(\d{1,2}):(\d{2})/); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 
@@ -3287,13 +3311,14 @@
             });
         }
 
-        function prayerSetStatus(msg, showRetry) {
+        function prayerSetStatus(msg, retryFn) {
             const box = document.getElementById('prayerStatus');
             const msgEl = document.getElementById('prayerStatusMsg');
             const retry = document.getElementById('prayerRetryBtn');
             box.style.display = msg ? 'flex' : 'none';
             msgEl.textContent = msg || '';
-            retry.style.display = showRetry ? 'inline-flex' : 'none';
+            retry.style.display = msg && retryFn ? 'inline-flex' : 'none';
+            if (retryFn) retry.onclick = retryFn;
         }
 
         async function prayerLoad(force) {
@@ -3308,7 +3333,7 @@
             prayerLoading = true;
             if (!prayerData) {
                 if (cached) { prayerData = cached; renderPrayerTimes(); } // stale until fresh arrives
-                prayerSetStatus('Loading prayer times…', false);
+                prayerSetStatus('Loading prayer times…');
             } else {
                 renderPrayerTimes(); // keep showing old card, silent refetch
             }
@@ -3322,12 +3347,11 @@
                 const json = await res.json();
                 const t = json && json.data && json.data.timings;
                 if (!t || !t.Fajr) throw new Error('bad payload');
-                const strip = v => (v || '').match(/(\d{1,2}:\d{2})/) ? RegExp.$1 : v;
                 prayerData = {
                     v: PRAYER_CACHE_V,
                     dateKey: dk,
                     method: prayerMethod,
-                    timings: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, strip(v)])),
+                    timings: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, prayerStripTiming(v)])),
                     locLabel: c.label,
                     ts: Date.now()
                 };
@@ -3336,9 +3360,9 @@
             } catch (e) {
                 if (prayerData && prayerData.dateKey === dk) {
                     prayerData.stale = true; // old-but-same-day cache survived
-                    prayerSetStatus('Offline — showing saved timings for today', false);
+                    prayerSetStatus('Offline — showing saved timings for today');
                 } else {
-                    prayerSetStatus('Could not load prayer times. Check your connection.', true);
+                    prayerSetStatus('Could not load prayer times. Check your connection.', () => prayerLoad(true));
                 }
             }
             prayerLoading = false;
@@ -3351,11 +3375,131 @@
             localStorage.setItem(PRAYER_METHOD_KEY, m);
             prayerData = null;
             localStorage.removeItem(PRAYER_CACHE_KEY); // cache is method-specific
+            localStorage.removeItem(PRAYER_MONTH_KEY); // monthly timetable too
             return prayerLoad(true);
         }
 
         function prayerRefresh() {
             prayerLoad(true);
+        }
+
+        // ═══ MONTHLY TIMETABLE — this month & next month, cached & auto-updated ═══
+        // Same engine, same text ("Fajr/Sunrise/Dhuhr/Asr/Maghrib/Isha"), same
+        // 12-hour format, same chips language as the rest of the app.
+        function prayerYmKey(ym) { return ym.year + '-' + String(ym.month).padStart(2, '0'); }
+        function prayerMonthAt(offset) {
+            const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + offset);
+            return { year: d.getFullYear(), month: d.getMonth() + 1 };
+        }
+        function prayerMonthCacheAll() {
+            try { const v = JSON.parse(localStorage.getItem(PRAYER_MONTH_KEY)); return v && typeof v === 'object' ? v : {}; }
+            catch (_) { return {}; }
+        }
+        function prayerMonthCached(ym) {
+            const c = prayerMonthCacheAll()[prayerYmKey(ym)];
+            return c && c.days && String(c.method) === String(prayerMethod) ? c : null;
+        }
+        function prayerMonthSave(ym, entry) {
+            const all = prayerMonthCacheAll();
+            all[prayerYmKey(ym)] = entry;
+            // prune — nothing but the neighbouring months survives
+            const keep = new Set([prayerYmKey(prayerMonthAt(-1)), prayerYmKey(prayerMonthAt(0)), prayerYmKey(prayerMonthAt(1))]);
+            Object.keys(all).forEach(k => { if (!keep.has(k)) delete all[k]; });
+            localStorage.setItem(PRAYER_MONTH_KEY, JSON.stringify(all));
+        }
+
+        function prayerMonthName(ym) {
+            return new Date(ym.year, ym.month - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+
+        // Show/hide daily blocks vs the month table
+        function prayerShowMonthUI(show) {
+            const ids = ['prayerSchedule', 'prayerMiniTitle', 'prayerProh'];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = show ? 'none' : ''; });
+            const wrap = document.getElementById('prayerMonthWrap');
+            if (wrap) wrap.style.display = show ? '' : 'none';
+        }
+
+        function prayerSyncChips() {
+            ['today', 'this', 'next'].forEach(k => {
+                const el = document.getElementById('pv-' + k);
+                if (el) el.classList.toggle('active', k === prayerView);
+            });
+        }
+
+        function prayerSetView(v) {
+            if (!['today', 'this', 'next'].includes(v)) return;
+            prayerView = v;
+            localStorage.setItem(PRAYER_VIEW_KEY, v);
+            prayerSyncChips();
+            prayerShowMonthUI(v !== 'today');
+            prayerSetStatus('');
+            if (v === 'today') renderPrayerTimes();
+            else prayerMonthView(true);
+        }
+
+        async function prayerMonthView(force) {
+            if (prayerView === 'today') return;
+            prayerShowMonthUI(true);
+            const ym = prayerMonthAt(prayerView === 'next' ? 1 : 0);
+            const cached = prayerMonthCached(ym);
+            if (cached) { renderPrayerMonth(ym, cached); return; }
+            if (prayerMonthLoading) return;
+            prayerMonthLoading = true;
+            prayerSetStatus(`Loading ${prayerMonthName(ym)} timetable…`);
+            try {
+                const c = await prayerGetCoords();
+                const url = `https://api.aladhan.com/v1/calendar/${ym.year}/${ym.month}?latitude=${c.lat}&longitude=${c.lon}&method=${prayerMethod}&school=1`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const arr = json && json.data;
+                if (!Array.isArray(arr) || !arr.length || !arr[0].timings) throw new Error('bad payload');
+                const days = arr.map(d => {
+                    const day = parseInt(d.date && d.date.gregorian && d.date.gregorian.day, 10) || 0;
+                    const tm = {};
+                    PRAYER_ORDER.forEach(k => { tm[k] = prayerStripTiming(d.timings[k]); });
+                    return { day, timings: tm };
+                }).filter(d => d.day);
+                if (!days.length) throw new Error('empty month');
+                const entry = { method: prayerMethod, year: ym.year, month: ym.month, locLabel: c.label, ts: Date.now(), days };
+                prayerMonthSave(ym, entry);
+                prayerSetStatus('');
+                renderPrayerMonth(ym, entry);
+            } catch (e) {
+                console.error('[FlowDesk] month timetable load failed:', e);
+                if (typeof window !== 'undefined') window._pmErr = (e && e.message) || String(e);
+                prayerSetStatus(`Could not load the ${prayerMonthName(ym)} timetable.`, () => prayerMonthView(true));
+            }
+            prayerMonthLoading = false;
+        }
+
+        function renderPrayerMonth(ym, entry) {
+            const wrap = document.getElementById('prayerMonthWrap');
+            if (!wrap) return;
+            const now = new Date();
+            const nowY = now.getFullYear(), nowM = now.getMonth() + 1, nowD = now.getDate();
+            const isThisMonth = (ym.year === nowY && ym.month === nowM);
+            const wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const fmt = h => (h === null ? '--' : fmtTime12(h));
+            const head = PRAYER_ORDER.map(n => `<span class="prayer-m-h">${n}</span>`).join('');
+            const rows = entry.days.map(d => {
+                const date = new Date(ym.year, ym.month - 1, d.day);
+                const isToday = isThisMonth && d.day === nowD;
+                const t = PRAYER_ORDER.map(n => `<span class="prayer-m-t">${fmt(d.timings[n])}</span>`).join('');
+                const mark = isToday ? ' today' : '';
+                return `<div class="prayer-m-row${mark}"><span class="prayer-m-day"><b>${d.day}</b><i>${wd[date.getDay()]}</i></span>${t}</div>`;
+            }).join('');
+            const updateTs = entry.ts ? new Date(entry.ts) : null;
+            const loadedWhen = updateTs
+                ? ` · loaded ${updateTs.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`
+                : '';
+            wrap.innerHTML = `
+                <p class="prayer-mini-title">${prayerMonthName(ym)} · live · ${entry.locLabel || ''}${loadedWhen}</p>
+                <div class="prayer-m-table">
+                    <div class="prayer-m-row head"><span class="prayer-m-day"><b>Date</b></span>${head}</div>
+                    ${rows}
+                </div>`;
         }
 
         // Convert "HH:MM (TZ)" → minutes since midnight
@@ -3530,6 +3674,10 @@
             updated.textContent = when
                 ? `🕌 ${prayerData.locLabel} · ${PRAYER_METHODS[prayerData.method].split(' (')[0]} · loaded ${when.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}${prayerData.stale ? ' (offline)' : ''}`
                 : '';
+            // Sync the view chips + keep the monthly table fresh (cache hit — no refetch)
+            prayerSyncChips();
+            prayerShowMonthUI(prayerView !== 'today');
+            if (prayerView !== 'today') prayerMonthView();
             updatePrayerLive();
         }
 
