@@ -3428,7 +3428,7 @@
             if (m.Sunrise !== null) {
                 rows.push({
                     label: 'Sunrise',
-                    note: 'Sun still rising — prayer must not be offered until it fully clears the horizon',
+                    note: 'Forbidden until the sun fully clears the horizon',
                     start: m.Sunrise,
                     end: m.Sunrise + PROHIB_SUNRISE_MIN
                 });
@@ -3437,7 +3437,7 @@
                 const afterRise = (m.Sunrise !== null) ? m.Sunrise + PROHIB_SUNRISE_MIN : 0;
                 rows.push({
                     label: 'Zawal (solar noon)',
-                    note: 'Sun crossing its zenith — prayer must not be offered until Dhuhr begins',
+                    note: 'Forbidden while the sun crosses its zenith',
                     start: Math.max(m.Dhuhr - PROHIB_ZAWAL_MIN, afterRise), // never bleeds into the sunrise window
                     end: m.Dhuhr
                 });
@@ -3445,7 +3445,7 @@
             if (m.Maghrib !== null) {
                 rows.push({
                     label: 'Sunset',
-                    note: 'Sun yellowing at the horizon — prayer must not be offered until Maghrib begins',
+                    note: 'Forbidden while the sun yellows at the horizon',
                     start: Math.max(m.Maghrib - PROHIB_SUNSET_MIN, 0),
                     end: m.Maghrib
                 });
@@ -3506,6 +3506,9 @@
             });
 
             // ── prohibited (impure) times — live windows from the sun path ──
+            // Layout: icon | [name + Active chip] / full-width time range /
+            // short caption — the range never competes for row width, so the
+            // end time ("praying becomes allowed again at") is never clipped.
             proh.innerHTML = '';
             prayerProhibited(st).forEach(p => {
                 const inNow = st.nowMin >= p.start && st.nowMin < p.end;
@@ -3515,11 +3518,11 @@
                 const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.innerHTML = inNow ? PROHIB_ACTIVE_SVG : PROHIB_SVG;
                 const txt = document.createElement('span'); txt.className = 'prayer-sch-text';
                 const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = p.label;
-                const sub = document.createElement('span'); sub.className = 'prayer-sch-sub'; sub.textContent = p.note;
-                txt.append(lab, sub);
-                if (inNow) { const chip = document.createElement('span'); chip.className = 'prayer-badge proh'; chip.textContent = 'Active'; lab.appendChild(chip); }
                 const rng = document.createElement('span'); rng.className = 'prayer-sch-range'; rng.textContent = `${fm(p.start)} – ${fm(p.end)}`;
-                rowEl.append(ic, txt, rng);
+                const sub = document.createElement('span'); sub.className = 'prayer-sch-sub'; sub.textContent = p.note;
+                if (inNow) { const chip = document.createElement('span'); chip.className = 'prayer-badge proh'; chip.textContent = 'Active'; lab.appendChild(chip); }
+                txt.append(lab, rng, sub);
+                rowEl.append(ic, txt);
                 proh.appendChild(rowEl);
             });
 

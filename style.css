@@ -2943,16 +2943,30 @@ body.dark-mode .calendar-day-cell.today {
     display: flex;
     flex-direction: column;
     gap: 1px;
+    flex: 1;
     min-width: 0;
 }
 
 .prayer-sch-sub {
     font-size: 0.66rem;
-    line-height: 1.35;
+    line-height: 1.4;
     color: var(--txt-2);
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;   /* wraps to 2 lines instead of vanishing mid-word */
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+}
+
+/* In prohibited rows the range is its OWN full-width line — the end time
+   ("praying becomes allowed again at …") can never be ellipsis-cut */
+.prayer-sch-row.proh .prayer-sch-range {
+    display: block;
+    margin: 2px 0 1px;
+    font-size: 0.75rem;
+    text-align: left;
+    color: var(--txt);
+    font-weight: 600;
 }
 
 .prayer-sch-name {
@@ -2969,11 +2983,9 @@ body.dark-mode .calendar-day-cell.today {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.78rem;
     color: var(--txt-2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap;   /* range always fully readable — name shrinks instead */
     text-align: right;
-    flex-shrink: 1;
+    flex-shrink: 0;
 }
 
 .prayer-sch-row.ongoing .prayer-sch-range,
@@ -3033,10 +3045,6 @@ body.dark-mode .calendar-day-cell.today {
     color: var(--txt-2);
     font-weight: 600;
     font-size: 0.84rem;
-}
-
-.prayer-sch-row.proh .prayer-sch-range {
-    font-size: 0.72rem;
 }
 
 .prayer-sch-row.proh.active {
