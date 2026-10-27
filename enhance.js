@@ -274,8 +274,19 @@
         grid.appendChild(fc);
 
         // Next Prayer (live; powered by the calendar panel's prayer engine via window.FlowPrayer)
-        const pc = card('Next Prayer', 'schedule');
+        // Whole card opens the Live Calendar & prayer side, not just the "Open →" link.
+        const pc = card('Next Prayer', 'calendar');
         const hp = (window.FlowPrayer && FlowPrayer.ready()) ? FlowPrayer.next() : null;
+        pc.classList.add('dash-card-clickable');
+        pc.addEventListener('click', e => {
+            if (e.target.closest('button')) return;
+            go('calendar');
+            setTimeout(() => {
+                const p = document.getElementById('prayerTimesSection');
+                if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 90);
+        });
+        pc.title = 'Open Live Calendar & prayer times';
         if (hp) {
             const pw = el('div', 'dash-weather');
             const side = el('div', 'dash-ring-side');

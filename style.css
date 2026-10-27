@@ -2960,8 +2960,8 @@ body.dark-mode .calendar-day-cell.today {
     font-size: 0.9rem;
     color: var(--txt);
     white-space: nowrap;
-    display: flex;
-    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .prayer-sch-range {
@@ -3078,6 +3078,99 @@ body.dark-mode .calendar-day-cell.today {
         flex-direction: row;
         align-items: baseline;
         gap: 8px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   CALENDAR & PRAYER — NO SIDEWAYS SCROLL (small screens)
+   The panel body (inline overflow-y:auto) computes overflow-x to
+   'auto' too, so any overflowing child creates a horizontal drag.
+   Hard-clip it and make every shrinking chain explicit.
+   ════════════════════════════════════════════════════════════ */
+.panel-calendar .panel-single {
+    overflow-x: hidden;                     /* vertical only, like every other tab */
+}
+
+/* Grid/flex children must be free to shrink … */
+.calendar-layout,
+.calendar-main,
+.calendar-event-sidebar,
+.prayer-times-section {
+    min-width: 0;
+}
+
+/* … and their text must break/shrink instead of pushing wider */
+.calendar-day-cell {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cell-bengali,
+.cell-arabic,
+.alt-val {
+    overflow-wrap: anywhere;                /* Bengali/Hijri strings wrap now */
+    min-width: 0;
+}
+
+.dark .calendar-day-cell,
+body.dark-mode .calendar-day-cell {
+    min-width: 0;
+}
+
+.prayer-method-select {
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    /* Month / year selects + Today + arrows can't fit in a row on phones */
+    .calendar-nav-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .calendar-selectors {
+        flex: 1 1 auto;
+        min-width: 0;
+        order: 0;
+    }
+
+    .calendar-selectors select {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+        width: auto;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        font-size: 0.88rem;
+    }
+
+    .calendar-nav-arrows {
+        flex-shrink: 0;
+    }
+
+    /* Tighter day cells */
+    .calendar-days {
+        grid-auto-rows: minmax(58px, 1fr);
+        gap: 5px;
+    }
+
+    .calendar-day-cell {
+        padding: 5px 6px;
+        min-height: 58px;
+    }
+
+    .cell-gregorian { font-size: 0.95rem; }
+    .cell-bengali, .cell-arabic { font-size: 0.62rem; }
+
+    /* Prayer topbar wraps instead of overflowing */
+    .prayer-topbar {
+        flex-wrap: wrap;
+    }
+
+    .prayer-method-select {
+        max-width: none;
+        flex: 1 1 auto;
     }
 }
 
@@ -4144,6 +4237,11 @@ body.dark-mode .sidebar-item.active {
     transition: border-color 0.2s, box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
 }
 .dash-card:hover { border-color: rgba(108, 99, 255, 0.35); box-shadow: var(--glow); transform: translateY(-1px); }
+/* Whole-card clickable (Next Prayer → Calendar) */
+.dash-card-clickable { cursor: pointer; }
+.dash-card-clickable .dash-weather { padding: 4px 6px; border-radius: var(--r-md); transition: background 0.15s; }
+.dash-card-clickable:hover .dash-weather { background: rgba(108, 99, 255, 0.07); }
+.dash-card-clickable:active { transform: scale(0.99); }
 .dash-card.span-2 { grid-column: span 2; }
 .dash-card-head { display: flex; align-items: center; justify-content: space-between; }
 .dash-card-head h2 { margin: 0; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--txt-2); }
