@@ -3540,8 +3540,24 @@
             if (!st) return;
             document.getElementById('prayerHeroCountdown').textContent = fmtCountdown(st.nextInMin);
             document.getElementById('prayerHeroAt').textContent = `at ${fmtTime12(`${String(Math.floor(st.mins[st.nextName] / 60) % 24).padStart(2, '0')}:${String(Math.floor(st.mins[st.nextName] % 60)).padStart(2, '0')}`)}`;
-            // Cheap reconciliation: if the minute state changed (prayer entered/ended), re-render badges
-            const tickKey = `${st.currentName}|${st.nextName}`;
+
+            // ── auto-synchronization ──
+            // (1) Midnight rollover: if the tab stayed open past midnight, the
+            //     loaded data belongs to yesterday → silently refetch today's
+            //     timings (prayerLoading guards double-fires).
+            if (prayerData && prayerData.dateKey && !prayerLoading) {
+                const today = dayKeyStr(new Date());
+                if (prayerData.dateKey !== today) {
+                    prayerData.stale = true;
+                    prayerLoad(false);
+                }
+            }
+
+            // (2) Cheap reconciliation — re-render the row badges whenever the
+            //     prayer state OR the live "Active" prohibited window changes,
+            //     so rows flip in/out of amber exactly at the window boundary.
+            const prohNow = (prayerData && prayerData.timings) ? prayerProhibited(st).find(p => st.nowMin >= p.start && st.nowMin < p.end) : null;
+            const tickKey = `${st.currentName}|${st.nextName}|${prohNow ? prohNow.label : ''}`;
             if (window._prayerTickKey !== tickKey) {
                 window._prayerTickKey = tickKey;
                 renderPrayerTimes();
