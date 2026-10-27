@@ -947,7 +947,7 @@
                                 </div>
 
                                 <div class="prayer-schedule" id="prayerSchedule"></div>
-                                <p class="prayer-mini-title">🚫 Prohibited Prayer Times</p>
+                                <p class="prayer-mini-title">Prohibited Prayer Times</p>
                                 <div class="prayer-schedule prayer-proh" id="prayerProh"></div>
                                 <div class="prayer-updated" id="prayerUpdated"></div>
                             </div>
@@ -3224,6 +3224,29 @@
             Isha: { name: 'Isha', icon: '🌙' }
         };
 
+        // ── Inline SVG icon set (stroke = currentColor, tinted via CSS) ──
+        const P = inner => `<svg class="prayer-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+        const PRAYER_ICON = {
+            // Fajr (dawn): horizon with glow arc + morning star
+            Fajr: P(`<path d="M2 19h20"/><path d="M7 15.5a5 5 0 0 1 10 0"/><path d="M7.3 10.4 6 9.1"/><path d="M16.7 10.4 18 9.1"/><path d="M12 7.2V5.6"/><path d="M19 3v3"/><path d="M17.5 4.5h3"/>`),
+            // Sunrise: sun above horizon with rising arrow
+            Sunrise: P(`<path d="M12 2v7"/><path d="m9 6 3-3 3 3"/><path d="M2 22h20"/><path d="M16 18a4 4 0 0 0-8 0"/><path d="M4.9 9.9 3.5 8.5"/><path d="M19.1 9.9 20.5 8.5"/>`),
+            // Dhuhr (solar noon): full sun, rays all around
+            Dhuhr: P(`<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>`),
+            // Asr (afternoon): lower sun over horizon
+            Asr: P(`<circle cx="12" cy="13" r="4"/><path d="M12 3v2"/><path d="M7.2 5.9 5.9 4.6"/><path d="M16.8 5.9 18.1 4.6"/><path d="M2 21h20"/>`),
+            // Maghrib (sunset): sun sinking with setting arrow
+            Maghrib: P(`<path d="M12 9V2"/><path d="m16 6-4 4-4-4"/><path d="M2 22h20"/><path d="M16 18a4 4 0 0 0-8 0"/><path d="M4.9 9.9 3.5 8.5"/><path d="M19.1 9.9 20.5 8.5"/>`),
+            // Isha (night): crescent moon + small star
+            Isha: P(`<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M18.5 4v3"/><path d="M17 5.5h3"/>`)
+        };
+        // Prohibition sign — outline (idle) & filled (active, "prohibited right now")
+        const PROHIB_SVG = P(`<circle cx="12" cy="12" r="9"/><path d="M5.75 5.75l12.5 12.5"/>`);
+        const PROHIB_ACTIVE_SVG = `<svg class="prayer-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M5.5 18.5l13-13" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/></svg>`;
+
+        // Helper used in renderPrayerTimes
+        function prayerIcon(name) { return PRAYER_ICON[name] || ''; }
+
         let prayerMethod = localStorage.getItem(PRAYER_METHOD_KEY) || '1';
         let prayerCoords = (() => {
             try {
@@ -3380,6 +3403,62 @@
             return (h ? `${h}h ` : '') + `${m}m ` + `${String(s).padStart(2, '0')}s`;
         }
 
+        // ── Prohibited (impure) prayer times ──
+        // These are the windows when fardh prayer is religiously prohibited,
+        // computed from today's actual sun path rather than fixed guesses:
+        //  1. Sunrise  — from sunrise until the sun fully clears the horizon
+        //                (≈ the 6° "ishraq" elevation ≈ 1/60th of the day arc,
+        //                 clamped to 12–30 min so it stays sensible at all latitudes)
+        //  2. Zawal    — solar noon: from just before the sun reaches/leaves
+        //                its zenith until Dhuhr begins (Aladhan's Dhuhr already
+        //                starts a few minutes after the exact zenith)
+        //  3. Sunset   — from when the sun starts yellowing near the horizon
+        //                until Maghrib begins (same elevation share, daylight-side)
+        // Windows are derived relative to the day arc so they scale with season
+        // and latitude, and each is clamped so times can't go negative, overlap
+        // a window that comes before it, or spill past midnight.
+        function prayerProhibited(st) {
+            const m = st.mins;
+            const rows = [];
+            const dayLen = (m.Sunrise !== null && m.Maghrib !== null) ? Math.max(0, m.Maghrib - m.Sunrise) : 720;
+            // 6° of a 180° day-arc = 1/30 of daylight ≈ 24 min on a 12h day
+            const win = Math.min(30, Math.max(12, Math.round(dayLen / 30)));
+
+            if (m.Sunrise !== null) {
+                rows.push({
+                    label: 'Sunrise',
+                    note: 'Sun still rising — prayer must not be offered until it fully clears the horizon',
+                    start: m.Sunrise,
+                    end: m.Sunrise + win
+                });
+            }
+            if (m.Dhuhr !== null) {
+                const afterRise = (m.Sunrise !== null) ? m.Sunrise + win : 0;
+                rows.push({
+                    label: 'Zawal (solar noon)',
+                    note: 'Sun crossing its zenith — prayer must not be offered until Dhuhr begins',
+                    start: Math.max(m.Dhuhr - 15, afterRise), // never bleeds into the sunrise window
+                    end: m.Dhuhr
+                });
+            }
+            if (m.Maghrib !== null) {
+                rows.push({
+                    label: 'Sunset',
+                    note: 'Sun yellowing at the horizon — prayer must not be offered until Maghrib begins',
+                    start: Math.max(m.Maghrib - win, 0),
+                    end: m.Maghrib
+                });
+            }
+            // Sanity: keep rows chronological and non-overlapping
+            rows.sort((a, b) => a.start - b.start);
+            rows.forEach((r, i) => {
+                r.end = Math.min(r.end, 1440);
+                if (i > 0) r.start = Math.max(r.start, rows[i - 1].end);
+                r.isLive = false; // filled in during render
+            });
+            return rows.filter(r => r.end > r.start);
+        }
+
         function renderPrayerTimes() {
             const methodSel = document.getElementById('prayerMethodSelect');
             methodSel.innerHTML = '';
@@ -3404,7 +3483,7 @@
             // ── hero ──
             const meta = PRAYER_META[st.nextName];
             document.getElementById('prayerHeroName').textContent = meta.name;
-            document.getElementById('prayerHeroIcon').textContent = meta.icon;
+            document.getElementById('prayerHeroIcon').innerHTML = prayerIcon(st.nextName);
             hero.classList.add('active');
 
             const fm = m => fmtTime12(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`);
@@ -3416,7 +3495,7 @@
                 if (!range) return;
                 const rowEl = document.createElement('div');
                 rowEl.className = 'prayer-sch-row' + (name === st.currentName ? ' ongoing' : '') + (name === st.nextName ? ' next' : '');
-                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.textContent = PRAYER_META[name].icon;
+                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.innerHTML = prayerIcon(name);
                 const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = PRAYER_META[name].name;
                 if (name === st.nextName) { const chip = document.createElement('span'); chip.className = 'prayer-badge next'; chip.textContent = 'Next'; lab.appendChild(chip); }
                 else if (name === st.currentName) { const chip = document.createElement('span'); chip.className = 'prayer-badge ongoing'; chip.textContent = 'Now'; lab.appendChild(chip); }
@@ -3425,21 +3504,21 @@
                 sched.appendChild(rowEl);
             });
 
-            // ── prohibited (impure) times — the 3 widely-listed daily windows ──
+            // ── prohibited (impure) times — live windows from the sun path ──
             proh.innerHTML = '';
-            const pRows = [];
-            if (st.mins.Sunrise !== null) pRows.push({ label: 'Sunrise', note: 'Sun rising — prayer not allowed until it fully clears the horizon', start: st.mins.Sunrise, end: st.mins.Sunrise + 20 });
-            if (st.mins.Dhuhr !== null) pRows.push({ label: 'Zawal (midday)', note: 'Sun at its zenith — not allowed until Dhuhr begins', start: st.mins.Dhuhr - 15, end: st.mins.Dhuhr });
-            if (st.mins.Maghrib !== null) pRows.push({ label: 'Sunset', note: 'Sun setting — not allowed until Maghrib begins', start: st.mins.Maghrib - 15, end: st.mins.Maghrib });
-            pRows.forEach(p => {
+            prayerProhibited(st).forEach(p => {
                 const inNow = st.nowMin >= p.start && st.nowMin < p.end;
                 const rowEl = document.createElement('div');
                 rowEl.className = 'prayer-sch-row proh' + (inNow ? ' active' : '');
                 rowEl.title = p.note;
-                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.textContent = inNow ? '⛔' : '🚫';
+                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.innerHTML = inNow ? PROHIB_ACTIVE_SVG : PROHIB_SVG;
+                const txt = document.createElement('span'); txt.className = 'prayer-sch-text';
                 const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = p.label;
+                const sub = document.createElement('span'); sub.className = 'prayer-sch-sub'; sub.textContent = p.note;
+                txt.append(lab, sub);
+                if (inNow) { const chip = document.createElement('span'); chip.className = 'prayer-badge proh'; chip.textContent = 'Active'; lab.appendChild(chip); }
                 const rng = document.createElement('span'); rng.className = 'prayer-sch-range'; rng.textContent = `${fm(p.start)} – ${fm(p.end)}`;
-                rowEl.append(ic, lab, rng);
+                rowEl.append(ic, txt, rng);
                 proh.appendChild(rowEl);
             });
 

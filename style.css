@@ -2731,7 +2731,7 @@ body.dark-mode .calendar-day-cell.today {
     display: block;
 }
 
-/* Next-prayer hero card — same look as active chips */
+/* Next-prayer hero card — layered gradient + soft glow, same family as active chips */
 .prayer-hero {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -2746,16 +2746,36 @@ body.dark-mode .calendar-day-cell.today {
 }
 
 .prayer-hero.active {
-    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    background:
+        radial-gradient(130% 160% at 88% -10%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 48%),
+        linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
     color: var(--txt-inv);
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+    box-shadow: 0 6px 18px rgba(108, 99, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .prayer-hero-icon {
-    font-size: 1.45rem;
-    line-height: 1;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: var(--txt-inv);
+    box-shadow: 0 2px 8px rgba(108, 99, 255, 0.35);
+}
+
+.prayer-hero.active .prayer-hero-icon {
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: none;
+}
+
+.prayer-svg {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .prayer-hero-info {
@@ -2766,15 +2786,15 @@ body.dark-mode .calendar-day-cell.today {
 }
 
 .prayer-hero-label {
-    font-size: 0.68rem;
-    font-weight: 600;
+    font-size: 0.66rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
     opacity: 0.85;
 }
 
 .prayer-hero-name {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -2790,14 +2810,17 @@ body.dark-mode .calendar-day-cell.today {
 
 .prayer-hero-count {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 .prayer-hero-at {
     font-size: 0.72rem;
-    opacity: 0.9;
+    font-weight: 600;
+    opacity: 0.92;
     white-space: nowrap;
 }
 
@@ -2841,6 +2864,15 @@ body.dark-mode .calendar-day-cell.today {
     background: var(--success);
 }
 
+.prayer-badge.next {
+    background: var(--brand);
+}
+
+.prayer-badge.proh {
+    background: var(--warn);
+    color: #2b1a00; /* dark ink on amber works in light & dark themes */
+}
+
 /* Full-day schedule list */
 .prayer-schedule {
     display: flex;
@@ -2849,40 +2881,87 @@ body.dark-mode .calendar-day-cell.today {
     overflow-y: auto;
     min-height: 0;
     padding-right: 4px;
+    scrollbar-width: thin;
 }
 
 .prayer-sch-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 12px;
+    gap: 10px;
+    padding: 8px 11px;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: var(--r-sm);
+    border-radius: var(--r-md);
     font-size: 0.88rem;
     flex-shrink: 0;
     min-width: 0;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.prayer-sch-row:not(.proh):hover {
+    border-color: var(--brand);
+    transform: translateX(2px);
 }
 
 .prayer-sch-row.ongoing {
     border-color: var(--success);
     box-shadow: 0 0 0 1px var(--success) inset;
+    background: rgba(16, 185, 129, 0.06);
 }
 
 .prayer-sch-row.next {
     border-color: var(--brand);
-    box-shadow: 0 2px 8px rgba(108, 99, 255, 0.15);
+    box-shadow: 0 2px 10px rgba(108, 99, 255, 0.18);
+    background: rgba(108, 99, 255, 0.06);
 }
 
+/* Rounded icon tile, tinted by state */
 .prayer-sch-icon {
-    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    border-radius: 9px;
+    background: var(--surface-3);
+    color: var(--txt-2);
+}
+
+.prayer-sch-row.ongoing .prayer-sch-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.prayer-sch-row.next .prayer-sch-icon {
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--brand);
+}
+
+/* Two-line text block used by prohibited rows */
+.prayer-sch-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.prayer-sch-sub {
+    font-size: 0.66rem;
+    line-height: 1.35;
+    color: var(--txt-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .prayer-sch-name {
     font-weight: 600;
+    font-size: 0.9rem;
     color: var(--txt);
     white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .prayer-sch-range {
@@ -2906,11 +2985,23 @@ body.dark-mode .calendar-day-cell.today {
 /* ── Prohibited (impure) prayer-time rows ── */
 .prayer-mini-title {
     margin: 2px 0 -2px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--warn);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--txt-2);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.prayer-mini-title::before {
+    content: '';
+    width: 3px;
+    height: 11px;
+    border-radius: 2px;
+    background: var(--warn);
+    flex-shrink: 0;
 }
 
 .prayer-proh {
@@ -2921,25 +3012,47 @@ body.dark-mode .calendar-day-cell.today {
 .prayer-sch-row.proh {
     background: transparent;
     border-style: dashed;
-    font-size: 0.8rem;
-    padding: 7px 12px;
+    font-size: 0.84rem;
+    padding: 7px 11px;
+}
+
+.prayer-sch-row.proh .prayer-sch-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warn);
+}
+
+.prayer-sch-row.proh .prayer-sch-icon .prayer-svg {
+    width: 16px;
+    height: 16px;
 }
 
 .prayer-sch-row.proh .prayer-sch-name {
     color: var(--txt-2);
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.84rem;
+}
+
+.prayer-sch-row.proh .prayer-sch-range {
+    font-size: 0.72rem;
 }
 
 .prayer-sch-row.proh.active {
-    background: rgba(245, 158, 11, 0.08);
+    background: rgba(245, 158, 11, 0.09);
     border-style: solid;
     border-color: var(--warn);
 }
 
 .prayer-sch-row.proh.active .prayer-sch-name,
-.prayer-sch-row.proh.active .prayer-sch-range,
-.prayer-sch-row.proh.active .prayer-sch-icon {
+.prayer-sch-row.proh.active .prayer-sch-range {
     color: var(--warn);
+}
+
+.prayer-sch-row.proh.active .prayer-sch-icon {
+    background: var(--warn);
+    color: var(--surface);
 }
 
 .prayer-updated {

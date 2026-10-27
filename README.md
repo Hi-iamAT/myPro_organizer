@@ -185,8 +185,9 @@ Lives inside the **BMI & Converters** tab, right under the BMI tool — everyday
 Displayed today's schedule in the Live Calendar sidebar — data from the free, keyless **Aladhan API**:
 
 - **Next-prayer hero card** — highlighted card showing the upcoming prayer with a **live 1-second countdown** ("Asr · at 3:24 PM · in 1h 9m") synced to the navbar clock
+- **Professional SVG icon set** — stroke-based sun/moon icons in rounded tiles inside the rows, tinted by state (green when ongoing, purple when next, amber for prohibited); the prohibition sign flips to a filled ⛔-style badge while active
 - **Full-day schedule (single list)** — one row per window: Fajr · Sunrise · Dhuhr · Asr · Maghrib · Isha, each with its start–end range; the ongoing window gets a green **Now** border/chip and the upcoming prayer a **Next** chip; Isha's window wraps to tomorrow's Fajr (marked ⁺)
-- **🚫 Prohibited prayer times** — live sub-list of the day's non-praying windows (Sunrise, Zawal/midday, before Sunset), turning amber ⛔ while active
+- **🚫 Prohibited prayer times** — live sub-list of the day's non-praying windows derived from the actual sun path (Sunrise until the disc fully clears the horizon, Zawal/solar-noon before Dhuhr, and yellowing sun before Maghrib). Window lengths scale with the seasonal day arc, are clamped to sane bounds, and each row turns amber with an **Active** chip while it's happening
 - **Hanafi Asr** — the API is queried with `school=1` so Asr uses the shadow-factor ×2 (Hanafi) rule across all calculation methods
 - **Calculation method selector** — 13 methods (Karachi default, ISNA, MWL, Umm al-Qura, Egypt, Gulf, Kuwait, Qatar, Singapore, Turkey, Moonsighting, Dubai); persisted choice, cached per-day (`localStorage` keys `flowdesk_prayer_cache`, `flowdesk_prayer_method`, `flowdesk_prayer_coords`) so the panel still works **offline**
 - **Location**: reuses browser geolocation with a Dhaka fallback when denied
