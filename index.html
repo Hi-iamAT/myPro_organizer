@@ -3404,40 +3404,41 @@
         }
 
         // ── Prohibited (impure) prayer times ──
-        // These are the windows when fardh prayer is religiously prohibited,
-        // computed from today's actual sun path rather than fixed guesses:
+        // The three daily windows when prayer is religiously prohibited —
+        // fixed lengths matching mainstream prayer tables (Islamic apps /
+        // printed timetables, e.g. Sunrise +15, Zawal −5, Sunset −15):
         //  1. Sunrise  — from sunrise until the sun fully clears the horizon
-        //                (≈ the 6° "ishraq" elevation ≈ 1/60th of the day arc,
-        //                 clamped to 12–30 min so it stays sensible at all latitudes)
-        //  2. Zawal    — solar noon: from just before the sun reaches/leaves
-        //                its zenith until Dhuhr begins (Aladhan's Dhuhr already
-        //                starts a few minutes after the exact zenith)
-        //  3. Sunset   — from when the sun starts yellowing near the horizon
-        //                until Maghrib begins (same elevation share, daylight-side)
-        // Windows are derived relative to the day arc so they scale with season
-        // and latitude, and each is clamped so times can't go negative, overlap
-        // a window that comes before it, or spill past midnight.
+        //                (+15 min, the standard "ishraq" guard length)
+        //  2. Zawal    — while the sun crosses/leaves its zenith: the sun
+        //                stalls & begins descending just minutes before the
+        //                printed Dhuhr (−5 min — Dhuhr itself starts a couple
+        //                of minutes after the exact zenith for safety)
+        //  3. Sunset   — from when the sun yellows/emits weaken light near
+        //                the horizon until Maghrib begins (−15 min)
+        // All windows are clamped so times can't go negative, overlap a
+        // window that comes before it, or spill past midnight (safety for
+        // extreme-latitude short days).
+        const PROHIB_SUNRISE_MIN = 15;   // after sunrise
+        const PROHIB_ZAWAL_MIN = 5;      // before Dhuhr
+        const PROHIB_SUNSET_MIN = 15;    // before Maghrib
         function prayerProhibited(st) {
             const m = st.mins;
             const rows = [];
-            const dayLen = (m.Sunrise !== null && m.Maghrib !== null) ? Math.max(0, m.Maghrib - m.Sunrise) : 720;
-            // 6° of a 180° day-arc = 1/30 of daylight ≈ 24 min on a 12h day
-            const win = Math.min(30, Math.max(12, Math.round(dayLen / 30)));
 
             if (m.Sunrise !== null) {
                 rows.push({
                     label: 'Sunrise',
                     note: 'Sun still rising — prayer must not be offered until it fully clears the horizon',
                     start: m.Sunrise,
-                    end: m.Sunrise + win
+                    end: m.Sunrise + PROHIB_SUNRISE_MIN
                 });
             }
             if (m.Dhuhr !== null) {
-                const afterRise = (m.Sunrise !== null) ? m.Sunrise + win : 0;
+                const afterRise = (m.Sunrise !== null) ? m.Sunrise + PROHIB_SUNRISE_MIN : 0;
                 rows.push({
                     label: 'Zawal (solar noon)',
                     note: 'Sun crossing its zenith — prayer must not be offered until Dhuhr begins',
-                    start: Math.max(m.Dhuhr - 15, afterRise), // never bleeds into the sunrise window
+                    start: Math.max(m.Dhuhr - PROHIB_ZAWAL_MIN, afterRise), // never bleeds into the sunrise window
                     end: m.Dhuhr
                 });
             }
@@ -3445,7 +3446,7 @@
                 rows.push({
                     label: 'Sunset',
                     note: 'Sun yellowing at the horizon — prayer must not be offered until Maghrib begins',
-                    start: Math.max(m.Maghrib - win, 0),
+                    start: Math.max(m.Maghrib - PROHIB_SUNSET_MIN, 0),
                     end: m.Maghrib
                 });
             }
