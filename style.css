@@ -2736,12 +2736,13 @@ body.dark-mode .calendar-day-cell.today {
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--r-md);
-    padding: 14px 16px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
     flex-shrink: 0;
+    min-width: 0;
 }
 
 .prayer-hero.active {
@@ -2752,8 +2753,9 @@ body.dark-mode .calendar-day-cell.today {
 }
 
 .prayer-hero-icon {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .prayer-hero-info {
@@ -2764,7 +2766,7 @@ body.dark-mode .calendar-day-cell.today {
 }
 
 .prayer-hero-label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -2772,8 +2774,9 @@ body.dark-mode .calendar-day-cell.today {
 }
 
 .prayer-hero-name {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .prayer-hero-time {
@@ -2782,18 +2785,19 @@ body.dark-mode .calendar-day-cell.today {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
+    min-width: 0;
 }
 
 .prayer-hero-count {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .prayer-hero-at {
-    font-size: 0.75rem;
-    opacity: 0.85;
+    font-size: 0.72rem;
+    opacity: 0.9;
     white-space: nowrap;
 }
 
@@ -2816,65 +2820,25 @@ body.dark-mode .calendar-day-cell.today {
     font-size: 0.75rem;
 }
 
-/* Grid of 6 window cards */
-.prayer-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
-.prayer-card {
-    position: relative;
-    padding: 12px;
-    border-radius: var(--r-md);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.prayer-card.ongoing {
-    border-color: var(--success);
-    box-shadow: 0 0 0 1px var(--success) inset;
-}
-
+/* Badge chip shown inline in schedule rows */
 .prayer-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 0.62rem;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 2px 7px;
+    line-height: 1;
+    padding: 3px 7px;
+    margin-left: 7px;
     border-radius: 999px;
     background: var(--brand);
     color: var(--txt-inv);
+    transform: translateY(-1px);
 }
 
 .prayer-badge.ongoing {
     background: var(--success);
-}
-
-.prayer-card-times {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--txt);
-    white-space: nowrap;
-}
-
-.prayer-card-sep {
-    color: var(--txt-2);
-    font-weight: 400;
-}
-
-.prayer-card .wc-label {
-    font-size: 0.7rem;
 }
 
 /* Full-day schedule list */
@@ -2890,17 +2854,19 @@ body.dark-mode .calendar-day-cell.today {
 .prayer-sch-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 9px 12px;
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--r-sm);
     font-size: 0.88rem;
     flex-shrink: 0;
+    min-width: 0;
 }
 
 .prayer-sch-row.ongoing {
     border-color: var(--success);
+    box-shadow: 0 0 0 1px var(--success) inset;
 }
 
 .prayer-sch-row.next {
@@ -2916,20 +2882,64 @@ body.dark-mode .calendar-day-cell.today {
 .prayer-sch-name {
     font-weight: 600;
     color: var(--txt);
+    white-space: nowrap;
 }
 
 .prayer-sch-range {
     margin-left: auto;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--txt-2);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+    flex-shrink: 1;
 }
 
 .prayer-sch-row.ongoing .prayer-sch-range,
 .prayer-sch-row.next .prayer-sch-range {
     color: var(--txt);
     font-weight: 600;
+}
+
+/* ── Prohibited (impure) prayer-time rows ── */
+.prayer-mini-title {
+    margin: 2px 0 -2px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--warn);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.prayer-proh {
+    flex: 0 0 auto;
+    overflow: visible;
+}
+
+.prayer-sch-row.proh {
+    background: transparent;
+    border-style: dashed;
+    font-size: 0.8rem;
+    padding: 7px 12px;
+}
+
+.prayer-sch-row.proh .prayer-sch-name {
+    color: var(--txt-2);
+    font-weight: 500;
+}
+
+.prayer-sch-row.proh.active {
+    background: rgba(245, 158, 11, 0.08);
+    border-style: solid;
+    border-color: var(--warn);
+}
+
+.prayer-sch-row.proh.active .prayer-sch-name,
+.prayer-sch-row.proh.active .prayer-sch-range,
+.prayer-sch-row.proh.active .prayer-sch-icon {
+    color: var(--warn);
 }
 
 .prayer-updated {
@@ -2945,17 +2955,7 @@ body.dark-mode .calendar-day-cell.today {
     font-family: 'JetBrains Mono', monospace;
 }
 
-@media (max-width: 1024px) {
-    .prayer-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
 @media (max-width: 640px) {
-    .prayer-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .prayer-hero {
         flex-wrap: wrap;
     }

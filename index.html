@@ -946,8 +946,9 @@
                                         style="display:none">Try Again</button>
                                 </div>
 
-                                <div class="prayer-grid" id="prayerGrid"></div>
                                 <div class="prayer-schedule" id="prayerSchedule"></div>
+                                <p class="prayer-mini-title">🚫 Prohibited Prayer Times</p>
+                                <div class="prayer-schedule prayer-proh" id="prayerProh"></div>
                                 <div class="prayer-updated" id="prayerUpdated"></div>
                             </div>
                         </div>
@@ -3197,19 +3198,22 @@
         const PRAYER_METHOD_KEY = 'flowdesk_prayer_method';
         const PRAYER_COORDS_KEY = 'flowdesk_prayer_coords';
         const PRAYER_METHODS = {
-            1: 'Karachi (Bangladesh/India/Pakistan)',
-            2: 'ISNA (North America)',
+            1: 'Karachi (Hanafi)',
+            2: 'ISNA',
             3: 'Muslim World League',
-            4: 'Umm al-Qura (Makkah)',
-            5: 'Egyptian General Authority',
+            4: 'Umm al-Qura',
+            5: 'Egyptian',
             8: 'Gulf Region',
             9: 'Kuwait',
             10: 'Qatar',
             11: 'Singapore',
             13: 'Turkey',
-            16: 'Moonsighting Committee',
+            16: 'Moonsighting',
             21: 'Dubai'
         };
+        // Hanafi Asr: the school=1 parameter makes Aladhan compute the Asr start
+        // by the shadow-factor ×2 rule (Hanafi) instead of the ×1 Shafi'i rule —
+        // requested so the Asr window matches Hanafi scholars' timetable.
         const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
         const PRAYER_META = {
             Fajr: { name: 'Fajr', icon: '🌅' },
@@ -3232,10 +3236,14 @@
 
         const prayerMinute = t => { const m = (t || '').match(/(\d{1,2}):(\d{2})/); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 
+        // Cache schema version: bump to invalidate previously-saved caches
+        // (v2 = switched to school=1 / Hanafi Asr — older caches hold Shafi'i Asr)
+        const PRAYER_CACHE_V = 2;
+
         function getCachedPrayer() {
             try {
                 const v = JSON.parse(localStorage.getItem(PRAYER_CACHE_KEY));
-                if (v && v.timings && v.timings.Fajr) return v;
+                if (v && v.timings && v.timings.Fajr && v.v === PRAYER_CACHE_V) return v;
             } catch (_) { }
             return null;
         }
@@ -3285,7 +3293,7 @@
                 const c = await prayerGetCoords();
                 const now = new Date();
                 const ddmm = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
-                const url = `https://api.aladhan.com/v1/timings/${ddmm}?latitude=${c.lat}&longitude=${c.lon}&method=${prayerMethod}&school=0`;
+                const url = `https://api.aladhan.com/v1/timings/${ddmm}?latitude=${c.lat}&longitude=${c.lon}&method=${prayerMethod}&school=1`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const json = await res.json();
@@ -3293,6 +3301,7 @@
                 if (!t || !t.Fajr) throw new Error('bad payload');
                 const strip = v => (v || '').match(/(\d{1,2}:\d{2})/) ? RegExp.$1 : v;
                 prayerData = {
+                    v: PRAYER_CACHE_V,
                     dateKey: dk,
                     method: prayerMethod,
                     timings: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, strip(v)])),
@@ -3383,12 +3392,12 @@
 
             const st = prayerState();
             const hero = document.getElementById('prayerHero');
-            const grid = document.getElementById('prayerGrid');
             const sched = document.getElementById('prayerSchedule');
+            const proh = document.getElementById('prayerProh');
             const updated = document.getElementById('prayerUpdated');
             if (!st) {
                 hero.classList.remove('active');
-                grid.innerHTML = ''; sched.innerHTML = ''; updated.textContent = '';
+                sched.innerHTML = ''; proh.innerHTML = ''; updated.textContent = '';
                 return;
             }
 
@@ -3398,27 +3407,9 @@
             document.getElementById('prayerHeroIcon').textContent = meta.icon;
             hero.classList.add('active');
 
-            // ── grid of 6 cards ──
-            grid.innerHTML = '';
-            PRAYER_ORDER.forEach(name => {
-                const range = prayerRangeLabel(name, st);
-                if (!range) return;
-                const cardEl = document.createElement('div');
-                cardEl.className = 'weather-card prayer-card' + (name === st.currentName ? ' ongoing' : '') + (name === st.nextName ? ' next' : '');
-                const icon = document.createElement('div'); icon.className = 'wc-icon'; icon.textContent = PRAYER_META[name].icon;
-                const label = document.createElement('span'); label.className = 'wc-label'; label.textContent = PRAYER_META[name].name;
-                const row = document.createElement('div'); row.className = 'prayer-card-times';
-                const a = document.createElement('span'); a.className = 'prayer-card-time'; a.textContent = range.start;
-                const sep = document.createElement('span'); sep.className = 'prayer-card-sep'; sep.textContent = '−';
-                const b = document.createElement('span'); b.className = 'prayer-card-time'; b.textContent = range.end + (range.endNote ? ' ⁺' : '');
-                row.append(a, sep, b);
-                if (name === st.nextName) { const badge = document.createElement('span'); badge.className = 'prayer-badge'; badge.textContent = 'Next'; cardEl.appendChild(badge); }
-                else if (name === st.currentName) { const badge = document.createElement('span'); badge.className = 'prayer-badge ongoing'; badge.textContent = 'Ongoing'; cardEl.appendChild(badge); }
-                cardEl.append(icon, label, row);
-                grid.appendChild(cardEl);
-            });
+            const fm = m => fmtTime12(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`);
 
-            // ── full-day schedule rows ──
+            // ── full-day schedule rows (single display) ──
             sched.innerHTML = '';
             PRAYER_ORDER.forEach(name => {
                 const range = prayerRangeLabel(name, st);
@@ -3427,9 +3418,29 @@
                 rowEl.className = 'prayer-sch-row' + (name === st.currentName ? ' ongoing' : '') + (name === st.nextName ? ' next' : '');
                 const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.textContent = PRAYER_META[name].icon;
                 const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = PRAYER_META[name].name;
+                if (name === st.nextName) { const chip = document.createElement('span'); chip.className = 'prayer-badge next'; chip.textContent = 'Next'; lab.appendChild(chip); }
+                else if (name === st.currentName) { const chip = document.createElement('span'); chip.className = 'prayer-badge ongoing'; chip.textContent = 'Now'; lab.appendChild(chip); }
                 const rng = document.createElement('span'); rng.className = 'prayer-sch-range'; rng.textContent = `${range.start} – ${range.end}${range.endNote ? ' ⁺' : ''}`;
                 rowEl.append(ic, lab, rng);
                 sched.appendChild(rowEl);
+            });
+
+            // ── prohibited (impure) times — the 3 widely-listed daily windows ──
+            proh.innerHTML = '';
+            const pRows = [];
+            if (st.mins.Sunrise !== null) pRows.push({ label: 'Sunrise', note: 'Sun rising — prayer not allowed until it fully clears the horizon', start: st.mins.Sunrise, end: st.mins.Sunrise + 20 });
+            if (st.mins.Dhuhr !== null) pRows.push({ label: 'Zawal (midday)', note: 'Sun at its zenith — not allowed until Dhuhr begins', start: st.mins.Dhuhr - 15, end: st.mins.Dhuhr });
+            if (st.mins.Maghrib !== null) pRows.push({ label: 'Sunset', note: 'Sun setting — not allowed until Maghrib begins', start: st.mins.Maghrib - 15, end: st.mins.Maghrib });
+            pRows.forEach(p => {
+                const inNow = st.nowMin >= p.start && st.nowMin < p.end;
+                const rowEl = document.createElement('div');
+                rowEl.className = 'prayer-sch-row proh' + (inNow ? ' active' : '');
+                rowEl.title = p.note;
+                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.textContent = inNow ? '⛔' : '🚫';
+                const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = p.label;
+                const rng = document.createElement('span'); rng.className = 'prayer-sch-range'; rng.textContent = `${fm(p.start)} – ${fm(p.end)}`;
+                rowEl.append(ic, lab, rng);
+                proh.appendChild(rowEl);
             });
 
             const when = prayerData.ts ? new Date(prayerData.ts) : null;
