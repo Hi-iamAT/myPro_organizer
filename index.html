@@ -1521,7 +1521,7 @@
                 btn.innerHTML = `
                     <span class="note-list-accent"></span>
                     <div class="note-list-info">
-                        <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml(note.title) || '<span class="untitled-note">Untitled Note</span>'}</span>
+                        <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml((note.title || '').trim()) || '<span class="untitled-note">Untitled Note</span>'}</span>
                         <span class="note-list-date">${dateStr}</span>
                     </div>`;
                 btn.onclick = () => openNote(note.id);
