@@ -573,10 +573,6 @@ nav#mainNav {
         font-weight: 600;
         color: var(--txt);
     }
-    .note-list-date {
-        font-size: 0.75rem;
-        opacity: 0.6;
-    }
 }
 
 @media (min-width: 769px) {
@@ -1190,11 +1186,6 @@ nav#mainNav {
     font-style: normal;
     font-weight: 400;
     opacity: 0.5;
-}
-
-.note-list-date {
-    font-size: 0.75rem;
-    color: var(--txt-2);
 }
 
 .note-editor-panel {
@@ -2209,6 +2200,13 @@ nav#mainNav {
         border-bottom: none;
     }
 
+    /* Notes list column also fills the whole tab height on small screens */
+    #panel-notes .split-left {
+        max-height: none;
+        flex: 1;
+        min-height: 0;
+    }
+
     .todo-list,
     .notes-list {
         flex: 1;
@@ -2685,8 +2683,7 @@ body.dark-mode .calendar-day-cell.today {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 150px;
-    max-height: 350px;
+    min-height: 0;
     padding-right: 4px;
 }
 

@@ -1515,15 +1515,12 @@
                 const btn = document.createElement('button');
                 btn.className = 'note-list-item' + (note.id === activeNoteId ? ' active' : '');
                 btn.style.setProperty('--nc', note.theme || '#6C63FF');
-                const dateStr = note.updatedAt
-                    ? new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                    : 'Just now';
                 btn.innerHTML = `
                     <span class="note-list-accent"></span>
                     <div class="note-list-info">
                         <span class="note-list-title">${note.pinned ? '<span class="pin-mark" title="Pinned">📌</span> ' : ''}${escapeHtml((note.title || '').trim()) || '<span class="untitled-note">Untitled Note</span>'}</span>
-                        <span class="note-list-date">${dateStr}</span>
                     </div>`;
+                btn.title = (note.title || '').trim() || 'Untitled Note'; // full title on hover
                 btn.onclick = () => openNote(note.id);
                 list.appendChild(btn);
             });
