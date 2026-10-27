@@ -74,7 +74,7 @@ Here is a tour of the FlowDesk dark & light productivity hub interface across al
 | **⏱️ Focus Timer** | Pomodoro-style countdown (Work 25m / Break 5m / Long Break 15m) with animated SVG progress ring and daily session counter. Plus **live-clock interval alerts** and **custom time reminders** (see [Focus Timer Extras](#️-focus-timer-extras--interval-alerts--custom-reminders)). |
 | **⚖️ BMI Calculator** | Easily check body mass index with category indicators — plus a built-in **Daily Unit Converter** (see [Unit Converter](#️-daily-unit-converter)). |
 | **🌤️ Weather Forecast** | Check live local weather updates. |
-| **⚖️ Live Calendar** | Check live calendar in English/ Bengali/ Hijri and add events. |
+| **⚖️ Live Calendar** | Live calendar in English / Bengali / Hijri — plus **live prayer times** with a next-prayer countdown (see [Prayer Times](#-prayer-times-live)). |
 | **🌤️ Daily Goals** | Add your daily goals and track your progress. |
 
 ### Extras
@@ -145,7 +145,7 @@ Fonts: **Inter** (UI) + **JetBrains Mono** (clock, calculator display, timer) vi
 
 ## 🚀 v3 Highlights
 
-- **Dashboard** (new home): greeting, KPIs (open tasks, due today, goals, focus minutes, notes), up-next tasks, goal ring, focus sparkline, upcoming events, weather snapshot, recent/pinned notes, quick actions.
+- **Dashboard** (new home): greeting, KPIs (open tasks, due today, goals, focus minutes, notes), up-next tasks, goal ring, focus sparkline, live **next-prayer countdown**, weather snapshot, recent/pinned notes, quick actions.
 - **Command palette** — `Ctrl/⌘ + K`; `Alt + 1…9` jumps between tools; `/` searches (To-Do/Notes); `N` new task; `?` shortcut help.
 - **To-Do**: live search + filters (All / Today / 7 days / High / No date).
 - **Notes**: search titles & content, pin notes to the top.
@@ -179,6 +179,17 @@ Lives inside the **BMI & Converters** tab, right under the BMI tool — everyday
 - Quick-card grid shows popular currencies (EUR, GBP, JPY, INR, PKR, BDT, SAR, AED…) — the entered amount in each at once
 - Cross-rates are computed directly (e.g. BDT → INR) with no manual two-step conversion
 - Styles reuse the same design tokens as the BMI tool (`.bmi-input-group` pills, `.unit-btn`-grade chips, `.weather-card` quick cards) — dark & light themes included
+
+## 🕌 Prayer Times (live, in the Live Calendar)
+
+Displayed today's schedule in the Live Calendar sidebar — data from the free, keyless **Aladhan API**:
+
+- **Next-prayer hero card** — highlighted card showing the upcoming prayer with a **live 1-second countdown** ("Asr · at 3:24 PM · in 1h 9m") synced to the navbar clock
+- **6 window cards** (Fajr · Sunrise · Dhuhr · Asr · Maghrib · Isha) — each shows its start–end time range; the ongoing window gets a green **Ongoing** border and the upcoming prayer an **Next** badge
+- **Full-day schedule rows** — vertical list of every window with the current one highlighted; Isha's window wraps to tomorrow's Fajr (marked ⁺)
+- **Calculation method selector** — 13 methods (Karachi default, ISNA, MWL, Umm al-Qura, Egypt, Gulf, Kuwait, Qatar, Singapore, Turkey, Moonsighting, Dubai); persisted choice, cached per-day (`localStorage` keys `flowdesk_prayer_cache`, `flowdesk_prayer_method`, `flowdesk_prayer_coords`) so the panel still works **offline**
+- **Location**: reuses browser geolocation with a Dhaka fallback when denied
+- Dashboard's calendar card replaced with a **live Next Prayer** widget driven by the same countdown
 
 ## ⏰ Focus Timer Extras — Interval Alerts & Custom Reminders
 

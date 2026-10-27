@@ -273,22 +273,21 @@
         fc.appendChild(spark);
         grid.appendChild(fc);
 
-        // Calendar
-        const cc = card('Today & upcoming events', 'calendar');
-        const cl = el('ul', 'dash-list');
-        let count = 0;
-        for (let i = 0; i < 14 && count < 4; i++) {
-            const d = new Date(now); d.setDate(d.getDate() + i);
-            (calendarEvents[dayKey(d)] || []).forEach(ev => {
-                if (count >= 4) return; count++;
-                const li = el('li', 'dash-item');
-                li.append(el('span', 'dash-date-chip', i === 0 ? 'Today' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })), el('span', 'dash-item-text', ev.text || ''));
-                cl.appendChild(li);
-            });
+        // Next Prayer (live; powered by the calendar panel's prayer engine via window.FlowPrayer)
+        const pc = card('Next Prayer', 'schedule');
+        const hp = (window.FlowPrayer && FlowPrayer.ready()) ? FlowPrayer.next() : null;
+        if (hp) {
+            const pw = el('div', 'dash-weather');
+            const side = el('div', 'dash-ring-side');
+            const sub = el('span', 'dash-prayer-sub');
+            sub.append(`at ${hp.at} · `, Object.assign(el('span', '', hp.countdown), { id: 'dashPrayerCountdown' }));
+            side.append(el('strong', '', hp.name), sub);
+            pw.append(el('span', 'dash-wx-icon', hp.icon), side);
+            pc.appendChild(pw);
+        } else {
+            pc.appendChild(el('div', 'dash-empty', 'Loading prayer times…'));
         }
-        if (!count) cl.appendChild(el('li', 'dash-empty', 'No events in the next 2 weeks'));
-        cc.appendChild(cl);
-        grid.appendChild(cc);
+        grid.appendChild(pc);
 
         // Weather snapshot
         const wc = card('Weather', 'weather');

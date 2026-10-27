@@ -842,7 +842,7 @@
                         </div>
                         <div>
                             <h1>Live Calendar</h1>
-                            <p class="panel-subtitle">Plan your days with Hijri & Bengali dates</p>
+                            <p class="panel-subtitle">Hijri &amp; Bengali dates · live prayer times</p>
                         </div>
                     </div>
                 </div>
@@ -909,21 +909,46 @@
                                 </div>
                             </div>
 
-                            <div class="notes-section">
-                                <h4>Events & Notes</h4>
-                                <div class="notes-list" id="calendarNotesList"></div>
-
-                                <div class="add-note-form">
-                                    <textarea id="calendarNoteInput" placeholder="Write a note/event for this day..."
-                                        rows="3"></textarea>
-                                    <button class="btn-primary" onclick="addCalendarNote()">
-                                        <svg viewBox="0 0 20 20" fill="none">
-                                            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"
-                                                stroke-linecap="round" />
-                                        </svg>
-                                        Add Note
-                                    </button>
+                            <!-- Prayer Times (live, Aladhan API; replaces events & notes) -->
+                            <div class="prayer-times-section" id="prayerTimesSection">
+                                <div class="prayer-topbar">
+                                    <h4>🕌 Prayer Times</h4>
+                                    <div class="prayer-topbar-actions">
+                                        <select id="prayerMethodSelect" class="prayer-method-select"
+                                            onchange="prayerSetMethod(this.value)" title="Calculation method"></select>
+                                        <button class="ghost-btn icon-btn-small" onclick="prayerRefresh()"
+                                            title="Reload prayer times" aria-label="Reload prayer times">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2.5">
+                                                <path fill-rule="evenodd"
+                                                    d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.389zM4 8a1 1 0 102 0V4h9V2H5a1 1 0 00-1 1v5z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <!-- Next prayer hero (live countdown) -->
+                                <div class="prayer-hero" id="prayerHero">
+                                    <div class="prayer-hero-icon" id="prayerHeroIcon">🕌</div>
+                                    <div class="prayer-hero-info">
+                                        <span class="prayer-hero-label">Next Prayer</span>
+                                        <span class="prayer-hero-name" id="prayerHeroName">—</span>
+                                    </div>
+                                    <div class="prayer-hero-time">
+                                        <span class="prayer-hero-count" id="prayerHeroCountdown">--</span>
+                                        <span class="prayer-hero-at" id="prayerHeroAt"></span>
+                                    </div>
+                                </div>
+
+                                <div class="prayer-status" id="prayerStatus" style="display:none">
+                                    <span id="prayerStatusMsg">Detecting your location…</span>
+                                    <button class="btn-primary" id="prayerRetryBtn" onclick="prayerRefresh()"
+                                        style="display:none">Try Again</button>
+                                </div>
+
+                                <div class="prayer-grid" id="prayerGrid"></div>
+                                <div class="prayer-schedule" id="prayerSchedule"></div>
+                                <div class="prayer-updated" id="prayerUpdated"></div>
                             </div>
                         </div>
                     </div>
@@ -2664,7 +2689,7 @@
         // ─── LIVE CALENDAR ────────────────────────────────────
         let calendarDate = new Date();
         let selectedDate = new Date();
-        let calendarEvents = JSON.parse(localStorage.getItem('calendar_events')) || {};
+        // ─ events & notes removed from the calendar; replaced by live prayer times ─
 
         const monthNames = [
             "January", "February", "March", "April", "May", "June",
@@ -3073,11 +3098,6 @@
                 cell.classList.add('selected');
             }
 
-            // Has events indicator
-            if (calendarEvents[dateStr] && calendarEvents[dateStr].length > 0) {
-                cell.classList.add('has-events');
-            }
-
             // Friday indicator
             if (dateObj.getDay() === 5) {
                 cell.classList.add('is-friday');
@@ -3167,86 +3187,293 @@
                 const fridayNote = document.getElementById('calendarFridayNote');
                 if (fridayNote) fridayNote.style.display = 'none';
             }
-
-            renderCalendarNotes(dateStr);
         }
 
-        function renderCalendarNotes(dateStr) {
-            const list = document.getElementById('calendarNotesList');
-            list.innerHTML = '';
+        // ─── LIVE PRAYER TIMES (Aladhan API — free, no key) ───
+        // Shows today's Fajr/Sunrise/Dhuhr/Asr/Maghrib/Isha with a live
+        // next-prayer countdown synced to the 1-second live clock. Timings are
+        // cached per-date so the panel still works offline / across restarts.
+        const PRAYER_CACHE_KEY = 'flowdesk_prayer_cache';
+        const PRAYER_METHOD_KEY = 'flowdesk_prayer_method';
+        const PRAYER_COORDS_KEY = 'flowdesk_prayer_coords';
+        const PRAYER_METHODS = {
+            1: 'Karachi (Bangladesh/India/Pakistan)',
+            2: 'ISNA (North America)',
+            3: 'Muslim World League',
+            4: 'Umm al-Qura (Makkah)',
+            5: 'Egyptian General Authority',
+            8: 'Gulf Region',
+            9: 'Kuwait',
+            10: 'Qatar',
+            11: 'Singapore',
+            13: 'Turkey',
+            16: 'Moonsighting Committee',
+            21: 'Dubai'
+        };
+        const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const PRAYER_META = {
+            Fajr: { name: 'Fajr', icon: '🌅' },
+            Sunrise: { name: 'Sunrise', icon: '🌄' },
+            Dhuhr: { name: 'Dhuhr', icon: '☀️' },
+            Asr: { name: 'Asr', icon: '🌤️' },
+            Maghrib: { name: 'Maghrib', icon: '🌇' },
+            Isha: { name: 'Isha', icon: '🌙' }
+        };
 
-            const notes = calendarEvents[dateStr] || [];
+        let prayerMethod = localStorage.getItem(PRAYER_METHOD_KEY) || '1';
+        let prayerCoords = (() => {
+            try {
+                const v = JSON.parse(localStorage.getItem(PRAYER_COORDS_KEY));
+                return (v && typeof v.lat === 'number') ? v : null;
+            } catch (_) { return null; }
+        })();
+        let prayerData = null;   // { dateKey, method, timings: {Fajr:'HH:MM',...}, locLabel, ts, stale }
+        let prayerLoading = false;
 
-            if (notes.length === 0) {
-                const empty = document.createElement('div');
-                empty.className = 'notes-empty-state';
-                empty.textContent = 'No events or notes for this date.';
-                list.appendChild(empty);
-                return;
-            }
+        const prayerMinute = t => { const m = (t || '').match(/(\d{1,2}):(\d{2})/); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 
-            notes.forEach((note) => {
-                const item = document.createElement('div');
-                item.className = 'note-item';
+        function getCachedPrayer() {
+            try {
+                const v = JSON.parse(localStorage.getItem(PRAYER_CACHE_KEY));
+                if (v && v.timings && v.timings.Fajr) return v;
+            } catch (_) { }
+            return null;
+        }
 
-                const textSpan = document.createElement('span');
-                textSpan.className = 'note-item-text';
-                textSpan.textContent = note.text;
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'note-delete-btn';
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.title = 'Delete Event';
-                deleteBtn.onclick = () => deleteCalendarNote(dateStr, note.id);
-
-                item.appendChild(textSpan);
-                item.appendChild(deleteBtn);
-                list.appendChild(item);
+        function prayerGetCoords() {
+            if (prayerCoords) return Promise.resolve(prayerCoords);
+            return new Promise(resolve => {
+                if (!('geolocation' in navigator)) return resolve({ lat: 23.8103, lon: 90.4125, label: 'Dhaka (approx.)' });
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        prayerCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Your location' };
+                        localStorage.setItem(PRAYER_COORDS_KEY, JSON.stringify(prayerCoords));
+                        resolve(prayerCoords);
+                    },
+                    () => resolve({ lat: 23.8103, lon: 90.4125, label: 'Dhaka (approx.)' }),
+                    { timeout: 8000, maximumAge: 600000 }
+                );
             });
         }
 
-        function addCalendarNote() {
-            const input = document.getElementById('calendarNoteInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const yyyy = selectedDate.getFullYear();
-            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(selectedDate.getDate()).padStart(2, '0');
-            const dateStr = `${yyyy}-${mm}-${dd}`;
-
-            if (!calendarEvents[dateStr]) {
-                calendarEvents[dateStr] = [];
-            }
-
-            const newEvent = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-                text: text
-            };
-
-            calendarEvents[dateStr].push(newEvent);
-            localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
-            input.value = '';
-
-            renderCalendar();
-            renderCalendarNotes(dateStr);
-            showToast('Event added successfully!', 'success');
+        function prayerSetStatus(msg, showRetry) {
+            const box = document.getElementById('prayerStatus');
+            const msgEl = document.getElementById('prayerStatusMsg');
+            const retry = document.getElementById('prayerRetryBtn');
+            box.style.display = msg ? 'flex' : 'none';
+            msgEl.textContent = msg || '';
+            retry.style.display = showRetry ? 'inline-flex' : 'none';
         }
 
-        function deleteCalendarNote(dateStr, noteId) {
-            if (!calendarEvents[dateStr]) return;
+        async function prayerLoad(force) {
+            if (prayerLoading) return;
+            const dk = dayKeyStr(new Date());
+            const cached = getCachedPrayer();
+            if (!force && cached && cached.dateKey === dk && String(cached.method) === String(prayerMethod)) {
+                prayerData = cached;
+                renderPrayerTimes();
+                return;
+            }
+            prayerLoading = true;
+            if (!prayerData) {
+                if (cached) { prayerData = cached; renderPrayerTimes(); } // stale until fresh arrives
+                prayerSetStatus('Loading prayer times…', false);
+            } else {
+                renderPrayerTimes(); // keep showing old card, silent refetch
+            }
+            try {
+                const c = await prayerGetCoords();
+                const now = new Date();
+                const ddmm = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+                const url = `https://api.aladhan.com/v1/timings/${ddmm}?latitude=${c.lat}&longitude=${c.lon}&method=${prayerMethod}&school=0`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const t = json && json.data && json.data.timings;
+                if (!t || !t.Fajr) throw new Error('bad payload');
+                const strip = v => (v || '').match(/(\d{1,2}:\d{2})/) ? RegExp.$1 : v;
+                prayerData = {
+                    dateKey: dk,
+                    method: prayerMethod,
+                    timings: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, strip(v)])),
+                    locLabel: c.label,
+                    ts: Date.now()
+                };
+                localStorage.setItem(PRAYER_CACHE_KEY, JSON.stringify(prayerData));
+                prayerSetStatus('');
+            } catch (e) {
+                if (prayerData && prayerData.dateKey === dk) {
+                    prayerData.stale = true; // old-but-same-day cache survived
+                    prayerSetStatus('Offline — showing saved timings for today', false);
+                } else {
+                    prayerSetStatus('Could not load prayer times. Check your connection.', true);
+                }
+            }
+            prayerLoading = false;
+            renderPrayerTimes();
+            if (window.FlowEnh && FlowEnh.refreshDashboard) FlowEnh.refreshDashboard();
+        }
 
-            calendarEvents[dateStr] = calendarEvents[dateStr].filter(note => note.id !== noteId);
-            if (calendarEvents[dateStr].length === 0) {
-                delete calendarEvents[dateStr];
+        function prayerSetMethod(m) {
+            prayerMethod = m;
+            localStorage.setItem(PRAYER_METHOD_KEY, m);
+            prayerData = null;
+            localStorage.removeItem(PRAYER_CACHE_KEY); // cache is method-specific
+            return prayerLoad(true);
+        }
+
+        function prayerRefresh() {
+            prayerLoad(true);
+        }
+
+        // Convert "HH:MM (TZ)" → minutes since midnight
+        // State machine over the day cycle: current window + next prayer (with countdown)
+        function prayerState() {
+            if (!prayerData || !prayerData.timings) return null;
+            const now = new Date();
+            const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+            const mins = {};
+            PRAYER_ORDER.forEach(k => { mins[k] = prayerMinute(prayerData.timings[k]); });
+            let curIdx = -1;
+            for (let i = PRAYER_ORDER.length - 1; i >= 0; i--) {
+                if (mins[PRAYER_ORDER[i]] !== null && nowMin >= mins[PRAYER_ORDER[i]]) { curIdx = i; break; }
+            }
+            // before Fajr → we are in yesterday's Isha window
+            const currentName = curIdx >= 0 ? PRAYER_ORDER[curIdx] : 'Isha';
+            // next prayer = first prayer strictly after now; else tomorrow's Fajr
+            let nextName = null, nextInMin = 0;
+            for (let i = 0; i < PRAYER_ORDER.length; i++) {
+                const m = mins[PRAYER_ORDER[i]];
+                if (m !== null && m > nowMin) { nextName = PRAYER_ORDER[i]; nextInMin = m - nowMin; break; }
+            }
+            if (!nextName) { nextName = 'Fajr'; nextInMin = 1440 - nowMin + (mins.Fajr ?? 0); }
+            return { nowMin, mins, currentName, nextName, nextInMin, now };
+        }
+
+        function prayerRangeLabel(name, st) {
+            const idx = PRAYER_ORDER.indexOf(name);
+            const start = st.mins[name];
+            if (start === null) return null;
+            // window end = the next time in the day cycle (wraps to Fajr after Isha)
+            let endObj, end;
+            if (idx < PRAYER_ORDER.length - 1) {
+                end = st.mins[PRAYER_ORDER[idx + 1]]; endObj = null;
+            } else {
+                end = st.mins.Fajr; endObj = 'tomorrow';
+            }
+            const fmt = m => m === null ? '--:--' : fmtTime12(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`);
+            return { start: fmt(start), end: fmt(end), endNote: endObj, startMin: start, endMin: end };
+        }
+
+        function fmtCountdown(mins) {
+            const total = Math.max(0, Math.round(mins * 60));
+            const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+            return (h ? `${h}h ` : '') + `${m}m ` + `${String(s).padStart(2, '0')}s`;
+        }
+
+        function renderPrayerTimes() {
+            const methodSel = document.getElementById('prayerMethodSelect');
+            methodSel.innerHTML = '';
+            Object.entries(PRAYER_METHODS).forEach(([num, label]) => {
+                const o = document.createElement('option');
+                o.value = num; o.textContent = label;
+                methodSel.appendChild(o);
+            });
+            methodSel.value = String(prayerMethod);
+
+            const st = prayerState();
+            const hero = document.getElementById('prayerHero');
+            const grid = document.getElementById('prayerGrid');
+            const sched = document.getElementById('prayerSchedule');
+            const updated = document.getElementById('prayerUpdated');
+            if (!st) {
+                hero.classList.remove('active');
+                grid.innerHTML = ''; sched.innerHTML = ''; updated.textContent = '';
+                return;
             }
 
-            localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
+            // ── hero ──
+            const meta = PRAYER_META[st.nextName];
+            document.getElementById('prayerHeroName').textContent = meta.name;
+            document.getElementById('prayerHeroIcon').textContent = meta.icon;
+            hero.classList.add('active');
 
-            renderCalendar();
-            renderCalendarNotes(dateStr);
-            showToast('Event deleted!', 'info');
+            // ── grid of 6 cards ──
+            grid.innerHTML = '';
+            PRAYER_ORDER.forEach(name => {
+                const range = prayerRangeLabel(name, st);
+                if (!range) return;
+                const cardEl = document.createElement('div');
+                cardEl.className = 'weather-card prayer-card' + (name === st.currentName ? ' ongoing' : '') + (name === st.nextName ? ' next' : '');
+                const icon = document.createElement('div'); icon.className = 'wc-icon'; icon.textContent = PRAYER_META[name].icon;
+                const label = document.createElement('span'); label.className = 'wc-label'; label.textContent = PRAYER_META[name].name;
+                const row = document.createElement('div'); row.className = 'prayer-card-times';
+                const a = document.createElement('span'); a.className = 'prayer-card-time'; a.textContent = range.start;
+                const sep = document.createElement('span'); sep.className = 'prayer-card-sep'; sep.textContent = '−';
+                const b = document.createElement('span'); b.className = 'prayer-card-time'; b.textContent = range.end + (range.endNote ? ' ⁺' : '');
+                row.append(a, sep, b);
+                if (name === st.nextName) { const badge = document.createElement('span'); badge.className = 'prayer-badge'; badge.textContent = 'Next'; cardEl.appendChild(badge); }
+                else if (name === st.currentName) { const badge = document.createElement('span'); badge.className = 'prayer-badge ongoing'; badge.textContent = 'Ongoing'; cardEl.appendChild(badge); }
+                cardEl.append(icon, label, row);
+                grid.appendChild(cardEl);
+            });
+
+            // ── full-day schedule rows ──
+            sched.innerHTML = '';
+            PRAYER_ORDER.forEach(name => {
+                const range = prayerRangeLabel(name, st);
+                if (!range) return;
+                const rowEl = document.createElement('div');
+                rowEl.className = 'prayer-sch-row' + (name === st.currentName ? ' ongoing' : '') + (name === st.nextName ? ' next' : '');
+                const ic = document.createElement('span'); ic.className = 'prayer-sch-icon'; ic.textContent = PRAYER_META[name].icon;
+                const lab = document.createElement('span'); lab.className = 'prayer-sch-name'; lab.textContent = PRAYER_META[name].name;
+                const rng = document.createElement('span'); rng.className = 'prayer-sch-range'; rng.textContent = `${range.start} – ${range.end}${range.endNote ? ' ⁺' : ''}`;
+                rowEl.append(ic, lab, rng);
+                sched.appendChild(rowEl);
+            });
+
+            const when = prayerData.ts ? new Date(prayerData.ts) : null;
+            updated.textContent = when
+                ? `🕌 ${prayerData.locLabel} · ${PRAYER_METHODS[prayerData.method].split(' (')[0]} · loaded ${when.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}${prayerData.stale ? ' (offline)' : ''}`
+                : '';
+            updatePrayerLive();
         }
+
+        // 1-second ticker: keeps the countdown, "Ongoing/Next" badges and the
+        // dashboard's Next-Prayer card fresh as the live clock moves.
+        function updatePrayerLive() {
+            const st = prayerState();
+            if (!st) return;
+            document.getElementById('prayerHeroCountdown').textContent = fmtCountdown(st.nextInMin);
+            document.getElementById('prayerHeroAt').textContent = `at ${fmtTime12(`${String(Math.floor(st.mins[st.nextName] / 60) % 24).padStart(2, '0')}:${String(Math.floor(st.mins[st.nextName] % 60)).padStart(2, '0')}`)}`;
+            // Cheap reconciliation: if the minute state changed (prayer entered/ended), re-render badges
+            const tickKey = `${st.currentName}|${st.nextName}`;
+            if (window._prayerTickKey !== tickKey) {
+                window._prayerTickKey = tickKey;
+                renderPrayerTimes();
+            }
+            const dash = document.getElementById('dashPrayerCountdown');
+            if (dash) dash.textContent = fmtCountdown(st.nextInMin);
+        }
+
+        // Bridge used by the dashboard (enhance.js): next prayer snapshot
+        window.FlowPrayer = {
+            ready: () => !!(prayerData && prayerData.timings),
+            next: () => {
+                const st = prayerState();
+                if (!st) return null;
+                const m = st.mins[st.nextName];
+                return {
+                    name: PRAYER_META[st.nextName].name,
+                    icon: PRAYER_META[st.nextName].icon,
+                    countdown: fmtCountdown(st.nextInMin),
+                    at: fmtTime12(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`)
+                };
+            }
+        };
+
+        setInterval(updatePrayerLive, 1000);
+        prayerLoad(false);
 
         // ─── THEME ────────────────────────────────────────────
         function toggleTheme() {
@@ -3260,7 +3487,7 @@
         // ─── EXPORT ───────────────────────────────────────────
         function exportData() {
             const blob = new Blob(
-                [JSON.stringify({ todos, notes: notesArr, calendarEvents, dgGoals: dgGoals || {},
+                [JSON.stringify({ todos, notes: notesArr, dgGoals: dgGoals || {},
                     focusLog: JSON.parse(localStorage.getItem('flowdesk_focus_log') || '{}'), exported: new Date().toISOString() }, null, 2)],
                 { type: 'application/json' }
             );
@@ -3306,8 +3533,6 @@
         function showImportModal(data) {
             const todoCount     = Array.isArray(data.todos)          ? data.todos.length          : 0;
             const noteCount     = Array.isArray(data.notes)          ? data.notes.length          : 0;
-            const eventCount    = (data.calendarEvents && typeof data.calendarEvents === 'object')
-                                    ? Object.values(data.calendarEvents).flat().length : 0;
             const dgCount       = (data.dgGoals && typeof data.dgGoals === 'object')
                                     ? Object.keys(data.dgGoals).length : 0;
             const exportedOn    = data.exported
@@ -3355,7 +3580,6 @@
                         ${[
                             ['📝 To-Dos',       todoCount],
                             ['🗒️ Notes',        noteCount],
-                            ['📅 Calendar',     eventCount + ' events'],
                             ['🎯 Daily Goals',  dgCount + ' days'],
                         ].map(([label, val]) => `
                             <div style="
@@ -3430,24 +3654,6 @@
                 }
                 saveData('advancedNotes', notesArr);
                 renderNotesList();
-            }
-
-            // ── Calendar events ──
-            if (data.calendarEvents && typeof data.calendarEvents === 'object') {
-                if (mode === 'replace') {
-                    calendarEvents = data.calendarEvents;
-                } else {
-                    Object.entries(data.calendarEvents).forEach(([dateKey, evts]) => {
-                        if (!calendarEvents[dateKey]) {
-                            calendarEvents[dateKey] = evts;
-                        } else {
-                            const existingIds = new Set(calendarEvents[dateKey].map(ev => ev.id));
-                            evts.forEach(ev => { if (!existingIds.has(ev.id)) calendarEvents[dateKey].push(ev); });
-                        }
-                    });
-                }
-                localStorage.setItem('calendar_events', JSON.stringify(calendarEvents));
-                if (typeof renderCalendar === 'function') renderCalendar();
             }
 
             // ── Daily Goals ──
