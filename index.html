@@ -561,6 +561,10 @@
                                 <input type="time" id="reminderTime" class="reminder-time-input" required>
                                 <input type="text" id="reminderMsg" class="reminder-msg-input" maxlength="120"
                                     placeholder="e.g. Take a walk, drink water…" required>
+                                <label class="reminder-repeat" title="Off: fires once, then removes itself · On: fires every day at this time">
+                                    <input type="checkbox" id="reminderRepeat">
+                                    <span>Daily</span>
+                                </label>
                                 <button type="submit" class="add-btn-sm" title="Add reminder" aria-label="Add reminder">
                                     <svg viewBox="0 0 20 20" fill="none">
                                         <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5"

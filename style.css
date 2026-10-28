@@ -4651,6 +4651,40 @@ body.dark-mode .sidebar-item.active {
     white-space: nowrap;
 }
 
+.reminder-item-repeat {
+    flex: none;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--txt-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.reminder-repeat {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--txt-2);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.reminder-repeat input {
+    accent-color: var(--brand);
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+}
+
 .reminder-item-del {
     flex: none;
     width: 24px;

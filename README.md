@@ -199,10 +199,11 @@ Two clock-synced alerting systems built into the Focus tab:
 
 ### 🗒 Custom Reminders
 - Add a reminder for **a specific time + your own message** (e.g. *10:00 AM — Drink water*).
-- List view (sorted by time, AM/PM chips) with a live **"in 2h 15m"** countdown and a **✓ done today** state — fires once per day, re-arms tomorrow.
+- **One-shot by default** ⚡ — the reminder fires at its exact time (with a 5-minute grace window if the device was asleep) and then **removes itself from the list**. A quick *"drink water in 30 min"* is delivered once and never nags you again the next day.
+- **☑ Daily checkbox** — tick it for true daily alarms (e.g. *Meds · 9:00 PM*); those fire once per day, show a **"✓ done today"** state, re-arm tomorrow, and get a **Daily** chip in the list so the two kinds are easy to tell apart.
+- List view (sorted by time, AM/PM chips) with a live **"in 2h 15m"** countdown until the next fire.
 - The browser notification body shows **your exact custom message**.
-- Late catch-up: fired within a 5-minute grace window if the page was closed at the due time.
-- Manageable: add / delete anytime; persisted (`localStorage` key `flowdesk_reminders`).
+- Manageable: add / delete anytime; persisted (`localStorage` key `flowdesk_reminders` — legacy reminders without the `repeat` field are migrated to one-shot, and already-fired ones are cleaned up automatically).
 
 ### 🪧 Live tab title
 The browser tab always tells you what's happening in the Focus tab:

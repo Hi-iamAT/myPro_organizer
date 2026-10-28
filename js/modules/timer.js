@@ -234,9 +234,21 @@ let intervalAlerts = (() => {
 let customReminders = (() => {
     try {
         const v = JSON.parse(localStorage.getItem('flowdesk_reminders'));
-        return Array.isArray(v) ? v : [];
+        if (!Array.isArray(v)) return [];
+        // Migration to the one-shot model: reminders created before the
+        // `repeat` field existed are one-shot by definition now, and any
+        // that already fired are complete — prune them so they don't
+        // re-fire tomorrow under the old always-daily behavior.
+        const migrated = v
+            .map(r => ({ ...r, repeat: r.repeat === 'daily' ? 'daily' : 'once' }))
+            .filter(r => !(r.repeat === 'once' && r.firedOn));
+        localStorage.setItem('flowdesk_reminders', JSON.stringify(migrated));
+        return migrated;
     } catch (_) { return []; }
 })();
+// One-shot reminders (default) fire once and self-remove; only explicit
+// 'daily' reminders re-arm every day.
+const repeatsDaily = r => r.repeat === 'daily';
 
 let lastReminderMinute = null; // minute-of-day last processed
 
@@ -314,11 +326,13 @@ function addReminder(e) {
     const msgInput = document.getElementById('reminderMsg');
     const msg = msgInput.value.trim();
     if (!timeInput.value || !msg) { showToast('Please set a time and message', 'warn'); return; }
+    const repeatEl = document.getElementById('reminderRepeat');
     customReminders.push({
         id: 'r' + Date.now(),
         time: timeInput.value,      // "HH:MM"
         message: msg,
-        firedOn: null               // last "YYYY-MM-DD" it fired on
+        firedOn: null,              // last "YYYY-MM-DD" it fired on (daily only)
+        repeat: repeatEl && repeatEl.checked ? 'daily' : 'once'
     });
     saveReminders();
     timeInput.value = ''; msgInput.value = '';
@@ -371,6 +385,15 @@ function renderReminders() {
         del.onclick = () => deleteReminder(r.id);
 
         li.append(timeChip, msg, status, del);
+        if (repeatsDaily(r)) {
+            // Daily reminders get a visible chip; one-shots silently
+            // vanish after they fire.
+            const rep = document.createElement('span');
+            rep.className = 'reminder-item-repeat';
+            rep.textContent = 'Daily';
+            rep.title = 'Repeats every day — uncheck "Daily" when adding for a one-time reminder';
+            li.insertBefore(rep, status);
+        }
         list.appendChild(li);
     });
     updateTabTitle();
@@ -411,17 +434,25 @@ function checkReminders() {
     }
 
     // 2) Custom reminders — fire at exact time, or catch-up within 5 min
-    customReminders.forEach(r => {
-        if (r.firedOn === today) return;
+    let changed = false;
+    for (let i = customReminders.length - 1; i >= 0; i--) {
+        const r = customReminders[i];
+        if (r.firedOn === today) continue;
         const [h, m] = r.time.split(':').map(Number);
         const rMin = h * 60 + m;
         const late = minuteOfDay - rMin;
         if (late >= 0 && late <= 5) {
             r.firedOn = today;
-            saveReminders();
             fireReminder(`⏰ ${fmtTime12(r.time)} — ${r.message}`, r.message);
+            if (!repeatsDaily(r)) {
+                // One-shot: delivered & done — self-remove so the list
+                // stays clean and it never re-fires tomorrow.
+                customReminders.splice(i, 1);
+            }
+            changed = true;
         }
-    });
+    }
+    if (changed) saveReminders();
 
     renderReminders(); // refresh countdowns / fired states
 }
