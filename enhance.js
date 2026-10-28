@@ -439,7 +439,7 @@
     }
     function runPal(i) { const c = palItems[i]; if (!c) return; closePalette(); c.run(); }
     function showShortcuts() {
-        showToast('Ctrl+K commands · Alt+1–9 tools · / search · N new task (To-Do) · T theme', 'info');
+        showToast('Ctrl+K commands · Alt+1–9 tools · / search · N new task (To-Do) · ? help', 'info');
     }
 
     // ── Global shortcuts ─────────────────────────────────────

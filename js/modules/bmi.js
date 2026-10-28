@@ -218,7 +218,13 @@ function renderConvCats() {
     curBtn.textContent = '💱 Currency';
     curBtn.onclick = async () => {
         convState.cat = 'currency';
-        if (!readCachedRates()) { convState.from = 'USD'; convState.to = 'BDT'; }
+        // The saved from/to may be stale (e.g. °F left over from the
+        // Temperature category) — only keep them if they're valid codes.
+        const cached = readCachedRates();
+        const codes = cached ? currencyCodeList(cached.rates) : null;
+        if (!codes || !codes.includes(convState.from) || !codes.includes(convState.to)) {
+            convState.from = 'USD'; convState.to = 'BDT';
+        }
         saveConvState();
         renderConvCats();
         updateConvRateStatus('💱 Fetching live rates…');
@@ -478,6 +484,7 @@ export const BmiModule = {
         renderConvUnits();
         const valInput = document.getElementById('convVal');
         if (valInput) valInput.value = convState.value || '1';
+        convConvert(); // populate the To-field & quick-reference cards on load
         // Warm the currency cache in the background so 💱 is instant on first use
         convFetchRates(false).then(rates => {
             if (rates && convState.cat === 'currency') { renderConvUnits(); convConvert(); }
