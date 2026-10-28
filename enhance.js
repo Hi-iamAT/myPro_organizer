@@ -7,6 +7,10 @@
 (function () {
     'use strict';
     const $ = id => document.getElementById(id);
+    // The active tool lives in main.html's script scope or, in the modular app,
+    // on window via a getter from main.js. (Do NOT name this `currentTool` —
+    // that would shadow the global and always read as undefined.)
+    const getTool = () => (typeof currentTool !== 'undefined') ? currentTool : window.currentTool;
     const FOCUS_KEY = 'flowdesk_focus_log';
     const pad = n => String(n).padStart(2, '0');
     const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -110,18 +114,21 @@
         b.id = 'notePinBtn'; b.type = 'button';
         b.title = 'Pin / unpin note'; b.setAttribute('aria-label', 'Pin note'); b.setAttribute('aria-pressed', 'false');
         b.addEventListener('click', () => {
-            const n = notesArr.find(x => x.id === activeNoteId);
+            const notes = window.notesArr || [];
+            const n = notes.find(x => x.id === window.activeNoteId);
             if (!n) return;
             n.pinned = !n.pinned;
-            saveData('advancedNotes', notesArr);
-            renderNotesList(); syncPin();
+            localStorage.setItem('advancedNotes', JSON.stringify(notes));
+            if (window.renderNotesList) renderNotesList();
+            syncPin();
             showToast(n.pinned ? 'Note pinned' : 'Note unpinned', 'info');
         });
         ctr.insertBefore(b, ctr.firstChild);
     }
     function syncPin() {
         const b = $('notePinBtn'); if (!b) return;
-        const n = notesArr.find(x => x.id === activeNoteId);
+        const notes = window.notesArr || [];
+        const n = notes.find(x => x.id === window.activeNoteId);
         const on = !!(n && n.pinned);
         b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
     }
@@ -168,10 +175,19 @@
         let x = $('bmiHealthy');
         if (!x) { x = el('p', 'bmi-healthy'); x.id = 'bmiHealthy'; desc.after(x); }
         let cm = 0;
-        try { cm = getBmiHeightCm(); } catch (_) { }
+        try {
+            const cmWrap = document.getElementById('bmiHeightCmWrap');
+            if (cmWrap && cmWrap.style.display !== 'none') {
+                cm = parseFloat(document.getElementById('bmiHeight')?.value) || 0;
+            } else {
+                const ft = parseFloat(document.getElementById('bmiHeightFt')?.value) || 0;
+                const inch = parseFloat(document.getElementById('bmiHeightIn')?.value) || 0;
+                cm = (ft * 30.48) + (inch * 2.54);
+            }
+        } catch (_) { }
         if (!cm || !isFinite(cm)) { x.textContent = ''; return; }
         const m = cm / 100, lo = 18.5 * m * m, hi = 24.9 * m * m;
-        const lbs = typeof bmiWeightUnit !== 'undefined' && bmiWeightUnit === 'lb';
+        const lbs = document.getElementById('unitLb')?.classList.contains('active');
         const f = v => lbs ? `${Math.round(v * 2.20462)} lb` : `${v.toFixed(1)} kg`;
         x.textContent = `Healthy weight for your height: ${f(lo)} – ${f(hi)}`;
     }
@@ -441,11 +457,11 @@
             if (k) { e.preventDefault(); go(k); }
             return;
         }
-        if (typing || e.ctrlKey || e.metaKey || e.altKey || currentTool === 'calc') return;
+        if (typing || e.ctrlKey || e.metaKey || e.altKey || getTool() === 'calc') return;
         if (e.key === '/') {
-            const s = currentTool === 'notes' ? $('notesSearch') : currentTool === 'todo' ? $('todoSearch') : null;
+            const s = getTool() === 'notes' ? $('notesSearch') : getTool() === 'todo' ? $('todoSearch') : null;
             if (s) { e.preventDefault(); s.focus(); }
-        } else if ((e.key === 'n' || e.key === 'N') && currentTool === 'todo') {
+        } else if ((e.key === 'n' || e.key === 'N') && getTool() === 'todo') {
             e.preventDefault(); openAddTask();
         } else if (e.key === '?') {
             showShortcuts();
@@ -458,12 +474,6 @@
         if (tool === 'notes') syncPin();
     }
 
-    // Keep pin state in sync when a note opens.
-    const origOpenNote = window.openNote;
-    if (typeof origOpenNote === 'function') {
-        window.openNote = function (id) { const r = origOpenNote.apply(this, arguments); syncPin(); return r; };
-    }
-
     window.FlowEnh = {
         todoMatches, setTodoFilter, renderWeatherExtra, logFocus, bmiExtra,
         refreshDashboard, onToolChange, openPalette, closePalette, focusSummary
@@ -473,7 +483,14 @@
         injectPinButton();
         renderFocusStats();
         refreshDashboard();
-        setInterval(() => { if (currentTool === 'dashboard' && !document.hidden) refreshDashboard(); }, 60000);
+        // Wrap window.openNote here, not at script eval: this defer script runs
+        // before the module that defines window.openNote, but window load
+        // fires after it.
+        const origOpenNote = window.openNote;
+        if (typeof origOpenNote === 'function') {
+            window.openNote = function (id) { const r = origOpenNote.apply(this, arguments); syncPin(); return r; };
+        }
+        setInterval(() => { if (getTool() === 'dashboard' && !document.hidden) refreshDashboard(); }, 60000);
     }
     if (document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();

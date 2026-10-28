@@ -566,7 +566,11 @@
         l: 'log(', n: 'ln(', r: '√(', R: '³√(', q: '²', i: '⁻¹', b: 'Abs('
     };
     document.addEventListener('keydown', e => {
-        if (typeof currentTool !== 'undefined' && currentTool !== 'calc') return;
+        // In the modular app (index.html) currentTool lives on window via a getter;
+        // in main.html it is a script-scope let. Fall back so keys never leak
+        // to the calculator while another panel is open.
+        const tool = (typeof currentTool !== 'undefined') ? currentTool : window.currentTool;
+        if (tool !== 'calc') return;
         const active = document.activeElement;
         if (active && active.matches('input, textarea, select, [contenteditable="true"]')) return;
         if (e.ctrlKey || e.metaKey || e.altKey) return;
